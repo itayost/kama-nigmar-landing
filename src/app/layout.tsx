@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: "פודקאסט ספורט יומי ומהיר",
     url: siteUrl,
     siteName: "כמה נגמר?",
-    images: [{ url: "/cover.png", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
     type: "website",
     locale: "he_IL",
   },
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "כמה נגמר? | התקציר היומי שלכם",
     description: "פודקאסט ספורט יומי ומהיר",
-    images: ["/cover.png"],
+    images: ["/og-image.jpg"],
   },
   alternates: {
     canonical: siteUrl,
