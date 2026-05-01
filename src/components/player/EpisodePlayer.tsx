@@ -8,11 +8,11 @@ export function EpisodePlayer({ spotifyShowId, applePodcastId }: EpisodePlayerPr
     <section aria-labelledby="latest-episode-heading" className="w-full">
       <h2
         id="latest-episode-heading"
-        className="mb-4 text-lg font-bold text-white"
+        className="mb-4 text-center text-lg font-bold text-white"
       >
         הפרק האחרון
       </h2>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col items-center gap-6">
         <iframe
           title="האזינו בספוטיפיי"
           src={`https://open.spotify.com/embed/show/${spotifyShowId}?theme=0`}
