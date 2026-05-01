@@ -10,10 +10,10 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   title: "כמה נגמר? | פודקאסט ספורט יומי",
-  description: "פודקאסט ספורט יומי ומהיר | מה קרה אתמול בעולם הספורט - בארץ ובחו״ל",
+  description: "כמה נגמר? - התקציר היומי שלכם",
   openGraph: {
     title: "כמה נגמר? | פודקאסט ספורט יומי",
-    description: "פודקאסט ספורט יומי ומהיר | מה קרה אתמול בעולם הספורט - בארץ ובחו״ל",
+    description: "כמה נגמר? - התקציר היומי שלכם",
     images: [{ url: "/cover.png", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
     type: "website",
     locale: "he_IL",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "כמה נגמר? | פודקאסט ספורט יומי",
-    description: "פודקאסט ספורט יומי ומהיר | מה קרה אתמול",
+    description: "כמה נגמר? - התקציר היומי שלכם",
     images: ["/cover.png"],
   },
 };

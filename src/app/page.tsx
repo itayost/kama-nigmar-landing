@@ -5,6 +5,7 @@ import { EpisodePlayer } from "@/components/player/EpisodePlayer";
 const spotifyShowUrl = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_URL ?? "#";
 const spotifyShowId = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_ID ?? "";
 const applePodcastUrl = process.env.NEXT_PUBLIC_APPLE_PODCAST_URL ?? "#";
+const applePodcastId = process.env.NEXT_PUBLIC_APPLE_PODCAST_ID ?? "id1895382563";
 
 export default function Home() {
   const year = new Date().getFullYear();
@@ -14,7 +15,7 @@ export default function Home() {
       <main className="flex w-full max-w-3xl flex-col items-center gap-2">
         <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
         <Divider />
-        <EpisodePlayer showId={spotifyShowId} />
+        <EpisodePlayer spotifyShowId={spotifyShowId} applePodcastId={applePodcastId} />
       </main>
       <footer className="mt-auto pt-12 text-center text-sm text-text-muted">
         כמה נגמר? {year}

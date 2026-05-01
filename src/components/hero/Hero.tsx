@@ -28,7 +28,7 @@ export function Hero({ spotifyUrl, applePodcastUrl }: HeroProps) {
           כמה נגמר?
         </h1>
         <p className="text-[clamp(0.875rem,0.8rem+0.3vw,1.125rem)] text-text-muted">
-          פודקאסט ספורט יומי ומהיר | מה קרה אתמול
+          התקציר היומי שלכם
         </p>
         <div className="flex gap-3">
           <PlatformButton
