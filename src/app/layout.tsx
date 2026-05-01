@@ -12,11 +12,11 @@ const siteUrl = "https://kama-nigmar-landing.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "כמה נגמר? | פודקאסט ספורט יומי",
-  description: "כמה נגמר? - התקציר היומי שלכם",
+  title: "כמה נגמר? | התקציר היומי שלכם",
+  description: "פודקאסט ספורט יומי ומהיר",
   openGraph: {
-    title: "כמה נגמר? | פודקאסט ספורט יומי",
-    description: "כמה נגמר? - התקציר היומי שלכם",
+    title: "כמה נגמר? | התקציר היומי שלכם",
+    description: "פודקאסט ספורט יומי ומהיר",
     url: siteUrl,
     siteName: "כמה נגמר?",
     images: [{ url: "/cover.png", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "כמה נגמר? | פודקאסט ספורט יומי",
-    description: "כמה נגמר? - התקציר היומי שלכם",
+    title: "כמה נגמר? | התקציר היומי שלכם",
+    description: "פודקאסט ספורט יומי ומהיר",
     images: ["/cover.png"],
   },
   alternates: {
