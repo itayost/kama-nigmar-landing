@@ -8,12 +8,17 @@ const heebo = Heebo({
   variable: "--font-heebo",
 });
 
+const siteUrl = "https://kama-nigmar-landing.vercel.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "כמה נגמר? | פודקאסט ספורט יומי",
   description: "כמה נגמר? - התקציר היומי שלכם",
   openGraph: {
     title: "כמה נגמר? | פודקאסט ספורט יומי",
     description: "כמה נגמר? - התקציר היומי שלכם",
+    url: siteUrl,
+    siteName: "כמה נגמר?",
     images: [{ url: "/cover.png", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
     type: "website",
     locale: "he_IL",
@@ -23,6 +28,9 @@ export const metadata: Metadata = {
     title: "כמה נגמר? | פודקאסט ספורט יומי",
     description: "כמה נגמר? - התקציר היומי שלכם",
     images: ["/cover.png"],
+  },
+  alternates: {
+    canonical: siteUrl,
   },
 };
 
