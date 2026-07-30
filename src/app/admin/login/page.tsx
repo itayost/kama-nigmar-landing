@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LoginForm } from "@/components/admin/LoginForm";
 
 export const metadata: Metadata = {
-  title: "כניסת מנהל | כמה נגמר?",
+  title: "כניסת מנהל",
   robots: { index: false, follow: false },
 };
 

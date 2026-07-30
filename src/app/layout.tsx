@@ -11,14 +11,22 @@ const heebo = Heebo({
 
 const siteUrl = SITE_URL;
 
+const siteDescription =
+  "פודקאסט ספורט יומי ומהיר — התקציר של כל מה שקרה אתמול בספורט: ליגת העל, כדורגל אירופאי, NBA ועוד. פרק חדש כל בוקר בספוטיפיי ובאפל פודקאסטס.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "כמה נגמר? | התקציר היומי שלכם",
-  description: "פודקאסט ספורט יומי ומהיר",
+  title: {
+    default: "כמה נגמר? | התקציר היומי שלכם",
+    template: "%s | כמה נגמר?",
+  },
+  description: siteDescription,
+  // Brand-level fallbacks. Canonical and og:url are deliberately NOT set here:
+  // in the root layout they would apply to every page that does not override
+  // them, marking inner pages as duplicates of the homepage.
   openGraph: {
     title: "כמה נגמר? | התקציר היומי שלכם",
-    description: "פודקאסט ספורט יומי ומהיר",
-    url: siteUrl,
+    description: siteDescription,
     siteName: "כמה נגמר?",
     images: [{ url: "/og-image.jpg", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
     type: "website",
@@ -27,11 +35,14 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "כמה נגמר? | התקציר היומי שלכם",
-    description: "פודקאסט ספורט יומי ומהיר",
+    description: siteDescription,
     images: ["/og-image.jpg"],
   },
   alternates: {
-    canonical: siteUrl,
+    types: { "application/rss+xml": "/feed.xml" },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
   },
   icons: {
     icon: "/favicon.ico",

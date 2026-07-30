@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api
 
 Sitemap: https://kama-nigmar-landing.vercel.app/sitemap.xml

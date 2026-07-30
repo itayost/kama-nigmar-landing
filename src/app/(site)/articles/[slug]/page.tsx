@@ -5,8 +5,10 @@ import { notFound } from "next/navigation";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getArticleBySlug } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
+import { FEED_ALTERNATE, breadcrumbSchema, newsArticleSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
@@ -19,20 +21,33 @@ export async function generateMetadata({
 
   const article = await getArticleBySlug(slug);
   if (!article) {
-    return { title: "הכתבה לא נמצאה | כמה נגמר?" };
+    return { title: "הכתבה לא נמצאה" };
   }
+  const articleUrl = `${SITE_URL}/articles/${article.slug}`;
+  const ogImage = article.coverImageUrl ?? "/og-image.jpg";
   return {
-    title: `${article.title} | כמה נגמר?`,
+    title: article.title,
     description: article.subtitle ?? undefined,
-    alternates: { canonical: `${SITE_URL}/articles/${article.slug}` },
+    alternates: { canonical: articleUrl, types: FEED_ALTERNATE },
     openGraph: {
       title: article.title,
       description: article.subtitle ?? undefined,
       type: "article",
-      url: `${SITE_URL}/articles/${article.slug}`,
+      url: articleUrl,
       siteName: "כמה נגמר?",
       locale: "he_IL",
-      images: article.coverImageUrl ? [{ url: article.coverImageUrl }] : undefined,
+      images: [{ url: ogImage }],
+      publishedTime: article.publishedAt?.toISOString(),
+      modifiedTime: article.updatedAt.toISOString(),
+      authors: [article.authorName],
+      section: article.tags[0],
+      tags: article.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.subtitle ?? undefined,
+      images: [ogImage],
     },
   };
 }
@@ -61,6 +76,14 @@ async function ArticleContent({
 
   return (
     <article className="flex flex-col gap-6">
+      <JsonLd data={newsArticleSchema(article)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "בית", url: SITE_URL },
+          { name: "כתבות", url: `${SITE_URL}/articles` },
+          { name: article.title, url: `${SITE_URL}/articles/${article.slug}` },
+        ])}
+      />
       <header className="flex flex-col gap-4">
         {article.tags.length > 0 ? (
           <div className="flex flex-wrap gap-2">

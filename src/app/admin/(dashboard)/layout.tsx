@@ -3,7 +3,7 @@ import Link from "next/link";
 import { logout } from "@/lib/actions/auth";
 
 export const metadata: Metadata = {
-  title: "ניהול כתבות | כמה נגמר?",
+  title: "ניהול כתבות",
   robots: { index: false, follow: false },
 };
 
