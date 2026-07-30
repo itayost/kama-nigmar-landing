@@ -39,20 +39,19 @@ export function Hero({ spotifyUrl, applePodcastUrl }: HeroProps) {
           />
         </div>
       </div>
-      <div className="order-1 relative flex justify-center md:order-2">
-        <div
-          aria-hidden="true"
-          className="absolute -inset-[10%] bg-[radial-gradient(closest-side,rgba(46,204,64,0.18),transparent_70%)] blur-[10px]"
-        />
-        <Image
-          src="/cover.png"
-          alt="כמה נגמר? - עטיפת הפודקאסט"
-          width={300}
-          height={300}
-          loading="eager"
-          fetchPriority="high"
-          className="relative h-auto w-[220px] rounded-3xl border-2 border-accent/25 shadow-[0_0_60px_rgba(46,204,64,0.15)] md:w-[300px]"
-        />
+      <div className="order-1 flex justify-center md:order-2">
+        <div className="relative">
+          <div aria-hidden="true" className="absolute inset-0 rounded-3xl bg-accent/15 blur-2xl" />
+          <Image
+            src="/cover.png"
+            alt="כמה נגמר? - עטיפת הפודקאסט"
+            width={300}
+            height={300}
+            loading="eager"
+            fetchPriority="high"
+            className="relative h-auto w-[220px] rounded-3xl border-2 border-accent/25 shadow-[0_0_60px_rgba(46,204,64,0.15)] md:w-[300px]"
+          />
+        </div>
       </div>
     </section>
   );

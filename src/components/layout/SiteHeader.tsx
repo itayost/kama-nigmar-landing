@@ -27,7 +27,7 @@ export function SiteHeader({ spotifyUrl }: SiteHeaderProps) {
       <div className="mx-auto flex h-15 w-full max-w-5xl items-center justify-between px-6">
         <Link
           href="/"
-          className="text-xl font-black tracking-tight transition-colors hover:text-accent"
+          className="whitespace-nowrap text-xl font-black tracking-tight transition-colors hover:text-accent"
         >
           כמה נגמר<span className="text-accent">?</span>
         </Link>
@@ -39,7 +39,7 @@ export function SiteHeader({ spotifyUrl }: SiteHeaderProps) {
             href={spotifyUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="whitespace-nowrap rounded-full bg-accent px-3.5 py-2 text-sm font-bold text-bg-start transition-all hover:-translate-y-px hover:shadow-[0_0_24px_rgba(46,204,64,0.45)] motion-reduce:transition-none sm:px-4.5"
+            className="hidden whitespace-nowrap rounded-full bg-accent px-3.5 py-2 text-sm font-bold text-bg-start transition-all hover:-translate-y-px hover:shadow-[0_0_24px_rgba(46,204,64,0.45)] motion-reduce:transition-none min-[360px]:inline-block sm:px-4.5"
           >
             האזינו עכשיו
           </a>

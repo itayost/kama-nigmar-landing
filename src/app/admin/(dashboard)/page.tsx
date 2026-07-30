@@ -44,10 +44,10 @@ export default async function AdminArticlesPage() {
                   {article.authorName}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Link
                   href={`/admin/articles/${article.id}/edit`}
-                  className="rounded-md border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-accent/50"
+                  className="whitespace-nowrap rounded-md border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-accent/50"
                 >
                   עריכה
                 </Link>
@@ -55,7 +55,7 @@ export default async function AdminArticlesPage() {
                   <input type="hidden" name="id" value={article.id} />
                   <button
                     type="submit"
-                    className="rounded-md border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-accent/50"
+                    className="whitespace-nowrap rounded-md border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-accent/50"
                   >
                     {article.status === "published" ? "הסרת פרסום" : "פרסום"}
                   </button>
