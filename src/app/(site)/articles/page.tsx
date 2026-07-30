@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ArticlesGrid } from "@/components/articles/ArticlesGrid";
 import { TagFilterBar } from "@/components/articles/TagFilterBar";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getAllTags, getPublishedArticles } from "@/lib/dal/articles";
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ async function FilteredArticles({
 export default function ArticlesPage({ searchParams }: PageProps<"/articles">) {
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
-      <h1 className="mb-6 text-3xl font-extrabold">כתבות</h1>
+      <SectionHeading title="כתבות" as="h1" />
       <Suspense fallback={<ArticlesSkeleton />}>
         <FilteredArticles searchParams={searchParams} />
       </Suspense>

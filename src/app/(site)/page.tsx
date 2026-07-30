@@ -2,27 +2,21 @@ import { Hero } from "@/components/hero/Hero";
 import { Divider } from "@/components/ui/Divider";
 import { EpisodePlayer } from "@/components/player/EpisodePlayer";
 import { LatestArticlesSection } from "@/components/articles/LatestArticlesSection";
-import { getCurrentYear } from "@/lib/site";
 
 const spotifyShowUrl = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_URL ?? "#";
 const spotifyShowId = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_ID ?? "";
 const applePodcastUrl = process.env.NEXT_PUBLIC_APPLE_PODCAST_URL ?? "#";
 const applePodcastId = process.env.NEXT_PUBLIC_APPLE_PODCAST_ID ?? "id1895382563";
 
-export default async function Home() {
-  const year = await getCurrentYear();
-
+export default function Home() {
   return (
-    <div className="flex min-h-dvh flex-col items-center px-6 py-12 md:py-20">
-      <main className="flex w-full max-w-3xl flex-col items-center gap-2">
-        <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
-        <Divider />
+    <main className="mx-auto flex w-full max-w-5xl flex-col px-6">
+      <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
+      <Divider />
+      <div className="flex flex-col gap-14 pb-10">
         <EpisodePlayer spotifyShowId={spotifyShowId} applePodcastId={applePodcastId} />
         <LatestArticlesSection />
-      </main>
-      <footer className="mt-auto pt-12 text-center text-sm text-text-muted">
-        כמה נגמר? {year}
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }

@@ -1,3 +1,5 @@
+import { SectionHeading } from "@/components/ui/SectionHeading";
+
 interface EpisodePlayerProps {
   readonly spotifyShowId: string;
   readonly applePodcastId: string;
@@ -6,12 +8,7 @@ interface EpisodePlayerProps {
 export function EpisodePlayer({ spotifyShowId, applePodcastId }: EpisodePlayerProps) {
   return (
     <section aria-labelledby="latest-episode-heading" className="w-full">
-      <h2
-        id="latest-episode-heading"
-        className="mb-4 text-center text-lg font-bold text-white"
-      >
-        הפרק האחרון
-      </h2>
+      <SectionHeading title="הפרק האחרון" id="latest-episode-heading" />
       <div className="flex flex-col items-center gap-6">
         <iframe
           title="האזינו בספוטיפיי"

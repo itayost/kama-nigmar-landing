@@ -1,33 +1,30 @@
-import Link from "next/link";
-import { Divider } from "@/components/ui/Divider";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getLatestArticles } from "@/lib/dal/articles";
 import { ArticleCard } from "./ArticleCard";
+import { ArticleLeadCard } from "./ArticleLeadCard";
 
 export async function LatestArticlesSection() {
   const articles = await getLatestArticles(4);
   if (articles.length === 0) return null;
 
+  const [lead, ...rest] = articles;
+
   return (
-    <>
-      <Divider />
-      <section aria-labelledby="latest-articles-heading" className="w-full">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 id="latest-articles-heading" className="text-lg font-bold text-white">
-            כתבות אחרונות
-          </h2>
-          <Link
-            href="/articles"
-            className="text-sm text-accent transition-opacity hover:opacity-80"
-          >
-            לכל הכתבות
-          </Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {articles.map((article) => (
+    <section aria-labelledby="latest-articles-heading" className="w-full">
+      <SectionHeading
+        title="כתבות"
+        id="latest-articles-heading"
+        linkHref="/articles"
+        linkLabel="לכל הכתבות"
+      />
+      <ArticleLeadCard article={lead} />
+      {rest.length > 0 ? (
+        <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {rest.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
-      </section>
-    </>
+      ) : null}
+    </section>
   );
 }
