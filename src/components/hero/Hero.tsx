@@ -17,7 +17,8 @@ export function Hero({ spotifyUrl, applePodcastUrl }: HeroProps) {
           alt="כמה נגמר? - עטיפת הפודקאסט"
           width={180}
           height={180}
-          priority
+          loading="eager"
+          fetchPriority="high"
           className="relative rounded-[20px] border-2 border-accent/20 shadow-[0_0_40px_rgba(46,204,64,0.15)] md:h-40 md:w-40"
         />
       </div>

@@ -1,14 +1,16 @@
 import { Hero } from "@/components/hero/Hero";
 import { Divider } from "@/components/ui/Divider";
 import { EpisodePlayer } from "@/components/player/EpisodePlayer";
+import { LatestArticlesSection } from "@/components/articles/LatestArticlesSection";
+import { getCurrentYear } from "@/lib/site";
 
 const spotifyShowUrl = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_URL ?? "#";
 const spotifyShowId = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_ID ?? "";
 const applePodcastUrl = process.env.NEXT_PUBLIC_APPLE_PODCAST_URL ?? "#";
 const applePodcastId = process.env.NEXT_PUBLIC_APPLE_PODCAST_ID ?? "id1895382563";
 
-export default function Home() {
-  const year = new Date().getFullYear();
+export default async function Home() {
+  const year = await getCurrentYear();
 
   return (
     <div className="flex min-h-dvh flex-col items-center px-6 py-12 md:py-20">
@@ -16,6 +18,7 @@ export default function Home() {
         <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
         <Divider />
         <EpisodePlayer spotifyShowId={spotifyShowId} applePodcastId={applePodcastId} />
+        <LatestArticlesSection />
       </main>
       <footer className="mt-auto pt-12 text-center text-sm text-text-muted">
         כמה נגמר? {year}

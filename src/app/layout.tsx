@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -8,7 +9,7 @@ const heebo = Heebo({
   variable: "--font-heebo",
 });
 
-const siteUrl = "https://kama-nigmar-landing.vercel.app";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
