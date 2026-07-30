@@ -1,6 +1,5 @@
 "use server";
 
-import { createHash, timingSafeEqual } from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
@@ -13,7 +12,6 @@ export interface LoginState {
 }
 
 const loginSchema = z.object({
-  email: z.string().min(1, "חובה למלא אימייל"),
   password: z.string().min(1, "חובה למלא סיסמה"),
 });
 
@@ -22,20 +20,11 @@ async function clientIp(): Promise<string> {
   return forwardedFor?.split(",")[0]?.trim() ?? "unknown";
 }
 
-// Constant-time comparison via fixed-length digests, so response timing
-// does not leak how much of the email matched.
-function secureEquals(a: string, b: string): boolean {
-  const digestA = createHash("sha256").update(a).digest();
-  const digestB = createHash("sha256").update(b).digest();
-  return timingSafeEqual(digestA, digestB);
-}
-
 export async function login(
   _prev: LoginState,
   formData: FormData,
 ): Promise<LoginState> {
   const parsed = loginSchema.safeParse({
-    email: formData.get("email"),
     password: formData.get("password"),
   });
   if (!parsed.success) {
@@ -47,23 +36,15 @@ export async function login(
     return { error: "יותר מדי ניסיונות כניסה. נסו שוב בעוד 10 דקות" };
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL;
   const passwordHash = process.env.ADMIN_PASSWORD_HASH;
-  if (!adminEmail || !passwordHash || !process.env.AUTH_SECRET) {
+  if (!passwordHash || !process.env.AUTH_SECRET) {
     return { error: "המערכת אינה מוגדרת. פנו למנהל האתר" };
   }
 
-  const emailMatches = secureEquals(
-    parsed.data.email.trim().toLowerCase(),
-    adminEmail.toLowerCase(),
-  );
-  // Always run the comparison so response time does not reveal whether
-  // the email was the wrong half.
   const passwordMatches = await bcrypt.compare(parsed.data.password, passwordHash);
-
-  if (!emailMatches || !passwordMatches) {
+  if (!passwordMatches) {
     recordFailure(ip);
-    return { error: "אימייל או סיסמה שגויים" };
+    return { error: "סיסמה שגויה" };
   }
 
   clearFailures(ip);

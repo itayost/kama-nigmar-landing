@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { login, type LoginState } from "@/lib/actions/auth";
 import { Field, inputClass } from "./Field";
 
@@ -8,31 +8,16 @@ const initialState: LoginState = {};
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(login, initialState);
-  // Controlled so React 19's automatic form reset does not clear the email
-  // after a failed attempt. The password stays uncontrolled: clearing it on
-  // failure is the expected behavior.
-  const [email, setEmail] = useState("");
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
-      <Field label="אימייל">
-        <input
-          type="email"
-          name="email"
-          dir="ltr"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className={`${inputClass} text-left`}
-        />
-      </Field>
       <Field label="סיסמה">
         <input
           type="password"
           name="password"
           dir="ltr"
           autoComplete="current-password"
+          autoFocus
           className={`${inputClass} text-left`}
         />
       </Field>
