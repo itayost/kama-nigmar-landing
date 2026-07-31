@@ -51,4 +51,39 @@ test.describe("admin flow", () => {
     await page.goto(`/articles/${slug}`);
     await expect(page.getByText("הכתבה לא נמצאה")).toBeVisible();
   });
+
+  test("manages tags centrally and offers them in the article form", async ({
+    page,
+  }) => {
+    const tagName = `תגית-בדיקה-${Date.now()}`;
+    const renamed = `${tagName}-חדש`;
+
+    await page.goto("/admin/login");
+    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
+    await page.getByRole("button", { name: "כניסה" }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+
+    await page.goto("/admin/tags");
+    await page.locator('input[name="name"]').fill(tagName);
+    await page.getByRole("button", { name: "+ הוספה" }).click();
+    await expect(page.getByText(tagName, { exact: true })).toBeVisible();
+
+    await page.goto("/admin/articles/new");
+    await expect(page.getByRole("button", { name: `+ ${tagName}` })).toBeVisible();
+
+    await page.goto("/admin/tags");
+    const row = page.getByRole("listitem").filter({ hasText: tagName });
+    await row.getByRole("button", { name: "שינוי שם" }).click();
+    // In rename mode the tag name lives in the input value, which hasText
+    // does not match - target the row-scoped rename input directly.
+    const renameInput = page.getByRole("listitem").locator('input[name="name"]');
+    await renameInput.fill(renamed);
+    await page.getByRole("listitem").getByRole("button", { name: "שמירה" }).click();
+    await expect(page.getByText(renamed, { exact: true })).toBeVisible();
+
+    const renamedRow = page.getByRole("listitem").filter({ hasText: renamed });
+    await renamedRow.getByRole("button", { name: "מחיקה" }).click();
+    await renamedRow.getByRole("button", { name: "מחיקה" }).last().click();
+    await expect(page.getByText(renamed, { exact: true })).toHaveCount(0);
+  });
 });

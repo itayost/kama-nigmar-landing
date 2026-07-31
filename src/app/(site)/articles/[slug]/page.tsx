@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
+import { RelatedArticles } from "@/components/articles/RelatedArticles";
+import { ViewTracker } from "@/components/articles/ViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getArticleBySlug } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
@@ -130,6 +132,8 @@ async function ArticleContent({
         ) : null}
       </header>
       <BlockRenderer blocks={article.content} />
+      <RelatedArticles slug={article.slug} />
+      <ViewTracker slug={article.slug} />
     </article>
   );
 }

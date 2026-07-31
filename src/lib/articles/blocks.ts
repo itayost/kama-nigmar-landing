@@ -94,14 +94,18 @@ export const slugSchema = z
   .max(100, "הכתובת ארוכה מדי")
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "הכתובת יכולה להכיל רק אותיות באנגלית, מספרים ומקפים");
 
+export const tagNameSchema = z
+  .string()
+  .trim()
+  .min(1, "חובה למלא שם תגית")
+  .max(30, "תגית ארוכה מדי");
+
 export const articleInputSchema = z.object({
   title: z.string().min(1, "חובה למלא כותרת").max(200, "הכותרת ארוכה מדי"),
   subtitle: z.string().max(300, "כותרת המשנה ארוכה מדי").optional(),
   slug: slugSchema,
   authorName: z.string().min(1, "חובה למלא שם כותב").max(100, "שם הכותב ארוך מדי"),
-  tags: z
-    .array(z.string().min(1).max(30, "תגית ארוכה מדי"))
-    .max(10, "אפשר להוסיף עד 10 תגיות"),
+  tags: z.array(tagNameSchema).max(10, "אפשר להוסיף עד 10 תגיות"),
   status: z.enum(["draft", "published"]),
   publishedAt: z.coerce.date().optional(),
   coverImageUrl: z

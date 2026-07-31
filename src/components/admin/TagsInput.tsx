@@ -6,10 +6,12 @@ import { inputClass } from "./Field";
 interface TagsInputProps {
   readonly value: readonly string[];
   readonly onChange: (tags: string[]) => void;
+  readonly suggestions?: readonly string[];
 }
 
-export function TagsInput({ value, onChange }: TagsInputProps) {
+export function TagsInput({ value, onChange, suggestions = [] }: TagsInputProps) {
   const [draft, setDraft] = useState("");
+  const unusedSuggestions = suggestions.filter((name) => !value.includes(name));
 
   function addTag() {
     // Commas are the CSV separator for the hidden form field, so split
@@ -61,9 +63,24 @@ export function TagsInput({ value, onChange }: TagsInputProps) {
           }
         }}
         onBlur={addTag}
-        placeholder="הקלידו תגית ולחצו Enter (למשל: כדורגל)"
+        placeholder="הקלידו תגית חדשה ולחצו Enter, או בחרו מהקיימות"
         className={inputClass}
       />
+      {unusedSuggestions.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-xs text-text-muted">תגיות קיימות:</span>
+          {unusedSuggestions.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onChange([...value, name])}
+              className="rounded-full border border-surface-border px-2.5 py-0.5 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-white"
+            >
+              + {name}
+            </button>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

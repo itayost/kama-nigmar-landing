@@ -12,7 +12,8 @@ import {
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { parseDatetimeLocalIsrael } from "@/lib/datetime";
 import { getDb } from "@/lib/db";
-import { articles } from "@/lib/db/schema";
+import { isUniqueViolation } from "@/lib/db/errors";
+import { articles, tags as tagsTable } from "@/lib/db/schema";
 import { isUuid } from "@/lib/uuid";
 import { parseVideoUrl } from "@/lib/video/parseVideoUrl";
 
@@ -37,17 +38,6 @@ function parseContentField(
     return { error: parsed.error.issues[0].message };
   }
   return { blocks: parsed.data };
-}
-
-const POSTGRES_UNIQUE_VIOLATION = "23505";
-
-function isUniqueViolation(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code?: unknown }).code === POSTGRES_UNIQUE_VIOLATION
-  );
 }
 
 // Derived video fields are never trusted from the client: recompute
@@ -170,6 +160,14 @@ export async function saveArticle(
     publishedAt,
     updatedAt: new Date(),
   };
+
+  // Form-created tags land in the central registry.
+  if (parsed.data.tags.length > 0) {
+    await db
+      .insert(tagsTable)
+      .values(parsed.data.tags.map((name) => ({ name })))
+      .onConflictDoNothing();
+  }
 
   try {
     if (articleId) {

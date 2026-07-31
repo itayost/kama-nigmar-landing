@@ -17,12 +17,13 @@ const initialState: ArticleFormState = { errors: {} };
 
 interface ArticleFormProps {
   readonly article?: Article;
+  readonly tagSuggestions?: readonly string[];
 }
 
 // Every field is controlled: React 19 resets uncontrolled inputs to their
 // defaultValue after a form action completes, which would wipe the admin's
 // input whenever the server returns a validation error.
-export function ArticleForm({ article }: ArticleFormProps) {
+export function ArticleForm({ article, tagSuggestions }: ArticleFormProps) {
   const [state, formAction, isPending] = useActionState(saveArticle, initialState);
   const [title, setTitle] = useState(article?.title ?? "");
   const [subtitle, setSubtitle] = useState(article?.subtitle ?? "");
@@ -99,7 +100,7 @@ export function ArticleForm({ article }: ArticleFormProps) {
       </Field>
 
       <Field label="תגיות" group error={state.errors.tags}>
-        <TagsInput value={tags} onChange={setTags} />
+        <TagsInput value={tags} onChange={setTags} suggestions={tagSuggestions} />
       </Field>
 
       <SlugField

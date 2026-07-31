@@ -1,5 +1,6 @@
 import {
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -23,6 +24,7 @@ export const articles = pgTable(
     authorName: text("author_name").notNull(),
     tags: text("tags").array().notNull().default([]),
     status: articleStatus("status").notNull().default("draft"),
+    views: integer("views").notNull().default(0),
     publishedAt: timestamp("published_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -33,5 +35,12 @@ export const articles = pgTable(
   ],
 );
 
+export const tags = pgTable("tags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;
+export type Tag = typeof tags.$inferSelect;

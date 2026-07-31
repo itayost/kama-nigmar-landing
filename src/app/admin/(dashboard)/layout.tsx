@@ -19,6 +19,18 @@ export default function AdminDashboardLayout({
           <h1 className="text-lg font-bold">ניהול כתבות</h1>
           <nav className="flex items-center gap-4 text-sm">
             <Link
+              href="/admin"
+              className="text-text-muted transition-colors hover:text-white"
+            >
+              כתבות
+            </Link>
+            <Link
+              href="/admin/tags"
+              className="text-text-muted transition-colors hover:text-white"
+            >
+              תגיות
+            </Link>
+            <Link
               href="/"
               className="text-text-muted transition-colors hover:text-white"
             >

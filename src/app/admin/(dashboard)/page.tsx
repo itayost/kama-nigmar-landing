@@ -42,6 +42,7 @@ export default async function AdminArticlesPage() {
                     : "טרם פורסם"}
                   {" · "}
                   {article.authorName}
+                  {article.views > 0 ? ` · ${article.views} צפיות` : ""}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">

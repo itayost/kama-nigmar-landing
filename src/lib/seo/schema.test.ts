@@ -18,6 +18,7 @@ const baseArticle: Article = {
   authorName: "יוסי",
   tags: ["כדורגל", "ליגת העל"],
   status: "published",
+  views: 0,
   publishedAt: new Date("2026-07-30T10:00:00Z"),
   createdAt: new Date("2026-07-29T10:00:00Z"),
   updatedAt: new Date("2026-07-30T12:00:00Z"),

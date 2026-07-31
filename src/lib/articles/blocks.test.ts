@@ -5,6 +5,7 @@ import {
   blocksSchema,
   isBlobUrl,
   slugSchema,
+  tagNameSchema,
 } from "./blocks";
 
 const BLOB_URL = "https://abc123.public.blob.vercel-storage.com/articles/pic.jpg";
@@ -83,6 +84,28 @@ describe("slugSchema", () => {
 
   test.each(invalid)("rejects %j", (slug) => {
     expect(slugSchema.safeParse(slug).success).toBe(false);
+  });
+});
+
+describe("tagNameSchema", () => {
+  test("trims and accepts a valid name", () => {
+    const result = tagNameSchema.safeParse("  כדורגל  ");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toBe("כדורגל");
+    }
+  });
+
+  test("rejects empty and whitespace-only names with a Hebrew message", () => {
+    const result = tagNameSchema.safeParse("   ");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe("חובה למלא שם תגית");
+    }
+  });
+
+  test("rejects names over 30 characters", () => {
+    expect(tagNameSchema.safeParse("א".repeat(31)).success).toBe(false);
   });
 });
 
