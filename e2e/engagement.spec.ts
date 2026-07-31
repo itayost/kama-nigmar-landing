@@ -91,7 +91,7 @@ test.describe("engagement surfaces", () => {
     // Player bar on public pages, absent on admin login.
     for (const path of ["/", "/articles", `/articles/${long.slug}`]) {
       await page.goto(path);
-      await expect(page.locator('iframe[title="נגן הפרק האחרון"]')).toBeVisible();
+      await expect(page.getByTestId("player-bar")).toBeVisible();
     }
 
     // Cleanup: articles, then the registry tag.
@@ -108,7 +108,7 @@ test.describe("engagement surfaces", () => {
     const anon = await page.context().browser()!.newContext();
     const anonPage = await anon.newPage();
     await anonPage.goto("http://localhost:3117/admin/login");
-    await expect(anonPage.locator('iframe[title="נגן הפרק האחרון"]')).toHaveCount(0);
+    await expect(anonPage.getByTestId("player-bar")).toHaveCount(0);
     await anon.close();
   });
 

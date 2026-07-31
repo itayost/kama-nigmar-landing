@@ -13,7 +13,7 @@ export function MidArticleRelated({ articles }: MidArticleRelatedProps) {
   return (
     <aside
       aria-label="עוד באותו נושא"
-      className="rounded-xl border border-surface-border bg-surface/50 p-4"
+      className="rounded-xl border border-surface-border border-s-[3px] border-s-accent bg-white/[0.03] p-4"
     >
       <p className="mb-3 flex items-center gap-2 text-sm font-bold text-accent">
         <span

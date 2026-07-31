@@ -12,7 +12,7 @@ export async function LatestArticlesSection() {
   return (
     <section aria-labelledby="latest-articles-heading" className="w-full">
       <SectionHeading
-        title="כתבות"
+        title="הסיפור הגדול"
         id="latest-articles-heading"
         linkHref="/articles"
         linkLabel="לכל הכתבות"

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/hero/Hero";
-import { Divider } from "@/components/ui/Divider";
 import { LatestArticlesSection } from "@/components/articles/LatestArticlesSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FEED_ALTERNATE, podcastSeriesSchema, webSiteSchema } from "@/lib/seo/schema";
@@ -21,8 +20,7 @@ export default function Home() {
         data={podcastSeriesSchema({ spotifyUrl: spotifyShowUrl, applePodcastUrl })}
       />
       <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
-      <Divider />
-      <div className="pb-10">
+      <div className="pb-10 pt-9">
         <LatestArticlesSection />
       </div>
     </main>

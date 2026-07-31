@@ -91,6 +91,9 @@ async function ArticleContent({
     article.updatedAt.getTime() - article.publishedAt.getTime() >
       UPDATED_LABEL_THRESHOLD_MS;
 
+  const crumbTitle =
+    article.title.length > 40 ? `${article.title.slice(0, 40)}…` : article.title;
+
   return (
     <article className="flex flex-col gap-6">
       <JsonLd data={newsArticleSchema(article)} />
@@ -102,44 +105,48 @@ async function ArticleContent({
         ])}
       />
       <header className="flex flex-col gap-4">
-        {article.tags.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {article.tags.map((tag) => (
-              <Link
-                key={tag}
-                href={`/articles?tag=${encodeURIComponent(tag)}`}
-                className="rounded-full border border-surface-border px-3 py-1 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-white"
-              >
-                {tag}
-              </Link>
-            ))}
-          </div>
+        <nav aria-label="פירורי לחם" className="flex flex-wrap gap-1.5 text-xs text-text-muted">
+          <Link href="/" className="transition-colors hover:text-white">
+            בית
+          </Link>
+          <span aria-hidden="true">‹</span>
+          <Link href="/articles" className="transition-colors hover:text-white">
+            כתבות
+          </Link>
+          <span aria-hidden="true">‹</span>
+          <span>{crumbTitle}</span>
+        </nav>
+        {article.tags[0] ? (
+          <Link
+            href={`/articles?tag=${encodeURIComponent(article.tags[0])}`}
+            className="self-start rounded-md bg-accent px-2.5 py-0.5 text-xs font-extrabold text-bg-start transition-opacity hover:opacity-85"
+          >
+            {article.tags[0]}
+          </Link>
         ) : null}
-        <h1 className="text-3xl font-extrabold leading-tight md:text-4xl">
+        <h1 className="text-[clamp(2rem,1.4rem+3vw,3.2rem)] font-black leading-[1.12] tracking-tight text-balance">
           {article.title}
         </h1>
         {article.subtitle ? (
-          <p className="text-lg leading-relaxed text-text-muted">{article.subtitle}</p>
+          <p className="text-xl font-light leading-relaxed text-white/70">
+            {article.subtitle}
+          </p>
         ) : null}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-text-muted">
-          <span>{article.authorName}</span>
-          {article.publishedAt ? (
-            <>
-              <span>·</span>
-              <time dateTime={article.publishedAt.toISOString()}>
-                {formatDateLong(article.publishedAt)}
-              </time>
-            </>
-          ) : null}
-          <span>·</span>
-          <span>{readingTimeLabel(article.content)}</span>
-          {wasUpdated ? (
-            <>
-              <span>·</span>
-              <span>עודכן: {formatDateLong(article.updatedAt)}</span>
-            </>
-          ) : null}
-          <ShareButton title={article.title} url={articleUrl} slug={article.slug} />
+        <div className="flex flex-wrap items-center gap-3 border-y border-surface-border py-3.5 text-sm text-text-muted">
+          <span className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-accent/20 font-extrabold text-accent">
+            {article.authorName.charAt(0)}
+          </span>
+          <span className="flex flex-col leading-snug">
+            <span className="text-[0.85rem] font-bold text-white">{article.authorName}</span>
+            <span className="text-xs">
+              {article.publishedAt ? `${formatDateLong(article.publishedAt)} · ` : ""}
+              {readingTimeLabel(article.content)}
+              {wasUpdated ? ` · עודכן: ${formatDateLong(article.updatedAt)}` : ""}
+            </span>
+          </span>
+          <span className="ms-auto">
+            <ShareButton title={article.title} url={articleUrl} slug={article.slug} />
+          </span>
         </div>
         {article.coverImageUrl ? (
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-surface-border">
@@ -158,13 +165,29 @@ async function ArticleContent({
       {article.episodeUrl ? <EpisodeCallout url={article.episodeUrl} /> : null}
       {plan.midArticle.length > 0 ? (
         <>
-          <BlockRenderer blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)} />
+          <BlockRenderer
+            blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)}
+            emphasizeOpener
+          />
           <MidArticleRelated articles={plan.midArticle} />
           <BlockRenderer blocks={article.content.slice(MID_MODULE_AFTER_BLOCKS)} />
         </>
       ) : (
-        <BlockRenderer blocks={article.content} />
+        <BlockRenderer blocks={article.content} emphasizeOpener />
       )}
+      {article.tags.length > 1 ? (
+        <div className="flex flex-wrap gap-2 border-t border-surface-border pt-5">
+          {article.tags.map((tag) => (
+            <Link
+              key={tag}
+              href={`/articles?tag=${encodeURIComponent(tag)}`}
+              className="rounded-full border border-surface-border px-3 py-1 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-white"
+            >
+              {tag}
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <PollSection />
       <RecirculationSections plan={plan} />
       <ViewTracker slug={article.slug} />

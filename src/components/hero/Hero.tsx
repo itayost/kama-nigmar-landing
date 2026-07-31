@@ -6,25 +6,34 @@ interface HeroProps {
   readonly applePodcastUrl: string;
 }
 
+// Slim editorial masthead: the brand stays present but compact, so the day's
+// lead story is the visual hero of the homepage.
 export function Hero({ spotifyUrl, applePodcastUrl }: HeroProps) {
   return (
     <section
       aria-label="כמה נגמר? — פודקאסט ספורט יומי"
-      className="grid items-center gap-10 py-11 text-center md:grid-cols-[1.2fr_0.8fr] md:py-18 md:text-start"
+      className="border-b border-surface-border"
     >
-      <div className="order-2 flex flex-col items-center md:order-1 md:items-start">
-        <span className="flex items-center gap-2 text-sm font-bold text-accent">
-          <span aria-hidden="true" className="h-0.5 w-6 rounded-full bg-accent" />
-          פודקאסט ספורט יומי
-        </span>
-        <h1 className="mt-3 text-[clamp(3rem,2rem+5vw,5.5rem)] font-black leading-[1.02] tracking-tight text-balance">
-          כמה נגמר
-          <span className="text-accent [text-shadow:0_0_40px_rgba(46,204,64,0.5)]">?</span>
-        </h1>
-        <p className="mt-2 mb-7 max-w-[30ch] text-lg text-text-muted">
-          התקציר היומי שלכם. כל מה שקרה אתמול בספורט — בכמה דקות.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3 md:justify-start">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-4 py-7">
+        <Image
+          src="/cover.png"
+          alt="כמה נגמר? - עטיפת הפודקאסט"
+          width={88}
+          height={88}
+          loading="eager"
+          fetchPriority="high"
+          className="h-[88px] w-[88px] shrink-0 rounded-[18px] border-2 border-accent/25 shadow-[0_0_32px_rgba(46,204,64,0.18)]"
+        />
+        <div>
+          <h1 className="text-[clamp(1.6rem,1.2rem+2vw,2.4rem)] font-black leading-[1.05] tracking-tight">
+            כמה נגמר
+            <span className="text-accent [text-shadow:0_0_30px_rgba(46,204,64,0.5)]">?</span>
+          </h1>
+          <p className="mt-1 text-[0.95rem] text-text-muted">
+            התקציר היומי שלכם · פרק חדש כל בוקר
+          </p>
+        </div>
+        <div className="flex gap-2.5 sm:ms-auto">
           <PlatformButton
             href={spotifyUrl}
             label="Spotify"
@@ -36,20 +45,6 @@ export function Hero({ spotifyUrl, applePodcastUrl }: HeroProps) {
             label="Apple Podcasts"
             ariaLabel="האזינו באפל פודקאסטס"
             variant="apple"
-          />
-        </div>
-      </div>
-      <div className="order-1 flex justify-center md:order-2">
-        <div className="relative">
-          <div aria-hidden="true" className="absolute inset-0 rounded-3xl bg-accent/15 blur-2xl" />
-          <Image
-            src="/cover.png"
-            alt="כמה נגמר? - עטיפת הפודקאסט"
-            width={300}
-            height={300}
-            loading="eager"
-            fetchPriority="high"
-            className="relative h-auto w-[220px] rounded-3xl border-2 border-accent/25 shadow-[0_0_60px_rgba(46,204,64,0.15)] md:w-[300px]"
           />
         </div>
       </div>
