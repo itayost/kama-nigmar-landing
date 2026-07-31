@@ -5,12 +5,15 @@ import type { Article } from "@/lib/db/schema";
 
 interface ArticleCardProps {
   readonly article: Article;
+  readonly phEvent?: string;
 }
 
-export function ArticleCard({ article }: ArticleCardProps) {
+export function ArticleCard({ article, phEvent }: ArticleCardProps) {
   return (
     <Link
       href={`/articles/${article.slug}`}
+      data-ph-event={phEvent}
+      data-ph-slug={article.slug}
       className="group flex flex-col overflow-hidden rounded-xl border border-surface-border bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_0_30px_rgba(46,204,64,0.12)]"
     >
       <div className="relative aspect-video w-full overflow-hidden">

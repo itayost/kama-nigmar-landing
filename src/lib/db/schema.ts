@@ -1,9 +1,11 @@
 import {
+  date,
   index,
   integer,
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uuid,
@@ -33,6 +35,19 @@ export const articles = pgTable(
     index("articles_status_published_at_idx").on(table.status, table.publishedAt),
     index("articles_tags_idx").using("gin", table.tags),
   ],
+);
+
+// Daily view rollups powering the 7-day Trending window (ADR 0001).
+export const articleViewsDaily = pgTable(
+  "article_views_daily",
+  {
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => articles.id, { onDelete: "cascade" }),
+    day: date("day").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.articleId, table.day] })],
 );
 
 export const tags = pgTable("tags", {

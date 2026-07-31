@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/hero/Hero";
 import { Divider } from "@/components/ui/Divider";
-import { EpisodePlayer } from "@/components/player/EpisodePlayer";
 import { LatestArticlesSection } from "@/components/articles/LatestArticlesSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FEED_ALTERNATE, podcastSeriesSchema, webSiteSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 
 const spotifyShowUrl = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_URL ?? "#";
-const spotifyShowId = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_ID ?? "";
 const applePodcastUrl = process.env.NEXT_PUBLIC_APPLE_PODCAST_URL ?? "#";
 
 export const metadata: Metadata = {
@@ -24,8 +22,7 @@ export default function Home() {
       />
       <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
       <Divider />
-      <div className="flex flex-col gap-14 pb-10">
-        <EpisodePlayer spotifyShowId={spotifyShowId} applePodcastUrl={applePodcastUrl} />
+      <div className="pb-10">
         <LatestArticlesSection />
       </div>
     </main>

@@ -1,8 +1,12 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { and, arrayContains, desc, eq } from "drizzle-orm";
-import { rankRelated } from "@/lib/articles/related";
+import { and, arrayContains, desc, eq, sql } from "drizzle-orm";
+import {
+  planRecirculation,
+  rankTrending,
+  type RecirculationPlan,
+} from "@/lib/articles/recirculation";
 import { getDb } from "@/lib/db";
-import { articles, type Article } from "@/lib/db/schema";
+import { articleViewsDaily, articles, type Article } from "@/lib/db/schema";
 
 export async function getPublishedArticles(tag?: string): Promise<Article[]> {
   "use cache";
@@ -42,20 +46,52 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   return rows[0] ?? null;
 }
 
+// Views received in the trailing 7 days, keyed by article id (ADR 0001).
+async function fetchWeeklyViews(): Promise<Record<string, number>> {
+  const rows = await getDb()
+    .select({
+      articleId: articleViewsDaily.articleId,
+      total: sql<number>`sum(${articleViewsDaily.count})::int`,
+    })
+    .from(articleViewsDaily)
+    .where(sql`${articleViewsDaily.day} >= CURRENT_DATE - 6`)
+    .groupBy(articleViewsDaily.articleId);
+  return Object.fromEntries(rows.map((row) => [row.articleId, row.total]));
+}
+
 // cacheLife("hours") instead of "max": rankings blend in view counts, which
-// accumulate without cache invalidation, so the list refreshes periodically
+// accumulate without cache invalidation, so results refresh periodically
 // in addition to instantly on publish (the "articles" tag).
-export async function getRelatedArticles(slug: string, limit: number): Promise<Article[]> {
+export async function getRecirculation(
+  slug: string,
+): Promise<RecirculationPlan<Article>> {
   "use cache";
   cacheLife("hours");
   cacheTag("articles");
-  const published = await getDb()
-    .select()
-    .from(articles)
-    .where(eq(articles.status, "published"));
+  const db = getDb();
+  const [published, weeklyViews] = await Promise.all([
+    db.select().from(articles).where(eq(articles.status, "published")),
+    fetchWeeklyViews(),
+  ]);
   const current = published.find((article) => article.slug === slug);
-  if (!current) return [];
-  return rankRelated(current, published, limit);
+  if (!current) return { midArticle: [], related: [], trending: [] };
+  return planRecirculation(
+    { slug: current.slug, tags: current.tags, blockCount: current.content.length },
+    published,
+    weeklyViews,
+  );
+}
+
+export async function getTrendingArticles(limit: number): Promise<Article[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("articles");
+  const db = getDb();
+  const [published, weeklyViews] = await Promise.all([
+    db.select().from(articles).where(eq(articles.status, "published")),
+    fetchWeeklyViews(),
+  ]);
+  return rankTrending(published, weeklyViews, limit);
 }
 
 export async function getAllTags(): Promise<string[]> {

@@ -5,13 +5,20 @@ import { notFound } from "next/navigation";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
-import { RelatedArticles } from "@/components/articles/RelatedArticles";
+import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
+import { RecirculationSections } from "@/components/articles/RecirculationSections";
+import { ShareButton } from "@/components/articles/ShareButton";
 import { ViewTracker } from "@/components/articles/ViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getArticleBySlug } from "@/lib/dal/articles";
+import { readingTimeLabel } from "@/lib/articles/reading-time";
+import { getArticleBySlug, getRecirculation } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
 import { FEED_ALTERNATE, breadcrumbSchema, newsArticleSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
+
+const UPDATED_LABEL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+const MID_MODULE_AFTER_BLOCKS = 2;
 
 export async function generateMetadata({
   params,
@@ -75,6 +82,12 @@ async function ArticleContent({
   if (!article) {
     notFound();
   }
+  const plan = await getRecirculation(article.slug);
+  const articleUrl = `${SITE_URL}/articles/${article.slug}`;
+  const wasUpdated =
+    article.publishedAt !== null &&
+    article.updatedAt.getTime() - article.publishedAt.getTime() >
+      UPDATED_LABEL_THRESHOLD_MS;
 
   return (
     <article className="flex flex-col gap-6">
@@ -106,7 +119,7 @@ async function ArticleContent({
         {article.subtitle ? (
           <p className="text-lg leading-relaxed text-text-muted">{article.subtitle}</p>
         ) : null}
-        <div className="flex items-center gap-2 text-sm text-text-muted">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-text-muted">
           <span>{article.authorName}</span>
           {article.publishedAt ? (
             <>
@@ -116,6 +129,15 @@ async function ArticleContent({
               </time>
             </>
           ) : null}
+          <span>·</span>
+          <span>{readingTimeLabel(article.content)}</span>
+          {wasUpdated ? (
+            <>
+              <span>·</span>
+              <span>עודכן: {formatDateLong(article.updatedAt)}</span>
+            </>
+          ) : null}
+          <ShareButton title={article.title} url={articleUrl} slug={article.slug} />
         </div>
         {article.coverImageUrl ? (
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-surface-border">
@@ -131,8 +153,16 @@ async function ArticleContent({
           </div>
         ) : null}
       </header>
-      <BlockRenderer blocks={article.content} />
-      <RelatedArticles slug={article.slug} />
+      {plan.midArticle.length > 0 ? (
+        <>
+          <BlockRenderer blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)} />
+          <MidArticleRelated articles={plan.midArticle} />
+          <BlockRenderer blocks={article.content.slice(MID_MODULE_AFTER_BLOCKS)} />
+        </>
+      ) : (
+        <BlockRenderer blocks={article.content} />
+      )}
+      <RecirculationSections plan={plan} />
       <ViewTracker slug={article.slug} />
     </article>
   );

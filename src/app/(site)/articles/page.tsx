@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ArticleMiniCard } from "@/components/articles/ArticleMiniCard";
 import { ArticlesGrid } from "@/components/articles/ArticlesGrid";
 import { TagFilterBar } from "@/components/articles/TagFilterBar";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getAllTags, getPublishedArticles } from "@/lib/dal/articles";
+import {
+  getAllTags,
+  getPublishedArticles,
+  getTrendingArticles,
+} from "@/lib/dal/articles";
 import { FEED_ALTERNATE, breadcrumbSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 
@@ -43,6 +48,26 @@ function ArticlesSkeleton() {
         />
       ))}
     </div>
+  );
+}
+
+async function TrendingStrip() {
+  const trending = await getTrendingArticles(3);
+  if (trending.length === 0) return null;
+
+  return (
+    <section aria-labelledby="trending-strip-heading" className="mb-8">
+      <SectionHeading title="הנקראות ביותר" id="trending-strip-heading" />
+      <div className="grid gap-3 sm:grid-cols-3">
+        {trending.map((article) => (
+          <ArticleMiniCard
+            key={article.id}
+            article={article}
+            phEvent="trending_index_click"
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -87,6 +112,7 @@ export default function ArticlesPage({ searchParams }: PageProps<"/articles">) {
         ])}
       />
       <SectionHeading title="כתבות" as="h1" />
+      <TrendingStrip />
       <Suspense fallback={<ArticlesSkeleton />}>
         <FilteredArticles searchParams={searchParams} />
       </Suspense>
