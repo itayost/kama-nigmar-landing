@@ -31,6 +31,12 @@ export default function AdminDashboardLayout({
               תגיות
             </Link>
             <Link
+              href="/admin/polls"
+              className="text-text-muted transition-colors hover:text-white"
+            >
+              סקרים
+            </Link>
+            <Link
               href="/"
               className="text-text-muted transition-colors hover:text-white"
             >

@@ -11,12 +11,21 @@ async function login(page: Page) {
 
 async function createArticle(
   page: Page,
-  options: { title: string; slug: string; tag: string; paragraphs: number },
+  options: {
+    title: string;
+    slug: string;
+    tag: string;
+    paragraphs: number;
+    episodeUrl?: string;
+  },
 ) {
   await page.goto("/admin/articles/new");
   await page.locator('input[name="title"]').fill(options.title);
   await page.locator('input[name="authorName"]').fill("בודק אוטומטי");
   await page.locator('input[name="slug"]').fill(options.slug);
+  if (options.episodeUrl) {
+    await page.locator('input[name="episodeUrl"]').fill(options.episodeUrl);
+  }
   const tagsInput = page.getByPlaceholder(/הקלידו תגית/);
   await tagsInput.fill(options.tag);
   await tagsInput.press("Enter");
@@ -101,5 +110,59 @@ test.describe("engagement surfaces", () => {
     await anonPage.goto("http://localhost:3117/admin/login");
     await expect(anonPage.locator('iframe[title="נגן הפרק האחרון"]')).toHaveCount(0);
     await anon.close();
+  });
+
+  test("daily poll and episode callout", async ({ page }) => {
+    const ts = Date.now();
+    const question = `מי מנצח הערב? ${ts}`;
+    const article = {
+      title: `כתבה עם פרק ${ts}`,
+      slug: `e2e-episode-${ts}`,
+      tag: `בדיקה-${ts}`,
+      paragraphs: 1,
+      episodeUrl: "https://open.spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk",
+    };
+
+    await login(page);
+
+    // Create + activate a poll.
+    await page.goto("/admin/polls");
+    await page.locator('input[name="question"]').fill(question);
+    await page.locator('input[name="option"]').nth(0).fill("מכבי");
+    await page.locator('input[name="option"]').nth(1).fill("הפועל");
+    await page.getByRole("button", { name: "יצירת סקר" }).click();
+    const pollRow = page.getByRole("listitem").filter({ hasText: question });
+    await expect(pollRow).toBeVisible();
+    await pollRow.getByRole("button", { name: "הפעלה" }).click();
+    await expect(pollRow.getByText("פעיל")).toBeVisible();
+
+    await createArticle(page, article);
+
+    // Article shows the episode callout and the poll; voting reveals results.
+    await page.goto(`/articles/${article.slug}`);
+    await expect(
+      page.locator('aside[aria-label="האזינו לפרק על הסיפור הזה"]'),
+    ).toBeVisible();
+    await expect(page.getByText(question)).toBeVisible();
+    await page.getByRole("button", { name: "מכבי", exact: true }).click();
+    await expect(page.getByText("הצבעה אחת")).toBeVisible();
+    await expect(page.getByText(/%/).first()).toBeVisible();
+
+    // Results persist on reload (localStorage).
+    await page.reload();
+    await expect(page.getByText("הצבעה אחת")).toBeVisible();
+
+    // Cleanup: poll, article, tag.
+    await page.goto("/admin/polls");
+    const cleanupRow = page.getByRole("listitem").filter({ hasText: question });
+    await cleanupRow.getByRole("button", { name: "מחיקה" }).click();
+    await cleanupRow.getByRole("button", { name: "מחיקה" }).last().click();
+    await expect(page.getByText(question)).toHaveCount(0);
+    await deleteArticle(page, article.title);
+    await page.goto("/admin/tags");
+    const tagRow = page.getByRole("listitem").filter({ hasText: article.tag });
+    await tagRow.getByRole("button", { name: "מחיקה" }).click();
+    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
+    await expect(page.getByText(article.tag, { exact: true })).toHaveCount(0);
   });
 });

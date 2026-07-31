@@ -107,6 +107,9 @@ export const articleInputSchema = z.object({
   authorName: z.string().min(1, "חובה למלא שם כותב").max(100, "שם הכותב ארוך מדי"),
   tags: z.array(tagNameSchema).max(10, "אפשר להוסיף עד 10 תגיות"),
   status: z.enum(["draft", "published"]),
+  // Spotify-episode validation happens in the save action via parseVideoUrl
+  // (importing it here would be circular).
+  episodeUrl: z.string().trim().optional(),
   publishedAt: z.coerce.date().optional(),
   coverImageUrl: z
     .string()

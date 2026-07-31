@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
+import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
 import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
+import { PollSection } from "@/components/polls/PollSection";
 import { RecirculationSections } from "@/components/articles/RecirculationSections";
 import { ShareButton } from "@/components/articles/ShareButton";
 import { ViewTracker } from "@/components/articles/ViewTracker";
@@ -153,6 +155,7 @@ async function ArticleContent({
           </div>
         ) : null}
       </header>
+      {article.episodeUrl ? <EpisodeCallout url={article.episodeUrl} /> : null}
       {plan.midArticle.length > 0 ? (
         <>
           <BlockRenderer blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)} />
@@ -162,6 +165,7 @@ async function ArticleContent({
       ) : (
         <BlockRenderer blocks={article.content} />
       )}
+      <PollSection />
       <RecirculationSections plan={plan} />
       <ViewTracker slug={article.slug} />
     </article>

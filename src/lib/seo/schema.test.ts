@@ -16,6 +16,7 @@ const baseArticle: Article = {
   coverImageUrl: "https://abc.public.blob.vercel-storage.com/articles/pic.jpg",
   content: [],
   authorName: "יוסי",
+  episodeUrl: null,
   tags: ["כדורגל", "ליגת העל"],
   status: "published",
   views: 0,

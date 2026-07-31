@@ -76,6 +76,7 @@ export async function saveArticle(
       : [];
   const publishedAtRaw = formData.get("publishedAt");
   const subtitleRaw = formData.get("subtitle");
+  const episodeUrlRaw = formData.get("episodeUrl");
 
   const parsed = articleInputSchema.safeParse({
     title: formData.get("title"),
@@ -84,6 +85,7 @@ export async function saveArticle(
     authorName: formData.get("authorName"),
     tags,
     status: formData.get("status"),
+    episodeUrl: typeof episodeUrlRaw === "string" ? episodeUrlRaw : undefined,
     // The datetime-local value is a naive wall-clock string; interpret it
     // in Israel time (matching how the form displays it) instead of letting
     // the server's own time zone shift it on every save.
@@ -114,6 +116,13 @@ export async function saveArticle(
   const content = normalizeVideoBlocks(parsed.data.content);
   if (!content) {
     return { errors: { content: "אחד מקישורי הסרטונים אינו תקין" } };
+  }
+
+  const episodeUrl = parsed.data.episodeUrl || null;
+  if (episodeUrl !== null && parseVideoUrl(episodeUrl)?.provider !== "spotify") {
+    return {
+      errors: { episodeUrl: "קישור הפרק חייב להיות קישור לפרק בספוטיפיי" },
+    };
   }
 
   const db = getDb();
@@ -155,6 +164,7 @@ export async function saveArticle(
     coverImageUrl: parsed.data.coverImageUrl || null,
     content,
     authorName: parsed.data.authorName,
+    episodeUrl,
     tags: parsed.data.tags,
     status: parsed.data.status,
     publishedAt,

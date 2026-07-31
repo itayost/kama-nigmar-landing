@@ -28,6 +28,7 @@ export function ArticleForm({ article, tagSuggestions }: ArticleFormProps) {
   const [title, setTitle] = useState(article?.title ?? "");
   const [subtitle, setSubtitle] = useState(article?.subtitle ?? "");
   const [authorName, setAuthorName] = useState(article?.authorName ?? "");
+  const [episodeUrl, setEpisodeUrl] = useState(article?.episodeUrl ?? "");
   const [status, setStatus] = useState<"draft" | "published">(
     article?.status ?? "draft",
   );
@@ -96,6 +97,22 @@ export function ArticleForm({ article, tagSuggestions }: ArticleFormProps) {
           onChange={(event) => setAuthorName(event.target.value)}
           placeholder="מי כתב את הכתבה?"
           className={inputClass}
+        />
+      </Field>
+
+      <Field
+        label="קישור לפרק בספוטיפיי"
+        error={state.errors.episodeUrl}
+        hint="אם הכתבה מבוססת על פרק — הדביקו קישור לפרק והוא יופיע בראש הכתבה"
+      >
+        <input
+          type="url"
+          name="episodeUrl"
+          dir="ltr"
+          value={episodeUrl}
+          onChange={(event) => setEpisodeUrl(event.target.value)}
+          placeholder="https://open.spotify.com/episode/..."
+          className={`${inputClass} text-left`}
         />
       </Field>
 
