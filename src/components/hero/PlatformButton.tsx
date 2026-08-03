@@ -5,11 +5,15 @@ interface PlatformButtonProps {
   readonly variant: "spotify" | "apple";
 }
 
+// Text colour lives per-variant: white on Spotify green is only 2.59:1, below the
+// 4.5:1 WCAG AA floor. Dark navy on that green is 7.01:1, and matches the
+// bg-accent/text-bg-start pairing the header already uses. Apple purple keeps
+// white (6.53:1).
 const variantStyles = {
   spotify:
-    "bg-spotify hover:shadow-[0_0_20px_rgba(29,185,84,0.4)] focus-visible:shadow-[0_0_20px_rgba(29,185,84,0.4)]",
+    "bg-spotify text-bg-start hover:shadow-[0_0_20px_rgba(29,185,84,0.4)] focus-visible:shadow-[0_0_20px_rgba(29,185,84,0.4)]",
   apple:
-    "bg-apple hover:shadow-[0_0_20px_rgba(135,46,196,0.4)] focus-visible:shadow-[0_0_20px_rgba(135,46,196,0.4)]",
+    "bg-apple text-white hover:shadow-[0_0_20px_rgba(135,46,196,0.4)] focus-visible:shadow-[0_0_20px_rgba(135,46,196,0.4)]",
 } as const;
 
 export function PlatformButton({ href, label, ariaLabel, variant }: PlatformButtonProps) {
@@ -20,7 +24,7 @@ export function PlatformButton({ href, label, ariaLabel, variant }: PlatformButt
       rel="noopener noreferrer"
       aria-label={ariaLabel}
       className={`
-        inline-block rounded-full px-6 py-2.5 text-sm font-semibold text-white
+        inline-block rounded-full px-6 py-2.5 text-sm font-semibold
         transition-all duration-200 ease-out
         hover:scale-105 focus-visible:scale-105
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30

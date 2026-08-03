@@ -98,7 +98,9 @@ Contains the podcast identity: cover art image, title, tagline, and platform lin
 
 **Platform buttons:**
 - Two pill-shaped buttons side by side
-- Spotify: green background (`#1DB954`), white text, links to the podcast's Spotify page
+- Spotify: green background (`#1DB954`), dark navy text (`#0a1628`), links to the podcast's Spotify page
+  - Amended 2026-08-03: originally specified white text, but that is 2.59:1 against this
+    green and fails WCAG AA. Dark navy is 7.01:1 and matches the header CTA.
 - Apple Podcasts: purple background (`#872ec4`), white text, links to the podcast's Apple Podcasts page
 - Both open in new tabs (`target="_blank" rel="noopener"`)
 - Hover: slight scale up + glow shadow matching the button color

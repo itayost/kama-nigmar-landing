@@ -5,7 +5,11 @@ import { useEffect, useRef, useState } from "react";
 const API_SCRIPT_SRC = "https://open.spotify.com/embed/iframe-api/v1";
 const READY_TIMEOUT_MS = 5000;
 
-type PlayerMode = "loading" | "custom" | "fallback";
+// "idle" is the pre-interaction state: the bar renders fully, but nothing from
+// open.spotify.com is requested yet, so no third-party cookie is set on visitors
+// who never press play. First press moves us to "loading" and from there the
+// original flow is unchanged.
+type PlayerMode = "idle" | "loading" | "custom" | "fallback";
 
 interface PlaybackUpdate {
   readonly data: {
@@ -45,12 +49,20 @@ interface PlayerBarProps {
 export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<SpotifyController | null>(null);
-  const [mode, setMode] = useState<PlayerMode>("loading");
+  const [mode, setMode] = useState<PlayerMode>("idle");
   const [isPaused, setIsPaused] = useState(true);
   const [progress, setProgress] = useState(0);
+  // A one-way latch, deliberately not `mode`: the effect must run exactly once.
+  // Depending on `mode` re-runs it when the controller sets "custom", which
+  // re-arms the timeout below, and since onSpotifyIframeApiReady only ever
+  // fires once, that second timeout would drop a working player to "fallback".
+  const [hasActivated, setHasActivated] = useState(false);
+  // Set when the user pressed play before the controller existed, so playback
+  // starts as soon as it does rather than needing a second press.
+  const shouldAutoPlayRef = useRef(false);
 
   useEffect(() => {
-    if (spotifyShowId === "") return;
+    if (spotifyShowId === "" || !hasActivated) return;
     let isCancelled = false;
     const timeout = setTimeout(() => {
       if (!isCancelled && !controllerRef.current) setMode("fallback");
@@ -75,6 +87,10 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
             });
             clearTimeout(timeout);
             setMode("custom");
+            if (shouldAutoPlayRef.current) {
+              shouldAutoPlayRef.current = false;
+              controller.togglePlay();
+            }
           },
         );
       } catch {
@@ -98,9 +114,21 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
       isCancelled = true;
       clearTimeout(timeout);
     };
-  }, [spotifyShowId]);
+  }, [spotifyShowId, hasActivated]);
 
   if (spotifyShowId === "") return null;
+
+  function handlePlayClick() {
+    if (!hasActivated) {
+      shouldAutoPlayRef.current = true;
+      setHasActivated(true);
+      setMode("loading");
+      return;
+    }
+    controllerRef.current?.togglePlay();
+  }
+
+  const isPlaying = mode === "custom" && !isPaused;
 
   return (
     <div
@@ -118,20 +146,35 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
         <div ref={hostRef} />
       </div>
 
-      {mode === "custom" ? (
-        <div className="relative mx-auto flex w-full max-w-5xl items-center gap-3.5 px-4 py-2.5">
-          <span
-            aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-0.5 origin-right bg-accent/70 transition-transform duration-300"
-            style={{ transform: `scaleX(${progress})` }}
+      {mode === "fallback" ? (
+        <div className="mx-auto w-full max-w-5xl px-4 py-2">
+          <iframe
+            title="נגן הפרק האחרון"
+            src={`https://open.spotify.com/embed/show/${spotifyShowId}?theme=0`}
+            width="100%"
+            height="80"
+            allow="encrypted-media"
+            loading="lazy"
+            className="rounded-lg border-0"
           />
+        </div>
+      ) : (
+        <div className="relative mx-auto flex w-full max-w-5xl items-center gap-3.5 px-4 py-2.5">
+          {mode === "custom" ? (
+            <span
+              aria-hidden="true"
+              className="absolute inset-x-0 top-0 h-0.5 origin-right bg-accent/70 transition-transform duration-300"
+              style={{ transform: `scaleX(${progress})` }}
+            />
+          ) : null}
           <button
             type="button"
-            onClick={() => controllerRef.current?.togglePlay()}
-            aria-label={isPaused ? "נגן את הפרק האחרון" : "השהה את הפרק"}
+            onClick={handlePlayClick}
+            aria-busy={mode === "loading"}
+            aria-label={isPlaying ? "השהה את הפרק" : "נגן את הפרק האחרון"}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent shadow-[0_0_24px_rgba(46,204,64,0.3)] transition-transform hover:scale-105 active:scale-95 motion-reduce:transform-none"
           >
-            {isPaused ? (
+            {!isPlaying ? (
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 translate-x-[1px] fill-bg-start">
                 <path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l10.54-6.86a1.04 1.04 0 0 0 0-1.76L9.56 4.26A1.04 1.04 0 0 0 8 5.14Z" />
               </svg>
@@ -149,7 +192,7 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
               כמה נגמר? — התקציר היומי שלכם
             </span>
           </span>
-          {!isPaused ? (
+          {isPlaying ? (
             <span aria-hidden="true" className="ms-auto flex items-end gap-[3px]">
               {[0, 1, 2, 3].map((i) => (
                 <span
@@ -160,18 +203,6 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
               ))}
             </span>
           ) : null}
-        </div>
-      ) : (
-        <div className="mx-auto w-full max-w-5xl px-4 py-2">
-          <iframe
-            title="נגן הפרק האחרון"
-            src={`https://open.spotify.com/embed/show/${spotifyShowId}?theme=0`}
-            width="100%"
-            height="80"
-            allow="encrypted-media"
-            loading="lazy"
-            className="rounded-lg border-0"
-          />
         </div>
       )}
     </div>
