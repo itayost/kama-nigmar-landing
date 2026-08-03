@@ -18,6 +18,19 @@ const nextConfig: NextConfig = {
       new URL("https://i.ytimg.com/**"),
     ],
   },
+  // The old production alias still served the whole site at 200 after the move to
+  // kama-nigmar.co.il, which is duplicate content. Scoped by host so the per-deployment
+  // preview URLs, which have different hostnames, are left alone.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "kama-nigmar-landing.vercel.app" }],
+        destination: "https://www.kama-nigmar.co.il/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

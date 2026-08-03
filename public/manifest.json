@@ -2,6 +2,8 @@
   "name": "כמה נגמר?",
   "short_name": "כמה נגמר?",
   "description": "כמה נגמר? - התקציר היומי שלכם",
+  "id": "/",
+  "scope": "/",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a1628",
