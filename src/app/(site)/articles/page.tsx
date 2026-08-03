@@ -28,13 +28,13 @@ export const metadata: Metadata = {
     siteName: "כמה נגמר?",
     type: "website",
     locale: "he_IL",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
+    images: [{ url: "/og-wide.jpg", width: 1200, height: 630, alt: "כמה נגמר? פודקאסט" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "כתבות | כמה נגמר?",
     description: pageDescription,
-    images: ["/og-image.jpg"],
+    images: ["/og-wide.jpg"],
   },
 };
 

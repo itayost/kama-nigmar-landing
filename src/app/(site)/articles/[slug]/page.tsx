@@ -47,7 +47,7 @@ export async function generateMetadata({
     return { title: "הכתבה לא נמצאה", robots: { index: false } };
   }
   const articleUrl = `${SITE_URL}/articles/${article.slug}`;
-  const ogImage = article.coverImageUrl ?? "/og-image.jpg";
+  const ogImage = article.coverImageUrl ?? "/og-wide.jpg";
   return {
     title: article.title,
     description: article.subtitle ?? undefined,

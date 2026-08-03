@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: "כמה נגמר? | התקציר היומי שלכם",
     description: siteDescription,
     siteName: "כמה נגמר?",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 1200, alt: "כמה נגמר? פודקאסט" }],
+    images: [{ url: "/og-wide.jpg", width: 1200, height: 630, alt: "כמה נגמר? פודקאסט" }],
     type: "website",
     locale: "he_IL",
   },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "כמה נגמר? | התקציר היומי שלכם",
     description: siteDescription,
-    images: ["/og-image.jpg"],
+    images: ["/og-wide.jpg"],
   },
   alternates: {
     types: { "application/rss+xml": "/feed.xml" },
