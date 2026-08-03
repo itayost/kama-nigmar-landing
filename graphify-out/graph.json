@@ -4,488 +4,15 @@
   "graph": {},
   "nodes": [
     {
-      "label": "neon-postgres/SKILL.md",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "neon-postgres/skill.md"
-    },
-    {
-      "label": "Neon Serverless Postgres",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L25",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "neon serverless postgres"
-    },
-    {
-      "label": "Setup Flow",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_setup_flow",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "setup flow"
-    },
-    {
-      "label": "1. Select the organization and project",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L31",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_1_select_the_organization_and_project",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "1. select the organization and project"
-    },
-    {
-      "label": "2. Get the connection string",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L35",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_2_get_the_connection_string",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "2. get the connection string"
-    },
-    {
-      "label": "When to use pooled vs direct connections",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L39",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_when_to_use_pooled_vs_direct_connections",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "when to use pooled vs direct connections"
-    },
-    {
-      "label": "3. Pick the connection method and driver",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L51",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_3_pick_the_connection_method_and_driver",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "3. pick the connection method and driver"
-    },
-    {
-      "label": "4. Set up the schema",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L63",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_4_set_up_the_schema",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "4. set up the schema"
-    },
-    {
-      "label": "Branching",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L69",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_branching",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "branching"
-    },
-    {
-      "label": "Autoscaling",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L87",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_autoscaling",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "autoscaling"
-    },
-    {
-      "label": "Scale to Zero",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L93",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_scale_to_zero",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "scale to zero"
-    },
-    {
-      "label": "Instant Restore",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L105",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_instant_restore",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "instant restore"
-    },
-    {
-      "label": "Read Replicas",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L117",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_read_replicas",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "read replicas"
-    },
-    {
-      "label": "Connection Pooling",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L129",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_connection_pooling",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "connection pooling"
-    },
-    {
-      "label": "IP Allow Lists",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L141",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_ip_allow_lists",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "ip allow lists"
-    },
-    {
-      "label": "Logical Replication",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon-postgres/SKILL.md",
-      "source_location": "L147",
-      "_origin": "ast",
-      "id": "agents_skills_neon_postgres_skill_logical_replication",
-      "community": 29,
-      "community_name": "Neon Serverless Postgres",
-      "norm_label": "logical replication"
-    },
-    {
-      "label": "neon/SKILL.md",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "neon/skill.md"
-    },
-    {
-      "label": "Neon",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L13",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_neon",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "neon"
-    },
-    {
-      "label": "Platform Services",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L19",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_platform_services",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "platform services"
-    },
-    {
-      "label": "Public Beta Service Availability",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L29",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_public_beta_service_availability",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "public beta service availability"
-    },
-    {
-      "label": "Architecture: How to Use Neon",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L35",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_architecture_how_to_use_neon",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "architecture: how to use neon"
-    },
-    {
-      "label": "Neon Documentation",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L49",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_neon_documentation",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "neon documentation"
-    },
-    {
-      "label": "Finding the Right Page",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L53",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_finding_the_right_page",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "finding the right page"
-    },
-    {
-      "label": "Fetching Docs as Markdown",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L61",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_fetching_docs_as_markdown",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "fetching docs as markdown"
-    },
-    {
-      "label": "Choosing the Right Skill",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L70",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_choosing_the_right_skill",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "choosing the right skill"
-    },
-    {
-      "label": "Installing the Right Skill",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L88",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_installing_the_right_skill",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "installing the right skill"
-    },
-    {
-      "label": "Updating Skills",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L110",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_updating_skills",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "updating skills"
-    },
-    {
-      "label": "Getting Started with Neon",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L116",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_getting_started_with_neon",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "getting started with neon"
-    },
-    {
-      "label": "Getting Started with the Neon CLI",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L134",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_getting_started_with_the_neon_cli",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "getting started with the neon cli"
-    },
-    {
-      "label": "Useful CLI Commands",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L140",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_useful_cli_commands",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "useful cli commands"
-    },
-    {
-      "label": "Getting Started with the Neon MCP Server",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L151",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_getting_started_with_the_neon_mcp_server",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "getting started with the neon mcp server"
-    },
-    {
-      "label": "Neon Infrastructure as Code",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L165",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_neon_infrastructure_as_code",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "neon infrastructure as code"
-    },
-    {
-      "label": "Provision services with neon config",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L195",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_provision_services_with_neon_config",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "provision services with neon config"
-    },
-    {
-      "label": "Type-safe env vars with parseEnv",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L226",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_type_safe_env_vars_with_parseenv",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "type-safe env vars with parseenv"
-    },
-    {
-      "label": "Branch configuration",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L259",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_branch_configuration",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "branch configuration"
-    },
-    {
-      "label": "Type-safe config: invalid setups don't compile",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L294",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_type_safe_config_invalid_setups_don_t_compile",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "type-safe config: invalid setups don't compile"
-    },
-    {
-      "label": "Branch-First Dev Flow",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L323",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_branch_first_dev_flow",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "branch-first dev flow"
-    },
-    {
-      "label": "How checkout composes with neon.ts",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L340",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_how_checkout_composes_with_neon_ts",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "how checkout composes with neon.ts"
-    },
-    {
-      "label": "Opting out of local env vars",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L344",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_opting_out_of_local_env_vars",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "opting out of local env vars"
-    },
-    {
-      "label": "Manage Neon Resources",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L357",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_manage_neon_resources",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "manage neon resources"
-    },
-    {
-      "label": "Neon for (Agentic) Platforms",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L363",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_neon_for_agentic_platforms",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "neon for (agentic) platforms"
-    },
-    {
-      "label": "Gotchas",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L379",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_gotchas",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "gotchas"
-    },
-    {
-      "label": "Neon Auth: \"invalid domain\"",
-      "file_type": "document",
-      "source_file": ".agents/skills/neon/SKILL.md",
-      "source_location": "L381",
-      "_origin": "ast",
-      "id": "agents_skills_neon_skill_neon_auth_invalid_domain",
-      "community": 26,
-      "community_name": "Neon",
-      "norm_label": "neon auth: \"invalid domain\""
-    },
-    {
       "label": "next.config.ts",
       "file_type": "code",
       "source_file": "next.config.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "next_config",
       "community": 17,
       "community_name": "next.config.ts",
-      "norm_label": "next.config.ts",
-      "id": "next_config"
+      "norm_label": "next.config.ts"
     },
     {
       "label": "nextConfig",
@@ -493,10 +20,659 @@
       "source_file": "next.config.ts",
       "source_location": "L3",
       "_origin": "ast",
+      "id": "next_config_nextconfig",
       "community": 17,
       "community_name": "next.config.ts",
-      "norm_label": "nextconfig",
-      "id": "next_config_nextconfig"
+      "norm_label": "nextconfig"
+    },
+    {
+      "label": "manifest.json",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "public_manifest",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "manifest.json"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "public_manifest_name",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "name"
+    },
+    {
+      "label": "short_name",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "public_manifest_short_name",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "short_name"
+    },
+    {
+      "label": "description",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "public_manifest_description",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "description"
+    },
+    {
+      "label": "id",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "public_manifest_id",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "id"
+    },
+    {
+      "label": "scope",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "public_manifest_scope",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "scope"
+    },
+    {
+      "label": "start_url",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "public_manifest_start_url",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "start_url"
+    },
+    {
+      "label": "display",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "public_manifest_display",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "display"
+    },
+    {
+      "label": "background_color",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "public_manifest_background_color",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "background_color"
+    },
+    {
+      "label": "theme_color",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "public_manifest_theme_color",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "theme_color"
+    },
+    {
+      "label": "dir",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "public_manifest_dir",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "dir"
+    },
+    {
+      "label": "lang",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "public_manifest_lang",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "lang"
+    },
+    {
+      "label": "icons",
+      "file_type": "code",
+      "source_file": "public/manifest.json",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "public_manifest_icons",
+      "community": 12,
+      "community_name": "manifest.json",
+      "norm_label": "icons"
+    },
+    {
+      "label": "robots.test.ts",
+      "file_type": "code",
+      "source_file": "src/app/robots.test.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_app_robots_test",
+      "community": 1,
+      "community_name": "[slug]/page.tsx",
+      "norm_label": "robots.test.ts"
+    },
+    {
+      "label": "robots.ts",
+      "file_type": "code",
+      "source_file": "src/app/robots.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_app_robots",
+      "community": 1,
+      "community_name": "[slug]/page.tsx",
+      "norm_label": "robots.ts"
+    },
+    {
+      "label": "robots()",
+      "file_type": "code",
+      "source_file": "src/app/robots.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "src_app_robots_robots",
+      "community": 1,
+      "community_name": "[slug]/page.tsx",
+      "norm_label": "robots()"
+    },
+    {
+      "label": "neon-postgres/SKILL.md",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "neon-postgres/skill.md",
+      "id": "agents_skills_neon_postgres_skill"
+    },
+    {
+      "label": "Neon Serverless Postgres",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L25",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "neon serverless postgres",
+      "id": "agents_skills_neon_postgres_skill_neon_serverless_postgres"
+    },
+    {
+      "label": "Setup Flow",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "setup flow",
+      "id": "agents_skills_neon_postgres_skill_setup_flow"
+    },
+    {
+      "label": "1. Select the organization and project",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L31",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "1. select the organization and project",
+      "id": "agents_skills_neon_postgres_skill_1_select_the_organization_and_project"
+    },
+    {
+      "label": "2. Get the connection string",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "2. get the connection string",
+      "id": "agents_skills_neon_postgres_skill_2_get_the_connection_string"
+    },
+    {
+      "label": "When to use pooled vs direct connections",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L39",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "when to use pooled vs direct connections",
+      "id": "agents_skills_neon_postgres_skill_when_to_use_pooled_vs_direct_connections"
+    },
+    {
+      "label": "3. Pick the connection method and driver",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L51",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "3. pick the connection method and driver",
+      "id": "agents_skills_neon_postgres_skill_3_pick_the_connection_method_and_driver"
+    },
+    {
+      "label": "4. Set up the schema",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L63",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "4. set up the schema",
+      "id": "agents_skills_neon_postgres_skill_4_set_up_the_schema"
+    },
+    {
+      "label": "Branching",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L69",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "branching",
+      "id": "agents_skills_neon_postgres_skill_branching"
+    },
+    {
+      "label": "Autoscaling",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L87",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "autoscaling",
+      "id": "agents_skills_neon_postgres_skill_autoscaling"
+    },
+    {
+      "label": "Scale to Zero",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L93",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "scale to zero",
+      "id": "agents_skills_neon_postgres_skill_scale_to_zero"
+    },
+    {
+      "label": "Instant Restore",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L105",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "instant restore",
+      "id": "agents_skills_neon_postgres_skill_instant_restore"
+    },
+    {
+      "label": "Read Replicas",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L117",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "read replicas",
+      "id": "agents_skills_neon_postgres_skill_read_replicas"
+    },
+    {
+      "label": "Connection Pooling",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L129",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "connection pooling",
+      "id": "agents_skills_neon_postgres_skill_connection_pooling"
+    },
+    {
+      "label": "IP Allow Lists",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L141",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "ip allow lists",
+      "id": "agents_skills_neon_postgres_skill_ip_allow_lists"
+    },
+    {
+      "label": "Logical Replication",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon-postgres/SKILL.md",
+      "source_location": "L147",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Neon Serverless Postgres",
+      "norm_label": "logical replication",
+      "id": "agents_skills_neon_postgres_skill_logical_replication"
+    },
+    {
+      "label": "neon/SKILL.md",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "neon/skill.md",
+      "id": "agents_skills_neon_skill"
+    },
+    {
+      "label": "Neon",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L13",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "neon",
+      "id": "agents_skills_neon_skill_neon"
+    },
+    {
+      "label": "Platform Services",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L19",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "platform services",
+      "id": "agents_skills_neon_skill_platform_services"
+    },
+    {
+      "label": "Public Beta Service Availability",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L29",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "public beta service availability",
+      "id": "agents_skills_neon_skill_public_beta_service_availability"
+    },
+    {
+      "label": "Architecture: How to Use Neon",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L35",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "architecture: how to use neon",
+      "id": "agents_skills_neon_skill_architecture_how_to_use_neon"
+    },
+    {
+      "label": "Neon Documentation",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L49",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "neon documentation",
+      "id": "agents_skills_neon_skill_neon_documentation"
+    },
+    {
+      "label": "Finding the Right Page",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L53",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "finding the right page",
+      "id": "agents_skills_neon_skill_finding_the_right_page"
+    },
+    {
+      "label": "Fetching Docs as Markdown",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L61",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "fetching docs as markdown",
+      "id": "agents_skills_neon_skill_fetching_docs_as_markdown"
+    },
+    {
+      "label": "Choosing the Right Skill",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L70",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "choosing the right skill",
+      "id": "agents_skills_neon_skill_choosing_the_right_skill"
+    },
+    {
+      "label": "Installing the Right Skill",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L88",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "installing the right skill",
+      "id": "agents_skills_neon_skill_installing_the_right_skill"
+    },
+    {
+      "label": "Updating Skills",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L110",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "updating skills",
+      "id": "agents_skills_neon_skill_updating_skills"
+    },
+    {
+      "label": "Getting Started with Neon",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L116",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "getting started with neon",
+      "id": "agents_skills_neon_skill_getting_started_with_neon"
+    },
+    {
+      "label": "Getting Started with the Neon CLI",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L134",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "getting started with the neon cli",
+      "id": "agents_skills_neon_skill_getting_started_with_the_neon_cli"
+    },
+    {
+      "label": "Useful CLI Commands",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L140",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "useful cli commands",
+      "id": "agents_skills_neon_skill_useful_cli_commands"
+    },
+    {
+      "label": "Getting Started with the Neon MCP Server",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L151",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "getting started with the neon mcp server",
+      "id": "agents_skills_neon_skill_getting_started_with_the_neon_mcp_server"
+    },
+    {
+      "label": "Neon Infrastructure as Code",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L165",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "neon infrastructure as code",
+      "id": "agents_skills_neon_skill_neon_infrastructure_as_code"
+    },
+    {
+      "label": "Provision services with neon config",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L195",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "provision services with neon config",
+      "id": "agents_skills_neon_skill_provision_services_with_neon_config"
+    },
+    {
+      "label": "Type-safe env vars with parseEnv",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L226",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "type-safe env vars with parseenv",
+      "id": "agents_skills_neon_skill_type_safe_env_vars_with_parseenv"
+    },
+    {
+      "label": "Branch configuration",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L259",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "branch configuration",
+      "id": "agents_skills_neon_skill_branch_configuration"
+    },
+    {
+      "label": "Type-safe config: invalid setups don't compile",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L294",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "type-safe config: invalid setups don't compile",
+      "id": "agents_skills_neon_skill_type_safe_config_invalid_setups_don_t_compile"
+    },
+    {
+      "label": "Branch-First Dev Flow",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L323",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "branch-first dev flow",
+      "id": "agents_skills_neon_skill_branch_first_dev_flow"
+    },
+    {
+      "label": "How checkout composes with neon.ts",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L340",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "how checkout composes with neon.ts",
+      "id": "agents_skills_neon_skill_how_checkout_composes_with_neon_ts"
+    },
+    {
+      "label": "Opting out of local env vars",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L344",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "opting out of local env vars",
+      "id": "agents_skills_neon_skill_opting_out_of_local_env_vars"
+    },
+    {
+      "label": "Manage Neon Resources",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L357",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "manage neon resources",
+      "id": "agents_skills_neon_skill_manage_neon_resources"
+    },
+    {
+      "label": "Neon for (Agentic) Platforms",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L363",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "neon for (agentic) platforms",
+      "id": "agents_skills_neon_skill_neon_for_agentic_platforms"
+    },
+    {
+      "label": "Gotchas",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L379",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "gotchas",
+      "id": "agents_skills_neon_skill_gotchas"
+    },
+    {
+      "label": "Neon Auth: \"invalid domain\"",
+      "file_type": "document",
+      "source_file": ".agents/skills/neon/SKILL.md",
+      "source_location": "L381",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "Neon",
+      "norm_label": "neon auth: \"invalid domain\"",
+      "id": "agents_skills_neon_skill_neon_auth_invalid_domain"
     },
     {
       "label": "[slug]/page.tsx",
@@ -1467,127 +1643,6 @@
       "id": "postcss_config_config"
     },
     {
-      "label": "manifest.json",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "manifest.json",
-      "community_name": "manifest.json",
-      "id": "public_manifest"
-    },
-    {
-      "label": "name",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L2",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "name",
-      "community_name": "manifest.json",
-      "id": "public_manifest_name"
-    },
-    {
-      "label": "short_name",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L3",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "short_name",
-      "community_name": "manifest.json",
-      "id": "public_manifest_short_name"
-    },
-    {
-      "label": "description",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L4",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "description",
-      "community_name": "manifest.json",
-      "id": "public_manifest_description"
-    },
-    {
-      "label": "start_url",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L5",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "start_url",
-      "community_name": "manifest.json",
-      "id": "public_manifest_start_url"
-    },
-    {
-      "label": "display",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L6",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "display",
-      "community_name": "manifest.json",
-      "id": "public_manifest_display"
-    },
-    {
-      "label": "background_color",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L7",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "background_color",
-      "community_name": "manifest.json",
-      "id": "public_manifest_background_color"
-    },
-    {
-      "label": "theme_color",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L8",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "theme_color",
-      "community_name": "manifest.json",
-      "id": "public_manifest_theme_color"
-    },
-    {
-      "label": "dir",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L9",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "dir",
-      "community_name": "manifest.json",
-      "id": "public_manifest_dir"
-    },
-    {
-      "label": "lang",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L10",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "lang",
-      "community_name": "manifest.json",
-      "id": "public_manifest_lang"
-    },
-    {
-      "label": "icons",
-      "file_type": "code",
-      "source_file": "public/manifest.json",
-      "source_location": "L11",
-      "_origin": "ast",
-      "community": 12,
-      "norm_label": "icons",
-      "community_name": "manifest.json",
-      "id": "public_manifest_icons"
-    },
-    {
       "label": "not-found.tsx",
       "file_type": "code",
       "source_file": "src/app/(site)/articles/[slug]/not-found.tsx",
@@ -1857,9 +1912,9 @@
       "source_file": "src/app/admin/(dashboard)/polls/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "polls/page.tsx",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_app_admin_dashboard_polls_page"
     },
     {
@@ -1868,9 +1923,9 @@
       "source_file": "src/app/admin/(dashboard)/polls/page.tsx",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "adminpollspage()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_app_admin_dashboard_polls_page_adminpollspage"
     },
     {
@@ -1879,9 +1934,9 @@
       "source_file": "src/app/admin/(dashboard)/tags/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "tags/page.tsx",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_app_admin_dashboard_tags_page"
     },
     {
@@ -1890,9 +1945,9 @@
       "source_file": "src/app/admin/(dashboard)/tags/page.tsx",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "admintagspage()",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_app_admin_dashboard_tags_page_admintagspage"
     },
     {
@@ -1967,9 +2022,9 @@
       "source_file": "src/app/api/articles/view/route.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 9,
       "norm_label": "view/route.ts",
-      "community_name": "db/schema.ts",
+      "community_name": "blocks.ts",
       "id": "src_app_api_articles_view_route"
     },
     {
@@ -1978,9 +2033,9 @@
       "source_file": "src/app/api/articles/view/route.ts",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 0,
+      "community": 9,
       "norm_label": "post()",
-      "community_name": "db/schema.ts",
+      "community_name": "blocks.ts",
       "id": "src_app_api_articles_view_route_post"
     },
     {
@@ -1989,9 +2044,9 @@
       "source_file": "src/app/api/articles/view/route.ts",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 0,
+      "community": 9,
       "norm_label": "adr-0001",
-      "community_name": "db/schema.ts",
+      "community_name": "blocks.ts",
       "id": "src_app_api_articles_view_route_ts_docref_adr_0001"
     },
     {
@@ -2165,9 +2220,9 @@
       "source_file": "src/components/admin/BlockEditor.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 14,
+      "community": 27,
       "norm_label": "blockeditor.tsx",
-      "community_name": "BlockItemEditor.tsx",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockeditor"
     },
     {
@@ -2176,9 +2231,9 @@
       "source_file": "src/components/admin/BlockEditor.tsx",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 28,
+      "community": 27,
       "norm_label": "blockeditorprops",
-      "community_name": "ArticleBlock",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockeditor_blockeditorprops"
     },
     {
@@ -2187,9 +2242,9 @@
       "source_file": "src/components/admin/BlockEditor.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 14,
+      "community": 27,
       "norm_label": "blocktype",
-      "community_name": "BlockItemEditor.tsx",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockeditor_blocktype"
     },
     {
@@ -2198,9 +2253,9 @@
       "source_file": "src/components/admin/BlockEditor.tsx",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 14,
+      "community": 27,
       "norm_label": "add_buttons",
-      "community_name": "BlockItemEditor.tsx",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockeditor_add_buttons"
     },
     {
@@ -2209,9 +2264,9 @@
       "source_file": "src/components/admin/BlockEditor.tsx",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 14,
+      "community": 27,
       "norm_label": "createblock()",
-      "community_name": "BlockItemEditor.tsx",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockeditor_createblock"
     },
     {
@@ -2220,9 +2275,9 @@
       "source_file": "src/components/admin/BlockEditor.tsx",
       "source_location": "L35",
       "_origin": "ast",
-      "community": 14,
+      "community": 27,
       "norm_label": "blockeditor()",
-      "community_name": "BlockItemEditor.tsx",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockeditor_blockeditor"
     },
     {
@@ -2319,9 +2374,9 @@
       "source_file": "src/components/admin/BlockItemEditor.tsx",
       "source_location": "L180",
       "_origin": "ast",
-      "community": 14,
+      "community": 27,
       "norm_label": "blockitemeditor()",
-      "community_name": "BlockItemEditor.tsx",
+      "community_name": "BlockEditor.tsx",
       "id": "src_components_admin_blockitemeditor_blockitemeditor"
     },
     {
@@ -2407,9 +2462,9 @@
       "source_file": "src/components/admin/ImageUploadField.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 14,
       "norm_label": "imageuploadfield.tsx",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "BlockItemEditor.tsx",
       "id": "src_components_admin_imageuploadfield"
     },
     {
@@ -2418,9 +2473,9 @@
       "source_file": "src/components/admin/ImageUploadField.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 2,
+      "community": 14,
       "norm_label": "imageuploadfieldprops",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "BlockItemEditor.tsx",
       "id": "src_components_admin_imageuploadfield_imageuploadfieldprops"
     },
     {
@@ -2429,9 +2484,9 @@
       "source_file": "src/components/admin/ImageUploadField.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 2,
+      "community": 14,
       "norm_label": "imageuploadfield()",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "BlockItemEditor.tsx",
       "id": "src_components_admin_imageuploadfield_imageuploadfield"
     },
     {
@@ -2572,9 +2627,9 @@
       "source_file": "src/components/admin/polls/NewPollForm.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "newpollform.tsx",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_newpollform"
     },
     {
@@ -2583,9 +2638,9 @@
       "source_file": "src/components/admin/polls/NewPollForm.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "initialstate",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_newpollform_initialstate"
     },
     {
@@ -2594,9 +2649,9 @@
       "source_file": "src/components/admin/polls/NewPollForm.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "newpollform()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_newpollform_newpollform"
     },
     {
@@ -2605,9 +2660,9 @@
       "source_file": "src/components/admin/polls/PollRow.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "pollrow.tsx",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_pollrow"
     },
     {
@@ -2618,7 +2673,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollrowprops",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_pollrow_pollrowprops"
     },
     {
@@ -2627,9 +2682,9 @@
       "source_file": "src/components/admin/polls/PollRow.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "status_labels",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_pollrow_status_labels"
     },
     {
@@ -2638,9 +2693,9 @@
       "source_file": "src/components/admin/polls/PollRow.tsx",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "pollrow()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_admin_polls_pollrow_pollrow"
     },
     {
@@ -2649,9 +2704,9 @@
       "source_file": "src/components/admin/tags/NewTagForm.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "newtagform.tsx",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_newtagform"
     },
     {
@@ -2660,9 +2715,9 @@
       "source_file": "src/components/admin/tags/NewTagForm.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "initialstate",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_newtagform_initialstate"
     },
     {
@@ -2671,9 +2726,9 @@
       "source_file": "src/components/admin/tags/NewTagForm.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "newtagform()",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_newtagform_newtagform"
     },
     {
@@ -2682,9 +2737,9 @@
       "source_file": "src/components/admin/tags/TagRow.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagrow.tsx",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_tagrow"
     },
     {
@@ -2693,9 +2748,9 @@
       "source_file": "src/components/admin/tags/TagRow.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "initialstate",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_tagrow_initialstate"
     },
     {
@@ -2704,9 +2759,9 @@
       "source_file": "src/components/admin/tags/TagRow.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagrowprops",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_tagrow_tagrowprops"
     },
     {
@@ -2715,9 +2770,9 @@
       "source_file": "src/components/admin/tags/TagRow.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagrow()",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_components_admin_tags_tagrow_tagrow"
     },
     {
@@ -3122,9 +3177,9 @@
       "source_file": "src/components/articles/VideoFacade.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videofacade.tsx",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videofacade"
     },
     {
@@ -3133,9 +3188,9 @@
       "source_file": "src/components/articles/VideoFacade.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "frame_classes",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videofacade_frame_classes"
     },
     {
@@ -3144,9 +3199,9 @@
       "source_file": "src/components/articles/VideoFacade.tsx",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "playbacksrc()",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videofacade_playbacksrc"
     },
     {
@@ -3155,9 +3210,9 @@
       "source_file": "src/components/articles/VideoFacade.tsx",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videofacadeprops",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videofacade_videofacadeprops"
     },
     {
@@ -3166,9 +3221,9 @@
       "source_file": "src/components/articles/VideoFacade.tsx",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videofacade()",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videofacade_videofacade"
     },
     {
@@ -3177,9 +3232,9 @@
       "source_file": "src/components/articles/VideoPlaceholder.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videoplaceholder.tsx",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videoplaceholder"
     },
     {
@@ -3188,9 +3243,9 @@
       "source_file": "src/components/articles/VideoPlaceholder.tsx",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "provider_labels",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videoplaceholder_provider_labels"
     },
     {
@@ -3199,9 +3254,9 @@
       "source_file": "src/components/articles/VideoPlaceholder.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "playcircle()",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videoplaceholder_playcircle"
     },
     {
@@ -3210,9 +3265,9 @@
       "source_file": "src/components/articles/VideoPlaceholder.tsx",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videoplaceholderprops",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videoplaceholder_videoplaceholderprops"
     },
     {
@@ -3221,9 +3276,9 @@
       "source_file": "src/components/articles/VideoPlaceholder.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videoplaceholder()",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_components_articles_videoplaceholder_videoplaceholder"
     },
     {
@@ -3597,7 +3652,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollsection.tsx",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollsection"
     },
     {
@@ -3608,7 +3663,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollsection()",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollsection_pollsection"
     },
     {
@@ -3619,7 +3674,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollwidget.tsx",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget"
     },
     {
@@ -3630,7 +3685,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "storedvote",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget_storedvote"
     },
     {
@@ -3641,7 +3696,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollwidgetprops",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget_pollwidgetprops"
     },
     {
@@ -3652,7 +3707,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "storagekey()",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget_storagekey"
     },
     {
@@ -3663,7 +3718,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "readstoredvote()",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget_readstoredvote"
     },
     {
@@ -3674,7 +3729,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "widgetstate",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget_widgetstate"
     },
     {
@@ -3685,7 +3740,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollwidget()",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_components_polls_pollwidget_pollwidget"
     },
     {
@@ -3925,9 +3980,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "actions/polls.ts",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls"
     },
     {
@@ -3936,9 +3991,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "pollformstate",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls_pollformstate"
     },
     {
@@ -3947,9 +4002,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "createpoll()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls_createpoll"
     },
     {
@@ -3958,9 +4013,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L43",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "findpollid()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls_findpollid"
     },
     {
@@ -3969,9 +4024,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L49",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "activatepoll()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls_activatepoll"
     },
     {
@@ -3980,9 +4035,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L60",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "closepoll()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls_closepoll"
     },
     {
@@ -3991,9 +4046,9 @@
       "source_file": "src/lib/actions/polls.ts",
       "source_location": "L69",
       "_origin": "ast",
-      "community": 0,
+      "community": 11,
       "norm_label": "deletepoll()",
-      "community_name": "db/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_actions_polls_deletepoll"
     },
     {
@@ -4013,9 +4068,9 @@
       "source_file": "src/lib/actions/tags.ts",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 2,
+      "community": 0,
       "norm_label": "tagformstate",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "db/schema.ts",
       "id": "src_lib_actions_tags_tagformstate"
     },
     {
@@ -4134,9 +4189,9 @@
       "source_file": "src/lib/articles/blocks.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videoprovider",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_lib_articles_blocks_videoprovider"
     },
     {
@@ -4178,9 +4233,9 @@
       "source_file": "src/lib/articles/blocks.ts",
       "source_location": "L26",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "videoblock",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_lib_articles_blocks_videoblock"
     },
     {
@@ -4387,9 +4442,9 @@
       "source_file": "src/lib/articles/recirculation.test.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "recirculation.test.ts",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_test"
     },
     {
@@ -4398,9 +4453,9 @@
       "source_file": "src/lib/articles/recirculation.test.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "make()",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_test_make"
     },
     {
@@ -4409,9 +4464,9 @@
       "source_file": "src/lib/articles/recirculation.test.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "views()",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_test_views"
     },
     {
@@ -4420,9 +4475,9 @@
       "source_file": "src/lib/articles/recirculation.test.ts",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "longcurrent",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_test_longcurrent"
     },
     {
@@ -4431,9 +4486,9 @@
       "source_file": "src/lib/articles/recirculation.test.ts",
       "source_location": "L23",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "shortcurrent",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_test_shortcurrent"
     },
     {
@@ -4442,9 +4497,9 @@
       "source_file": "src/lib/articles/recirculation.test.ts",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "slugs()",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_test_slugs"
     },
     {
@@ -4453,9 +4508,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "recirculation.ts",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation"
     },
     {
@@ -4464,9 +4519,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "recircinput",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_recircinput"
     },
     {
@@ -4475,9 +4530,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "recirccurrent",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_recirccurrent"
     },
     {
@@ -4497,9 +4552,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "planoptions",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_planoptions"
     },
     {
@@ -4508,9 +4563,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L27",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "default_options",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_default_options"
     },
     {
@@ -4519,9 +4574,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L34",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "publishedtime()",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_publishedtime"
     },
     {
@@ -4530,9 +4585,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L45",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "planrecirculation()",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_planrecirculation"
     },
     {
@@ -4541,9 +4596,9 @@
       "source_file": "src/lib/articles/recirculation.ts",
       "source_location": "L99",
       "_origin": "ast",
-      "community": 1,
+      "community": 13,
       "norm_label": "ranktrending()",
-      "community_name": "[slug]/page.tsx",
+      "community_name": "recirculation.ts",
       "id": "src_lib_articles_recirculation_ranktrending"
     },
     {
@@ -4807,7 +4862,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "getactivepoll()",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_dal_polls_getactivepoll"
     },
     {
@@ -4882,9 +4937,9 @@
       "source_file": "src/lib/datetime.test.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "datetime.test.ts",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_test"
     },
     {
@@ -4893,9 +4948,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "datetime.ts",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime"
     },
     {
@@ -4904,9 +4959,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "longdateformatter",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_longdateformatter"
     },
     {
@@ -4915,9 +4970,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "shortdateformatter",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_shortdateformatter"
     },
     {
@@ -4926,9 +4981,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "israelpartsformatter",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_israelpartsformatter"
     },
     {
@@ -4959,9 +5014,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L37",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "wallclockparts",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_wallclockparts"
     },
     {
@@ -4970,9 +5025,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L46",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "israelwallclock()",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_israelwallclock"
     },
     {
@@ -4981,9 +5036,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L61",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "israeloffsetms()",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_israeloffsetms"
     },
     {
@@ -4992,9 +5047,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L79",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "todatetimelocalisrael()",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_todatetimelocalisrael"
     },
     {
@@ -5003,9 +5058,9 @@
       "source_file": "src/lib/datetime.ts",
       "source_location": "L91",
       "_origin": "ast",
-      "community": 13,
+      "community": 5,
       "norm_label": "parsedatetimelocalisrael()",
-      "community_name": "datetime.ts",
+      "community_name": "Article",
       "id": "src_lib_datetime_parsedatetimelocalisrael"
     },
     {
@@ -5113,9 +5168,9 @@
       "source_file": "src/lib/db/schema.ts",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 0,
+      "community": 9,
       "norm_label": "articleviewsdaily",
-      "community_name": "db/schema.ts",
+      "community_name": "blocks.ts",
       "id": "src_lib_db_schema_articleviewsdaily"
     },
     {
@@ -5214,7 +5269,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "polls/schema.test.ts",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema_test"
     },
     {
@@ -5225,7 +5280,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "polls/schema.ts",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema"
     },
     {
@@ -5236,7 +5291,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "polloption",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema_polloption"
     },
     {
@@ -5247,7 +5302,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "polloptionlabelschema",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema_polloptionlabelschema"
     },
     {
@@ -5258,7 +5313,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollinputschema",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema_pollinputschema"
     },
     {
@@ -5269,7 +5324,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "voteinputschema",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema_voteinputschema"
     },
     {
@@ -5280,7 +5335,7 @@
       "_origin": "ast",
       "community": 11,
       "norm_label": "pollresults",
-      "community_name": "polls/schema.ts",
+      "community_name": "actions/polls.ts",
       "id": "src_lib_polls_schema_pollresults"
     },
     {
@@ -5432,9 +5487,9 @@
       "source_file": "src/lib/slug/transliterate.test.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "transliterate.test.ts",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate_test"
     },
     {
@@ -5443,9 +5498,9 @@
       "source_file": "src/lib/slug/transliterate.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "transliterate.ts",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate"
     },
     {
@@ -5454,9 +5509,9 @@
       "source_file": "src/lib/slug/transliterate.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "hebrew_letter_map",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate_hebrew_letter_map"
     },
     {
@@ -5465,9 +5520,9 @@
       "source_file": "src/lib/slug/transliterate.ts",
       "source_location": "L31",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "geresh_digraph_map",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate_geresh_digraph_map"
     },
     {
@@ -5476,9 +5531,9 @@
       "source_file": "src/lib/slug/transliterate.ts",
       "source_location": "L40",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "geresh_chars",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate_geresh_chars"
     },
     {
@@ -5487,9 +5542,9 @@
       "source_file": "src/lib/slug/transliterate.ts",
       "source_location": "L44",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "transliteratehebrew()",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate_transliteratehebrew"
     },
     {
@@ -5498,9 +5553,9 @@
       "source_file": "src/lib/slug/transliterate.ts",
       "source_location": "L67",
       "_origin": "ast",
-      "community": 2,
+      "community": 30,
       "norm_label": "suggestslug()",
-      "community_name": "ArticleForm.tsx",
+      "community_name": "transliterate.ts",
       "id": "src_lib_slug_transliterate_suggestslug"
     },
     {
@@ -5553,9 +5608,9 @@
       "source_file": "src/lib/video/parseVideoUrl.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 27,
+      "community": 7,
       "norm_label": "parsedvideo",
-      "community_name": "VideoFacade.tsx",
+      "community_name": "parseVideoUrl.ts",
       "id": "src_lib_video_parsevideourl_parsedvideo"
     },
     {
@@ -6047,13 +6102,239 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "next.config.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "next_config",
+      "target": "next_config_nextconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_background_color",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_description",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L11",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_dir",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_display",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_icons",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_id",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_lang",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_scope",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_short_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_start_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "public/manifest.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "public_manifest",
+      "target": "public_manifest_theme_color",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.test.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots_test",
+      "target": "src_app_robots",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.test.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots_test",
+      "target": "src_app_robots_robots",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots_test",
+      "target": "src_lib_site",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.test.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots_test",
+      "target": "src_lib_site_site_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots",
+      "target": "src_app_robots_robots",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots",
+      "target": "src_lib_site",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/app/robots.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app_robots",
+      "target": "src_lib_site_site_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": ".agents/skills/neon-postgres/SKILL.md",
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill",
-      "target": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_neon_serverless_postgres"
     },
     {
       "relation": "contains",
@@ -6062,9 +6343,9 @@
       "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_autoscaling",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_autoscaling"
     },
     {
       "relation": "contains",
@@ -6073,9 +6354,9 @@
       "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_branching",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_branching"
     },
     {
       "relation": "contains",
@@ -6084,9 +6365,9 @@
       "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_connection_pooling",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_connection_pooling"
     },
     {
       "relation": "contains",
@@ -6095,9 +6376,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_instant_restore",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_instant_restore"
     },
     {
       "relation": "contains",
@@ -6106,9 +6387,9 @@
       "source_location": "L141",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_ip_allow_lists",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_ip_allow_lists"
     },
     {
       "relation": "contains",
@@ -6117,9 +6398,9 @@
       "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_logical_replication",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_logical_replication"
     },
     {
       "relation": "contains",
@@ -6128,9 +6409,9 @@
       "source_location": "L117",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_read_replicas",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_read_replicas"
     },
     {
       "relation": "contains",
@@ -6139,9 +6420,9 @@
       "source_location": "L93",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_scale_to_zero",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_scale_to_zero"
     },
     {
       "relation": "contains",
@@ -6150,9 +6431,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_neon_serverless_postgres",
-      "target": "agents_skills_neon_postgres_skill_setup_flow",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_setup_flow"
     },
     {
       "relation": "contains",
@@ -6161,9 +6442,9 @@
       "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_setup_flow",
-      "target": "agents_skills_neon_postgres_skill_1_select_the_organization_and_project",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_1_select_the_organization_and_project"
     },
     {
       "relation": "contains",
@@ -6172,9 +6453,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_setup_flow",
-      "target": "agents_skills_neon_postgres_skill_2_get_the_connection_string",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_2_get_the_connection_string"
     },
     {
       "relation": "contains",
@@ -6183,9 +6464,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_setup_flow",
-      "target": "agents_skills_neon_postgres_skill_3_pick_the_connection_method_and_driver",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_3_pick_the_connection_method_and_driver"
     },
     {
       "relation": "contains",
@@ -6194,9 +6475,9 @@
       "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_setup_flow",
-      "target": "agents_skills_neon_postgres_skill_4_set_up_the_schema",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_4_set_up_the_schema"
     },
     {
       "relation": "contains",
@@ -6205,9 +6486,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_postgres_skill_2_get_the_connection_string",
-      "target": "agents_skills_neon_postgres_skill_when_to_use_pooled_vs_direct_connections",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_postgres_skill_when_to_use_pooled_vs_direct_connections"
     },
     {
       "relation": "contains",
@@ -6216,9 +6497,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill",
-      "target": "agents_skills_neon_skill_neon",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_neon"
     },
     {
       "relation": "contains",
@@ -6227,9 +6508,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_architecture_how_to_use_neon",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_architecture_how_to_use_neon"
     },
     {
       "relation": "contains",
@@ -6238,9 +6519,9 @@
       "source_location": "L323",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_branch_first_dev_flow",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_branch_first_dev_flow"
     },
     {
       "relation": "contains",
@@ -6249,9 +6530,9 @@
       "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_choosing_the_right_skill",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_choosing_the_right_skill"
     },
     {
       "relation": "contains",
@@ -6260,9 +6541,9 @@
       "source_location": "L116",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_getting_started_with_neon",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_getting_started_with_neon"
     },
     {
       "relation": "contains",
@@ -6271,9 +6552,9 @@
       "source_location": "L379",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_gotchas",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_gotchas"
     },
     {
       "relation": "contains",
@@ -6282,9 +6563,9 @@
       "source_location": "L357",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_manage_neon_resources",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_manage_neon_resources"
     },
     {
       "relation": "contains",
@@ -6293,9 +6574,9 @@
       "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_neon_documentation",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_neon_documentation"
     },
     {
       "relation": "contains",
@@ -6304,9 +6585,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_neon_infrastructure_as_code",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_neon_infrastructure_as_code"
     },
     {
       "relation": "contains",
@@ -6315,9 +6596,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon",
-      "target": "agents_skills_neon_skill_platform_services",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_platform_services"
     },
     {
       "relation": "contains",
@@ -6326,9 +6607,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_platform_services",
-      "target": "agents_skills_neon_skill_public_beta_service_availability",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_public_beta_service_availability"
     },
     {
       "relation": "contains",
@@ -6337,9 +6618,9 @@
       "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon_documentation",
-      "target": "agents_skills_neon_skill_fetching_docs_as_markdown",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_fetching_docs_as_markdown"
     },
     {
       "relation": "contains",
@@ -6348,9 +6629,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon_documentation",
-      "target": "agents_skills_neon_skill_finding_the_right_page",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_finding_the_right_page"
     },
     {
       "relation": "contains",
@@ -6359,9 +6640,9 @@
       "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_choosing_the_right_skill",
-      "target": "agents_skills_neon_skill_installing_the_right_skill",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_installing_the_right_skill"
     },
     {
       "relation": "contains",
@@ -6370,9 +6651,9 @@
       "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_choosing_the_right_skill",
-      "target": "agents_skills_neon_skill_updating_skills",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_updating_skills"
     },
     {
       "relation": "contains",
@@ -6381,9 +6662,9 @@
       "source_location": "L134",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_getting_started_with_neon",
-      "target": "agents_skills_neon_skill_getting_started_with_the_neon_cli",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_getting_started_with_the_neon_cli"
     },
     {
       "relation": "contains",
@@ -6392,9 +6673,9 @@
       "source_location": "L151",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_getting_started_with_neon",
-      "target": "agents_skills_neon_skill_getting_started_with_the_neon_mcp_server",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_getting_started_with_the_neon_mcp_server"
     },
     {
       "relation": "contains",
@@ -6403,9 +6684,9 @@
       "source_location": "L140",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_getting_started_with_the_neon_cli",
-      "target": "agents_skills_neon_skill_useful_cli_commands",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_useful_cli_commands"
     },
     {
       "relation": "contains",
@@ -6414,9 +6695,9 @@
       "source_location": "L259",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon_infrastructure_as_code",
-      "target": "agents_skills_neon_skill_branch_configuration",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_branch_configuration"
     },
     {
       "relation": "contains",
@@ -6425,9 +6706,9 @@
       "source_location": "L195",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon_infrastructure_as_code",
-      "target": "agents_skills_neon_skill_provision_services_with_neon_config",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_provision_services_with_neon_config"
     },
     {
       "relation": "contains",
@@ -6436,9 +6717,9 @@
       "source_location": "L294",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon_infrastructure_as_code",
-      "target": "agents_skills_neon_skill_type_safe_config_invalid_setups_don_t_compile",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_type_safe_config_invalid_setups_don_t_compile"
     },
     {
       "relation": "contains",
@@ -6447,9 +6728,9 @@
       "source_location": "L226",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_neon_infrastructure_as_code",
-      "target": "agents_skills_neon_skill_type_safe_env_vars_with_parseenv",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_type_safe_env_vars_with_parseenv"
     },
     {
       "relation": "contains",
@@ -6458,9 +6739,9 @@
       "source_location": "L340",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_branch_first_dev_flow",
-      "target": "agents_skills_neon_skill_how_checkout_composes_with_neon_ts",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_how_checkout_composes_with_neon_ts"
     },
     {
       "relation": "contains",
@@ -6469,9 +6750,9 @@
       "source_location": "L344",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_branch_first_dev_flow",
-      "target": "agents_skills_neon_skill_opting_out_of_local_env_vars",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_opting_out_of_local_env_vars"
     },
     {
       "relation": "contains",
@@ -6480,9 +6761,9 @@
       "source_location": "L363",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "agents_skills_neon_skill_manage_neon_resources",
-      "target": "agents_skills_neon_skill_neon_for_agentic_platforms",
-      "confidence_score": 1.0
+      "target": "agents_skills_neon_skill_neon_for_agentic_platforms"
     },
     {
       "relation": "contains",
@@ -6491,20 +6772,9 @@
       "source_location": "L381",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "agents_skills_neon_skill_gotchas",
-      "target": "agents_skills_neon_skill_neon_auth_invalid_domain",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "next.config.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast",
       "confidence_score": 1.0,
-      "source": "next_config",
-      "target": "next_config_nextconfig"
+      "source": "agents_skills_neon_skill_gotchas",
+      "target": "agents_skills_neon_skill_neon_auth_invalid_domain"
     },
     {
       "relation": "contains",
@@ -8344,116 +8614,6 @@
       "confidence_score": 1.0,
       "source": "postcss_config",
       "target": "postcss_config_config"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_background_color"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_description"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_dir"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_display"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L11",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_icons"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L10",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_lang"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L2",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_name"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_short_name"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_start_url"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "public/manifest.json",
-      "source_location": "L8",
-      "weight": 1.0,
-      "_origin": "ast",
-      "confidence_score": 1.0,
-      "source": "public_manifest",
-      "target": "public_manifest_theme_color"
     },
     {
       "relation": "contains",
@@ -17829,5 +17989,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4076f995ba652377847ea1fd143da4dab2120d94"
+  "built_at_commit": "d5d889cb473ada52fd8db36b47e825f106fcd681"
 }
