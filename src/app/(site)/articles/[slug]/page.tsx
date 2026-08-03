@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cacheLife, cacheTag } from "next/cache";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
@@ -13,7 +12,11 @@ import { ShareButton } from "@/components/articles/ShareButton";
 import { ViewTracker } from "@/components/articles/ViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { readingTimeLabel } from "@/lib/articles/reading-time";
-import { getArticleBySlug, getRecirculation } from "@/lib/dal/articles";
+import {
+  getArticleBySlug,
+  getPublishedArticles,
+  getRecirculation,
+} from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
 import { FEED_ALTERNATE, breadcrumbSchema, newsArticleSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
@@ -22,17 +25,26 @@ const UPDATED_LABEL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 const MID_MODULE_AFTER_BLOCKS = 2;
 
+// Every published article gets its own prerendered entry. Without this the route
+// falls back to a single slug-agnostic shell shared by every [slug], which can be
+// written once with a not-found render and then served for all articles.
+export async function generateStaticParams() {
+  const articles = await getPublishedArticles();
+  return articles.map((article) => ({ slug: article.slug }));
+}
+
+// Not marked "use cache": the params promise is not a stable cache key, and metadata
+// is part of the shell. getArticleBySlug() is already cached and keyed on the slug
+// string, which is where the caching belongs.
 export async function generateMetadata({
   params,
 }: PageProps<"/articles/[slug]">): Promise<Metadata> {
-  "use cache";
   const { slug } = await params;
-  cacheLife("max");
-  cacheTag("articles", `article-${slug}`);
 
   const article = await getArticleBySlug(slug);
   if (!article) {
-    return { title: "הכתבה לא נמצאה" };
+    // notFound() streams with a 200 status, so Next never adds noindex itself.
+    return { title: "הכתבה לא נמצאה", robots: { index: false } };
   }
   const articleUrl = `${SITE_URL}/articles/${article.slug}`;
   const ogImage = article.coverImageUrl ?? "/og-image.jpg";

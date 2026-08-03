@@ -10,7 +10,7 @@ import { articleViewsDaily, articles, type Article } from "@/lib/db/schema";
 
 export async function getPublishedArticles(tag?: string): Promise<Article[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("article");
   cacheTag("articles");
   const where = tag
     ? and(eq(articles.status, "published"), arrayContains(articles.tags, [tag]))
@@ -24,7 +24,7 @@ export async function getPublishedArticles(tag?: string): Promise<Article[]> {
 
 export async function getLatestArticles(count: number): Promise<Article[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("article");
   cacheTag("articles");
   return getDb()
     .select()
@@ -36,7 +36,7 @@ export async function getLatestArticles(count: number): Promise<Article[]> {
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   "use cache";
-  cacheLife("max");
+  cacheLife("article");
   cacheTag("articles", `article-${slug}`);
   const rows = await getDb()
     .select()
@@ -96,7 +96,7 @@ export async function getTrendingArticles(limit: number): Promise<Article[]> {
 
 export async function getAllTags(): Promise<string[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("article");
   cacheTag("articles");
   const rows = await getDb()
     .select({ tags: articles.tags })

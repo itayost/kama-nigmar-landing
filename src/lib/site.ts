@@ -1,6 +1,6 @@
 import { cacheLife } from "next/cache";
 
-export const SITE_URL = "https://kama-nigmar-landing.vercel.app";
+export const SITE_URL = "https://www.kama-nigmar.co.il";
 
 // Social profiles and channels shown in the footer. Empty string hides the icon.
 export const SOCIAL_LINKS = {
