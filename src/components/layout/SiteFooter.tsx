@@ -88,6 +88,22 @@ export async function SiteFooter({ spotifyUrl, applePodcastUrl }: SiteFooterProp
               </li>
               <li>
                 <Link
+                  href="/terms"
+                  className="text-sm text-text-muted transition-colors hover:text-white"
+                >
+                  תנאי שימוש
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-sm text-text-muted transition-colors hover:text-white"
+                >
+                  מדיניות פרטיות
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/admin"
                   className="text-xs text-text-muted/70 transition-colors hover:text-white"
                 >
