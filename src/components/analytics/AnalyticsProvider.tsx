@@ -41,6 +41,8 @@ export function AnalyticsProvider() {
         if (!target?.dataset.phEvent) return;
         posthog.capture(target.dataset.phEvent, {
           slug: target.dataset.phSlug,
+          pollId: target.dataset.phPollId,
+          placement: target.dataset.phPlacement,
           path: window.location.pathname,
         });
       });
