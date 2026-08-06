@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PollOption, PollResults } from "@/lib/polls/schema";
+import type { PollOption, PollPlacement, PollResults } from "@/lib/polls/schema";
 
 interface StoredVote {
   readonly optionId: string;
@@ -12,6 +12,7 @@ interface PollWidgetProps {
   readonly pollId: string;
   readonly question: string;
   readonly options: readonly PollOption[];
+  readonly placement: PollPlacement;
 }
 
 function storageKey(pollId: string): string {
@@ -32,7 +33,7 @@ interface WidgetState {
   readonly vote: StoredVote | null;
 }
 
-export function PollWidget({ pollId, question, options }: PollWidgetProps) {
+export function PollWidget({ pollId, question, options, placement }: PollWidgetProps) {
   const [{ isReady, vote }, setState] = useState<WidgetState>({
     isReady: false,
     vote: null,
@@ -77,7 +78,7 @@ export function PollWidget({ pollId, question, options }: PollWidgetProps) {
           aria-hidden="true"
           className="h-2 w-2 rounded-[3px] bg-accent shadow-[0_0_10px_rgba(46,204,64,0.6)]"
         />
-        הסקר היומי
+        {placement === "article-mid" ? "מה דעתכם?" : "הסקר היומי"}
       </p>
       <h2 className="mb-4 text-lg font-bold">{question}</h2>
 
@@ -124,6 +125,8 @@ export function PollWidget({ pollId, question, options }: PollWidgetProps) {
               onClick={() => handleVote(option.id)}
               data-ph-event="poll_vote"
               data-ph-slug={option.id}
+              data-ph-poll-id={pollId}
+              data-ph-placement={placement}
               className="rounded-lg border border-surface-border px-3.5 py-2 text-start text-sm transition-colors hover:border-accent/50 hover:bg-accent/5 disabled:opacity-50"
             >
               {option.label}

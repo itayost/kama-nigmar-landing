@@ -45,15 +45,28 @@ async function findPollId(formData: FormData): Promise<string | null> {
   return typeof id === "string" && isUuid(id) ? id : null;
 }
 
-// Exactly one poll is active at a time: activating closes the others.
+// Any number of polls may be active: article-linked polls run alongside the
+// main one. Which poll renders where is decided at read time in the DAL.
 export async function activatePoll(formData: FormData): Promise<void> {
   await requireAdmin();
   const id = await findPollId(formData);
   if (!id) return;
 
+  await getDb().update(polls).set({ status: "active" }).where(eq(polls.id, id));
+  updateTag("polls");
+}
+
+// At most one poll is main (homepage + article fallback): flagging one clears
+// the others. Two statements without a transaction (neon-http): the worst case
+// is a momentary window with no main poll, which just renders nothing.
+export async function setMainPoll(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = await findPollId(formData);
+  if (!id) return;
+
   const db = getDb();
-  await db.update(polls).set({ status: "closed" }).where(eq(polls.status, "active"));
-  await db.update(polls).set({ status: "active" }).where(eq(polls.id, id));
+  await db.update(polls).set({ isMain: false }).where(eq(polls.isMain, true));
+  await db.update(polls).set({ isMain: true }).where(eq(polls.id, id));
   updateTag("polls");
 }
 

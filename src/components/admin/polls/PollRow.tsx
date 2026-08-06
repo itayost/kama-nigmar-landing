@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { activatePoll, closePoll, deletePoll } from "@/lib/actions/polls";
+import { activatePoll, closePoll, deletePoll, setMainPoll } from "@/lib/actions/polls";
 import type { PollOption } from "@/lib/polls/schema";
 
 interface PollRowProps {
@@ -9,6 +9,8 @@ interface PollRowProps {
   readonly question: string;
   readonly options: readonly PollOption[];
   readonly status: "draft" | "active" | "closed";
+  readonly isMain: boolean;
+  readonly linkedArticleCount: number;
   readonly votes: Readonly<Record<string, number>>;
   readonly totalVotes: number;
 }
@@ -18,7 +20,16 @@ const STATUS_LABELS = { draft: "טיוטה", active: "פעיל", closed: "סגו
 const actionButtonClass =
   "whitespace-nowrap rounded-md border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-accent/50";
 
-export function PollRow({ id, question, options, status, votes, totalVotes }: PollRowProps) {
+export function PollRow({
+  id,
+  question,
+  options,
+  status,
+  isMain,
+  linkedArticleCount,
+  votes,
+  totalVotes,
+}: PollRowProps) {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   return (
@@ -34,9 +45,21 @@ export function PollRow({ id, question, options, status, votes, totalVotes }: Po
         >
           {STATUS_LABELS[status]}
         </span>
+        {isMain ? (
+          <span className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">
+            ראשי
+          </span>
+        ) : null}
         <span className="text-sm text-text-muted">
           {totalVotes === 1 ? "הצבעה אחת" : `${totalVotes} הצבעות`}
         </span>
+        {linkedArticleCount > 0 ? (
+          <span className="text-sm text-text-muted">
+            {linkedArticleCount === 1
+              ? "מקושר לכתבה אחת"
+              : `מקושר ל־${linkedArticleCount} כתבות`}
+          </span>
+        ) : null}
       </div>
       <ul className="flex flex-col gap-1 text-sm text-text-muted">
         {options.map((option) => (
@@ -62,6 +85,14 @@ export function PollRow({ id, question, options, status, votes, totalVotes }: Po
             </button>
           </form>
         )}
+        {status === "active" && !isMain ? (
+          <form action={setMainPoll}>
+            <input type="hidden" name="id" value={id} />
+            <button type="submit" className={actionButtonClass}>
+              הצגה בעמוד הבית
+            </button>
+          </form>
+        ) : null}
         {isConfirmingDelete ? (
           <>
             <span className="text-sm text-red-400">למחוק? כולל ההצבעות</span>

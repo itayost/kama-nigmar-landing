@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
       revalidate: 60 * 60,
       expire: 60 * 60 * 24,
     },
+    // Poll lookups can return null (no main poll), so they get the same
+    // bounded TTL instead of "max" to avoid pinning a negative result.
+    poll: {
+      stale: 60 * 5,
+      revalidate: 60 * 60,
+      expire: 60 * 60 * 24,
+    },
   },
   images: {
     remotePatterns: [

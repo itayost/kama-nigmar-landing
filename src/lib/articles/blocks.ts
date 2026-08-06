@@ -110,6 +110,7 @@ export const articleInputSchema = z.object({
   // Spotify-episode validation happens in the save action via parseVideoUrl
   // (importing it here would be circular).
   episodeUrl: z.string().trim().optional(),
+  pollId: z.uuid("סקר לא תקין").optional(),
   publishedAt: z.coerce.date().optional(),
   coverImageUrl: z
     .string()
