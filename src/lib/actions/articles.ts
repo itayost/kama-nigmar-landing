@@ -77,6 +77,7 @@ export async function saveArticle(
   const publishedAtRaw = formData.get("publishedAt");
   const subtitleRaw = formData.get("subtitle");
   const episodeUrlRaw = formData.get("episodeUrl");
+  const pollIdRaw = formData.get("pollId");
 
   const parsed = articleInputSchema.safeParse({
     title: formData.get("title"),
@@ -86,6 +87,7 @@ export async function saveArticle(
     tags,
     status: formData.get("status"),
     episodeUrl: typeof episodeUrlRaw === "string" ? episodeUrlRaw : undefined,
+    pollId: typeof pollIdRaw === "string" && pollIdRaw !== "" ? pollIdRaw : undefined,
     // The datetime-local value is a naive wall-clock string; interpret it
     // in Israel time (matching how the form displays it) instead of letting
     // the server's own time zone shift it on every save.
@@ -165,6 +167,7 @@ export async function saveArticle(
     content,
     authorName: parsed.data.authorName,
     episodeUrl,
+    pollId: parsed.data.pollId ?? null,
     tags: parsed.data.tags,
     status: parsed.data.status,
     publishedAt,

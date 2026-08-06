@@ -134,6 +134,18 @@ describe("articleInputSchema", () => {
     }
   });
 
+  test("accepts a linked poll id and rejects a malformed one in Hebrew", () => {
+    const pollId = "3b241101-e2bb-4255-8caf-4136c566a962";
+    expect(articleInputSchema.safeParse({ ...validInput, pollId }).success).toBe(true);
+    expect(articleInputSchema.safeParse(validInput).success).toBe(true);
+
+    const result = articleInputSchema.safeParse({ ...validInput, pollId: "not-a-uuid" });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe("סקר לא תקין");
+    }
+  });
+
   test("limits tags to 10", () => {
     const tags = Array.from({ length: 11 }, (_, i) => `tag${i}`);
     expect(articleInputSchema.safeParse({ ...validInput, tags }).success).toBe(false);

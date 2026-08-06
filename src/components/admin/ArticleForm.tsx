@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import { saveArticle, type ArticleFormState } from "@/lib/actions/articles";
 import type { ArticleBlock } from "@/lib/articles/blocks";
 import { toDatetimeLocalIsrael } from "@/lib/datetime";
+import type { PollChoice } from "@/lib/dal/polls";
 import type { Article } from "@/lib/db/schema";
 import { suggestSlug } from "@/lib/slug/transliterate";
 import { BlockEditor } from "./BlockEditor";
@@ -18,17 +19,21 @@ const initialState: ArticleFormState = { errors: {} };
 interface ArticleFormProps {
   readonly article?: Article;
   readonly tagSuggestions?: readonly string[];
+  readonly pollChoices?: readonly PollChoice[];
 }
+
+const POLL_STATUS_SUFFIX = { draft: "", active: " ● פעיל", closed: " (סגור)" } as const;
 
 // Every field is controlled: React 19 resets uncontrolled inputs to their
 // defaultValue after a form action completes, which would wipe the admin's
 // input whenever the server returns a validation error.
-export function ArticleForm({ article, tagSuggestions }: ArticleFormProps) {
+export function ArticleForm({ article, tagSuggestions, pollChoices }: ArticleFormProps) {
   const [state, formAction, isPending] = useActionState(saveArticle, initialState);
   const [title, setTitle] = useState(article?.title ?? "");
   const [subtitle, setSubtitle] = useState(article?.subtitle ?? "");
   const [authorName, setAuthorName] = useState(article?.authorName ?? "");
   const [episodeUrl, setEpisodeUrl] = useState(article?.episodeUrl ?? "");
+  const [pollId, setPollId] = useState(article?.pollId ?? "");
   const [status, setStatus] = useState<"draft" | "published">(
     article?.status ?? "draft",
   );
@@ -115,6 +120,29 @@ export function ArticleForm({ article, tagSuggestions }: ArticleFormProps) {
           className={`${inputClass} text-left`}
         />
       </Field>
+
+      {pollChoices && pollChoices.length > 0 ? (
+        <Field
+          label="סקר מקושר"
+          error={state.errors.pollId}
+          hint="סקר מקושר מופיע באמצע הכתבה; בלעדיו מוצג הסקר הראשי בסופה"
+        >
+          <select
+            name="pollId"
+            value={pollId}
+            onChange={(event) => setPollId(event.target.value)}
+            className={inputClass}
+          >
+            <option value="">ללא סקר</option>
+            {pollChoices.map((choice) => (
+              <option key={choice.id} value={choice.id}>
+                {choice.question}
+                {POLL_STATUS_SUFFIX[choice.status]}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
 
       <Field label="תגיות" group error={state.errors.tags}>
         <TagsInput value={tags} onChange={setTags} suggestions={tagSuggestions} />
