@@ -7,6 +7,7 @@ import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
 import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
 import { PollSection } from "@/components/polls/PollSection";
+import { getPollById } from "@/lib/dal/polls";
 import { RecirculationSections } from "@/components/articles/RecirculationSections";
 import { ShareButton } from "@/components/articles/ShareButton";
 import { ViewTracker } from "@/components/articles/ViewTracker";
@@ -96,7 +97,14 @@ async function ArticleContent({
   if (!article) {
     notFound();
   }
-  const plan = await getRecirculation(article.slug);
+  const [plan, linkedPoll] = await Promise.all([
+    getRecirculation(article.slug),
+    article.pollId ? getPollById(article.pollId) : Promise.resolve(null),
+  ]);
+  // A linked poll renders mid-article (the high-engagement zone just below the
+  // fold); the generic main poll stays at the bottom. Never both.
+  const midPoll = linkedPoll?.status === "active" ? linkedPoll : null;
+  const shouldSplitBlocks = plan.midArticle.length > 0 || midPoll !== null;
   const articleUrl = `${SITE_URL}/articles/${article.slug}`;
   const wasUpdated =
     article.publishedAt !== null &&
@@ -175,13 +183,16 @@ async function ArticleContent({
         ) : null}
       </header>
       {article.episodeUrl ? <EpisodeCallout url={article.episodeUrl} /> : null}
-      {plan.midArticle.length > 0 ? (
+      {shouldSplitBlocks ? (
         <>
           <BlockRenderer
             blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)}
             emphasizeOpener
           />
-          <MidArticleRelated articles={plan.midArticle} />
+          {midPoll ? <PollSection poll={midPoll} placement="article-mid" /> : null}
+          {plan.midArticle.length > 0 ? (
+            <MidArticleRelated articles={plan.midArticle} />
+          ) : null}
           <BlockRenderer blocks={article.content.slice(MID_MODULE_AFTER_BLOCKS)} />
         </>
       ) : (
@@ -200,7 +211,7 @@ async function ArticleContent({
           ))}
         </div>
       ) : null}
-      <PollSection />
+      {midPoll ? null : <PollSection placement="article-bottom" />}
       <RecirculationSections plan={plan} />
       <ViewTracker slug={article.slug} />
     </article>

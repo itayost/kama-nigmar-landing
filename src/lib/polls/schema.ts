@@ -28,6 +28,10 @@ export const voteInputSchema = z.object({
   optionId: z.string().min(1).max(64),
 });
 
+// Where a poll renders on the site; carried through to analytics so
+// participation can be compared per surface.
+export type PollPlacement = "homepage" | "article-mid" | "article-bottom";
+
 export interface PollResults {
   readonly results: ReadonlyArray<{ readonly optionId: string; readonly count: number }>;
   readonly total: number;
