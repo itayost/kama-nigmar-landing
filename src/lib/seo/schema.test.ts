@@ -17,6 +17,7 @@ const baseArticle: Article = {
   content: [],
   authorName: "יוסי",
   episodeUrl: null,
+  pollId: null,
   tags: ["כדורגל", "ליגת העל"],
   status: "published",
   views: 0,

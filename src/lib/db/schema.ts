@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   index,
   integer,
@@ -16,6 +17,16 @@ import type { PollOption } from "@/lib/polls/schema";
 export const articleStatus = pgEnum("article_status", ["draft", "published"]);
 export const pollStatus = pgEnum("poll_status", ["draft", "active", "closed"]);
 
+export const polls = pgTable("polls", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  question: text("question").notNull(),
+  options: jsonb("options").$type<PollOption[]>().notNull(),
+  status: pollStatus("status").notNull().default("draft"),
+  // At most one poll is main: it renders on the homepage and as the article fallback.
+  isMain: boolean("is_main").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const articles = pgTable(
   "articles",
   {
@@ -27,6 +38,7 @@ export const articles = pgTable(
     content: jsonb("content").$type<ArticleBlock[]>().notNull().default([]),
     authorName: text("author_name").notNull(),
     episodeUrl: text("episode_url"),
+    pollId: uuid("poll_id").references(() => polls.id, { onDelete: "set null" }),
     tags: text("tags").array().notNull().default([]),
     status: articleStatus("status").notNull().default("draft"),
     views: integer("views").notNull().default(0),
@@ -56,14 +68,6 @@ export const articleViewsDaily = pgTable(
 export const tags = pgTable("tags", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const polls = pgTable("polls", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  question: text("question").notNull(),
-  options: jsonb("options").$type<PollOption[]>().notNull(),
-  status: pollStatus("status").notNull().default("draft"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
