@@ -17,6 +17,7 @@ async function createArticle(
     tag: string;
     paragraphs: number;
     episodeUrl?: string;
+    pollLabel?: string;
   },
 ) {
   await page.goto("/admin/articles/new");
@@ -25,6 +26,9 @@ async function createArticle(
   await page.locator('input[name="slug"]').fill(options.slug);
   if (options.episodeUrl) {
     await page.locator('input[name="episodeUrl"]').fill(options.episodeUrl);
+  }
+  if (options.pollLabel) {
+    await page.locator('select[name="pollId"]').selectOption({ label: options.pollLabel });
   }
   const tagsInput = page.getByPlaceholder(/הקלידו תגית/);
   await tagsInput.fill(options.tag);
@@ -110,6 +114,72 @@ test.describe("engagement surfaces", () => {
     await anonPage.goto("http://localhost:3117/admin/login");
     await expect(anonPage.getByTestId("player-bar")).toHaveCount(0);
     await anon.close();
+  });
+
+  test("linked poll mid-article, homepage main poll, and fallback", async ({ page }) => {
+    const ts = Date.now();
+    const linkedQuestion = `סקר מקושר ${ts}`;
+    const mainQuestion = `סקר ראשי ${ts}`;
+    const article = {
+      title: `כתבה עם סקר ${ts}`,
+      slug: `e2e-poll-link-${ts}`,
+      tag: `בדיקה-${ts}`,
+      paragraphs: 3,
+      pollLabel: `${linkedQuestion} ● פעיל`,
+    };
+
+    await login(page);
+
+    // Two active polls: one to link, one flagged as main.
+    for (const question of [linkedQuestion, mainQuestion]) {
+      await page.goto("/admin/polls");
+      await page.locator('input[name="question"]').fill(question);
+      await page.locator('input[name="option"]').nth(0).fill("כן");
+      await page.locator('input[name="option"]').nth(1).fill("לא");
+      await page.getByRole("button", { name: "יצירת סקר" }).click();
+      const row = page.getByRole("listitem").filter({ hasText: question });
+      await row.getByRole("button", { name: "הפעלה" }).click();
+      await expect(row.getByText("פעיל")).toBeVisible();
+    }
+    const mainRow = page.getByRole("listitem").filter({ hasText: mainQuestion });
+    await mainRow.getByRole("button", { name: "הצגה בעמוד הבית" }).click();
+    await expect(mainRow.getByText("ראשי")).toBeVisible();
+
+    await createArticle(page, article);
+
+    // Article: the linked poll renders mid-article, and the main poll is absent.
+    await page.goto(`/articles/${article.slug}`);
+    await expect(page.getByText("מה דעתכם?")).toBeVisible();
+    await expect(page.getByText(linkedQuestion)).toBeVisible();
+    await expect(page.getByText(mainQuestion)).toHaveCount(0);
+
+    // Homepage: the main poll.
+    await page.goto("/");
+    await expect(page.getByText(mainQuestion)).toBeVisible();
+
+    // Closing the linked poll: the article falls back to the main poll.
+    await page.goto("/admin/polls");
+    const linkedRow = page.getByRole("listitem").filter({ hasText: linkedQuestion });
+    await linkedRow.getByRole("button", { name: "סגירה" }).click();
+    await expect(linkedRow.getByText("סגור")).toBeVisible();
+    await page.goto(`/articles/${article.slug}`);
+    await expect(page.getByText(mainQuestion)).toBeVisible();
+    await expect(page.getByText(linkedQuestion)).toHaveCount(0);
+
+    // Cleanup: article first (releases the poll link), then polls, then the tag.
+    await deleteArticle(page, article.title);
+    for (const question of [linkedQuestion, mainQuestion]) {
+      await page.goto("/admin/polls");
+      const row = page.getByRole("listitem").filter({ hasText: question });
+      await row.getByRole("button", { name: "מחיקה" }).click();
+      await row.getByRole("button", { name: "מחיקה" }).last().click();
+      await expect(page.getByText(question)).toHaveCount(0);
+    }
+    await page.goto("/admin/tags");
+    const tagRow = page.getByRole("listitem").filter({ hasText: article.tag });
+    await tagRow.getByRole("button", { name: "מחיקה" }).click();
+    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
+    await expect(page.getByText(article.tag, { exact: true })).toHaveCount(0);
   });
 
   test("daily poll and episode callout", async ({ page }) => {
