@@ -11,7 +11,8 @@ export default async function AdminPollsPage() {
       <NewPollForm />
       {polls.length === 0 ? (
         <p className="rounded-xl border border-dashed border-surface-border p-12 text-center text-text-muted">
-          עדיין אין סקרים — צרו את הראשון ולחצו הפעלה כדי שיופיע בכתבות
+          עדיין אין סקרים — צרו סקר, לחצו הפעלה, ובחרו &quot;הצגה בעמוד הבית&quot; כדי
+          שיופיע בעמוד הבית ובכתבות. קישור סקר לכתבה מסוימת נעשה מעורך הכתבה
         </p>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -22,6 +23,8 @@ export default async function AdminPollsPage() {
               question={poll.question}
               options={poll.options}
               status={poll.status}
+              isMain={poll.isMain}
+              linkedArticleCount={poll.linkedArticleCount}
               votes={poll.votes}
               totalVotes={poll.totalVotes}
             />
