@@ -76,9 +76,9 @@ test.describe("engagement surfaces", () => {
     await expect(midModule.getByRole("link")).toHaveCount(2);
 
     // End rows: related row present; no article recommended twice on the page.
-    await expect(
-      page.getByRole("heading", { name: "עוד באותו נושא" }),
-    ).toBeVisible();
+    // The mid-article module carries an h2 with the same name, so target the
+    // end-of-article section heading by id.
+    await expect(page.locator("h2#related-articles-heading")).toBeVisible();
     const recircHrefs = await page
       .locator("aside[aria-label] a[href^='/articles/'], section:has(h2#related-articles-heading) a[href^='/articles/'], section:has(h2#trending-articles-heading) a[href^='/articles/']")
       .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
