@@ -46,6 +46,32 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   return rows[0] ?? null;
 }
 
+export async function getArticleByNumber(number: number): Promise<Article | null> {
+  "use cache";
+  cacheLife("article");
+  cacheTag("articles", `article-${number}`);
+  const rows = await getDb()
+    .select()
+    .from(articles)
+    .where(and(eq(articles.number, number), eq(articles.status, "published")))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+// Legacy transliterated slugs resolve to the article number so old shared
+// URLs can permanently redirect. Only pre-migration articles have a slug.
+export async function getArticleNumberBySlug(slug: string): Promise<number | null> {
+  "use cache";
+  cacheLife("article");
+  cacheTag("articles");
+  const rows = await getDb()
+    .select({ number: articles.number })
+    .from(articles)
+    .where(and(eq(articles.slug, slug), eq(articles.status, "published")))
+    .limit(1);
+  return rows[0]?.number ?? null;
+}
+
 // Views received in the trailing 7 days, keyed by article id (ADR 0001).
 async function fetchWeeklyViews(): Promise<Record<string, number>> {
   const rows = await getDb()
