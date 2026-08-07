@@ -34,18 +34,6 @@ export async function getLatestArticles(count: number): Promise<Article[]> {
     .limit(count);
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  "use cache";
-  cacheLife("article");
-  cacheTag("articles", `article-${slug}`);
-  const rows = await getDb()
-    .select()
-    .from(articles)
-    .where(and(eq(articles.slug, slug), eq(articles.status, "published")))
-    .limit(1);
-  return rows[0] ?? null;
-}
-
 export async function getArticleByNumber(number: number): Promise<Article | null> {
   "use cache";
   cacheLife("article");
@@ -89,7 +77,7 @@ async function fetchWeeklyViews(): Promise<Record<string, number>> {
 // accumulate without cache invalidation, so results refresh periodically
 // in addition to instantly on publish (the "articles" tag).
 export async function getRecirculation(
-  slug: string,
+  number: number,
 ): Promise<RecirculationPlan<Article>> {
   "use cache";
   cacheLife("hours");
@@ -99,7 +87,7 @@ export async function getRecirculation(
     db.select().from(articles).where(eq(articles.status, "published")),
     fetchWeeklyViews(),
   ]);
-  const current = published.find((article) => article.slug === slug);
+  const current = published.find((article) => article.number === number);
   if (!current) return { midArticle: [], related: [], trending: [] };
   return planRecirculation(
     { id: current.id, tags: current.tags, blockCount: current.content.length },

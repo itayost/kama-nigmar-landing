@@ -1,26 +1,24 @@
 import { and, eq, sql } from "drizzle-orm";
-import { slugSchema } from "@/lib/articles/blocks";
+import { z } from "zod";
 import { getDb } from "@/lib/db";
 import { articleViewsDaily, articles } from "@/lib/db/schema";
 
 const RETENTION_DAYS = 30;
 
+const viewPayloadSchema = z.object({ number: z.number().int().min(1) });
+
 // Public view-count beacon. Deliberately does NOT invalidate any cache
 // (ADR 0001): views are a ranking signal read by the recirculation planner,
 // which refreshes on its own cacheLife("hours") schedule.
 export async function POST(request: Request): Promise<Response> {
-  let slug: string;
+  let number: number;
   try {
     const body: unknown = await request.json();
-    const parsed = slugSchema.safeParse(
-      typeof body === "object" && body !== null && "slug" in body
-        ? (body as { slug: unknown }).slug
-        : undefined,
-    );
+    const parsed = viewPayloadSchema.safeParse(body);
     if (!parsed.success) {
       return new Response(null, { status: 400 });
     }
-    slug = parsed.data;
+    number = parsed.data.number;
   } catch {
     return new Response(null, { status: 400 });
   }
@@ -29,7 +27,7 @@ export async function POST(request: Request): Promise<Response> {
   const updated = await db
     .update(articles)
     .set({ views: sql`${articles.views} + 1` })
-    .where(and(eq(articles.slug, slug), eq(articles.status, "published")))
+    .where(and(eq(articles.number, number), eq(articles.status, "published")))
     .returning({ id: articles.id });
 
   const articleId = updated[0]?.id;

@@ -65,7 +65,7 @@ describe("newsArticleSchema", () => {
     expect(schema.datePublished).toBe("2026-07-30T10:00:00.000Z");
     expect(schema.dateModified).toBe("2026-07-30T12:00:00.000Z");
     expect(schema.author).toEqual({ "@type": "Person", name: "יוסי" });
-    expect(schema.mainEntityOfPage).toBe(`${SITE_URL}/articles/test-article`);
+    expect(schema.mainEntityOfPage).toBe(`${SITE_URL}/articles/1`);
     expect(schema.articleSection).toBe("כדורגל");
     expect(schema.keywords).toBe("כדורגל, ליגת העל");
   });

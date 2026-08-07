@@ -52,7 +52,7 @@ export function newsArticleSchema(article: Article) {
       name: SITE_NAME,
       logo: { "@type": "ImageObject", url: `${SITE_URL}/icon-512.png` },
     },
-    mainEntityOfPage: `${SITE_URL}/articles/${article.slug}`,
+    mainEntityOfPage: `${SITE_URL}/articles/${article.number}`,
     inLanguage: "he",
     articleSection: article.tags[0],
     keywords: article.tags.length > 0 ? article.tags.join(", ") : undefined,

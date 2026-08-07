@@ -3,17 +3,17 @@
 import { useEffect, useRef } from "react";
 
 interface ViewTrackerProps {
-  readonly slug: string;
+  readonly articleNumber: number;
 }
 
-export function ViewTracker({ slug }: ViewTrackerProps) {
+export function ViewTracker({ articleNumber }: ViewTrackerProps) {
   const hasFired = useRef(false);
 
   useEffect(() => {
     if (hasFired.current) return;
     hasFired.current = true;
 
-    const payload = JSON.stringify({ slug });
+    const payload = JSON.stringify({ number: articleNumber });
     if (typeof navigator.sendBeacon === "function") {
       navigator.sendBeacon("/api/articles/view", payload);
       return;
@@ -25,7 +25,7 @@ export function ViewTracker({ slug }: ViewTrackerProps) {
     }).catch(() => {
       // Best-effort signal; losing a view is fine.
     });
-  }, [slug]);
+  }, [articleNumber]);
 
   return null;
 }

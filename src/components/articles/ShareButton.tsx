@@ -5,10 +5,10 @@ import { useState } from "react";
 interface ShareButtonProps {
   readonly title: string;
   readonly url: string;
-  readonly slug: string;
+  readonly articleNumber: number;
 }
 
-export function ShareButton({ title, url, slug }: ShareButtonProps) {
+export function ShareButton({ title, url, articleNumber }: ShareButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   async function handleShare() {
@@ -34,7 +34,7 @@ export function ShareButton({ title, url, slug }: ShareButtonProps) {
       type="button"
       onClick={handleShare}
       data-ph-event="share_click"
-      data-ph-slug={slug}
+      data-ph-slug={String(articleNumber)}
       className="flex items-center gap-1.5 rounded-full border border-surface-border px-3 py-1 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-white"
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 fill-current">

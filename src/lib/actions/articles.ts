@@ -129,18 +129,18 @@ export async function saveArticle(
 
   const db = getDb();
 
-  let previousSlug: string | null = null;
+  let previousNumber: number | null = null;
   let previousPublishedAt: Date | null = null;
   if (articleId) {
     const existing = await db
-      .select({ slug: articles.slug, publishedAt: articles.publishedAt })
+      .select({ number: articles.number, publishedAt: articles.publishedAt })
       .from(articles)
       .where(eq(articles.id, articleId))
       .limit(1);
     if (!existing[0]) {
       return { errors: { form: "הכתבה לא נמצאה" } };
     }
-    previousSlug = existing[0].slug;
+    previousNumber = existing[0].number;
     previousPublishedAt = existing[0].publishedAt;
   }
 
@@ -186,7 +186,11 @@ export async function saveArticle(
     if (articleId) {
       await db.update(articles).set(values).where(eq(articles.id, articleId));
     } else {
-      await db.insert(articles).values(values);
+      const inserted = await db
+        .insert(articles)
+        .values(values)
+        .returning({ number: articles.number });
+      updateTag(`article-${inserted[0].number}`);
     }
   } catch (error) {
     // The slug check above races concurrent saves; the unique constraint
@@ -198,9 +202,8 @@ export async function saveArticle(
   }
 
   updateTag("articles");
-  updateTag(`article-${parsed.data.slug}`);
-  if (previousSlug && previousSlug !== parsed.data.slug) {
-    updateTag(`article-${previousSlug}`);
+  if (previousNumber !== null) {
+    updateTag(`article-${previousNumber}`);
   }
 
   redirect("/admin");
@@ -233,7 +236,7 @@ export async function deleteArticle(formData: FormData): Promise<void> {
   }
 
   updateTag("articles");
-  updateTag(`article-${article.slug}`);
+  updateTag(`article-${article.number}`);
 }
 
 export async function toggleArticleStatus(formData: FormData): Promise<void> {
@@ -258,5 +261,5 @@ export async function toggleArticleStatus(formData: FormData): Promise<void> {
     .where(eq(articles.id, id));
 
   updateTag("articles");
-  updateTag(`article-${article.slug}`);
+  updateTag(`article-${article.number}`);
 }

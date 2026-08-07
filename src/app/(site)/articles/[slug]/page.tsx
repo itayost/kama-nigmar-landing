@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
@@ -12,9 +12,11 @@ import { RecirculationSections } from "@/components/articles/RecirculationSectio
 import { ShareButton } from "@/components/articles/ShareButton";
 import { ViewTracker } from "@/components/articles/ViewTracker";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { parseArticleNumber } from "@/lib/articles/article-param";
 import { readingTimeLabel } from "@/lib/articles/reading-time";
 import {
-  getArticleBySlug,
+  getArticleByNumber,
+  getArticleNumberBySlug,
   getPublishedArticles,
   getRecirculation,
 } from "@/lib/dal/articles";
@@ -31,23 +33,37 @@ const MID_MODULE_AFTER_BLOCKS = 2;
 // written once with a not-found render and then served for all articles.
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
-  return articles.map((article) => ({ slug: article.slug }));
+  return articles.map((article) => ({ slug: String(article.number) }));
+}
+
+// Numeric params are canonical; anything else is a legacy transliterated
+// slug that permanently redirects to the numeric URL (or 404s).
+async function resolveArticle(slugParam: string) {
+  const number = parseArticleNumber(slugParam);
+  if (number !== null) {
+    return getArticleByNumber(number);
+  }
+  const target = await getArticleNumberBySlug(slugParam);
+  if (target !== null) {
+    permanentRedirect(`/articles/${target}`);
+  }
+  return null;
 }
 
 // Not marked "use cache": the params promise is not a stable cache key, and metadata
-// is part of the shell. getArticleBySlug() is already cached and keyed on the slug
-// string, which is where the caching belongs.
+// is part of the shell. resolveArticle() delegates to already-cached DAL functions
+// keyed on the number or slug, which is where the caching belongs.
 export async function generateMetadata({
   params,
 }: PageProps<"/articles/[slug]">): Promise<Metadata> {
   const { slug } = await params;
 
-  const article = await getArticleBySlug(slug);
+  const article = await resolveArticle(slug);
   if (!article) {
     // notFound() streams with a 200 status, so Next never adds noindex itself.
     return { title: "הכתבה לא נמצאה", robots: { index: false } };
   }
-  const articleUrl = `${SITE_URL}/articles/${article.slug}`;
+  const articleUrl = `${SITE_URL}/articles/${article.number}`;
   const ogImage = article.coverImageUrl ?? "/og-wide.jpg";
   return {
     title: article.title,
@@ -93,19 +109,19 @@ async function ArticleContent({
   readonly params: PageProps<"/articles/[slug]">["params"];
 }) {
   const { slug } = await params;
-  const article = await getArticleBySlug(slug);
+  const article = await resolveArticle(slug);
   if (!article) {
     notFound();
   }
   const [plan, linkedPoll] = await Promise.all([
-    getRecirculation(article.slug),
+    getRecirculation(article.number),
     article.pollId ? getPollById(article.pollId) : Promise.resolve(null),
   ]);
   // A linked poll renders mid-article (the high-engagement zone just below the
   // fold); the generic main poll stays at the bottom. Never both.
   const midPoll = linkedPoll?.status === "active" ? linkedPoll : null;
   const shouldSplitBlocks = plan.midArticle.length > 0 || midPoll !== null;
-  const articleUrl = `${SITE_URL}/articles/${article.slug}`;
+  const articleUrl = `${SITE_URL}/articles/${article.number}`;
   const wasUpdated =
     article.publishedAt !== null &&
     article.updatedAt.getTime() - article.publishedAt.getTime() >
@@ -121,7 +137,7 @@ async function ArticleContent({
         data={breadcrumbSchema([
           { name: "בית", url: SITE_URL },
           { name: "כתבות", url: `${SITE_URL}/articles` },
-          { name: article.title, url: `${SITE_URL}/articles/${article.slug}` },
+          { name: article.title, url: `${SITE_URL}/articles/${article.number}` },
         ])}
       />
       <header className="flex flex-col gap-4">
@@ -165,7 +181,7 @@ async function ArticleContent({
             </span>
           </span>
           <span className="ms-auto">
-            <ShareButton title={article.title} url={articleUrl} slug={article.slug} />
+            <ShareButton title={article.title} url={articleUrl} articleNumber={article.number} />
           </span>
         </div>
         {article.coverImageUrl ? (
@@ -213,7 +229,7 @@ async function ArticleContent({
       ) : null}
       {midPoll ? null : <PollSection placement="article-bottom" />}
       <RecirculationSections plan={plan} />
-      <ViewTracker slug={article.slug} />
+      <ViewTracker articleNumber={article.number} />
     </article>
   );
 }
