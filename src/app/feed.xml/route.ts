@@ -7,7 +7,7 @@ export async function GET(): Promise<Response> {
 
   const items = articles
     .map((article) => {
-      const link = `${SITE_URL}/articles/${article.slug}`;
+      const link = `${SITE_URL}/articles/${article.number}`;
       const parts = [
         `      <title>${escapeXml(article.title)}</title>`,
         `      <link>${link}</link>`,

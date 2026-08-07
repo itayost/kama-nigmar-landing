@@ -10,9 +10,9 @@ interface ArticleMiniCardProps {
 export function ArticleMiniCard({ article, phEvent }: ArticleMiniCardProps) {
   return (
     <Link
-      href={`/articles/${article.slug}`}
+      href={`/articles/${article.number}`}
       data-ph-event={phEvent}
-      data-ph-slug={article.slug}
+      data-ph-slug={article.number}
       className="group flex items-center gap-3 rounded-xl border border-surface-border bg-surface p-2.5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40"
     >
       <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">

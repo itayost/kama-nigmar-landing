@@ -11,9 +11,9 @@ interface ArticleCardProps {
 export function ArticleCard({ article, phEvent }: ArticleCardProps) {
   return (
     <Link
-      href={`/articles/${article.slug}`}
+      href={`/articles/${article.number}`}
       data-ph-event={phEvent}
-      data-ph-slug={article.slug}
+      data-ph-slug={article.number}
       className="group flex flex-col overflow-hidden rounded-xl border border-surface-border bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_0_30px_rgba(46,204,64,0.12)] active:scale-[0.98] motion-reduce:transform-none"
     >
       <div className="relative aspect-video w-full overflow-hidden">

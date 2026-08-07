@@ -12,7 +12,7 @@ interface ArticleLeadCardProps {
 export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
   return (
     <Link
-      href={`/articles/${article.slug}`}
+      href={`/articles/${article.number}`}
       className="group relative block min-h-[340px] overflow-hidden rounded-[20px] border border-surface-border transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_0_44px_rgba(46,204,64,0.14)] active:scale-[0.99] motion-reduce:transform-none md:min-h-[380px]"
     >
       <div className="absolute inset-0">
