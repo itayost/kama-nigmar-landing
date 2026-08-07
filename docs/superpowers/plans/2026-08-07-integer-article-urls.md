@@ -458,3 +458,67 @@ Expected: a 3xx status with `redirect_url` ending in `/articles/<number>`. If th
 git add e2e/admin-flow.spec.ts e2e/engagement.spec.ts
 git commit -m "test(e2e): drive article flows through numeric URLs"
 ```
+
+---
+
+### Task 9: Real 308 for legacy slugs via the proxy (added mid-execution by user decision)
+
+**Files:**
+- Modify: `src/proxy.ts`
+
+**Interfaces:**
+- Consumes: `parseArticleNumber` (Task 3), `getDb` from `@/lib/db`, `articles` from `@/lib/db/schema`.
+- Produces: requests to `/articles/<non-numeric>` return a real HTTP 308 to `/articles/<number>` when the slug matches a published article; numeric and unknown params pass through untouched.
+
+Background: the in-page `permanentRedirect` streams as 200 + meta refresh because the article shell is partially prerendered. The proxy runs before any response bytes, so it can issue a genuine 308. The in-page redirect stays as defense-in-depth.
+
+- [ ] **Step 1: Extend the proxy**
+
+Add `"/articles/:slug"` to the matcher and branch at the top of `proxy()`:
+
+```ts
+import { and, eq } from "drizzle-orm";
+import { parseArticleNumber } from "@/lib/articles/article-param";
+import { getDb } from "@/lib/db";
+import { articles } from "@/lib/db/schema";
+
+// Legacy transliterated slugs get a real 308 here: the article page's own
+// permanentRedirect streams as a 200 (PPR shell) so it cannot carry the
+// status code. Numeric params pass through without a database query.
+async function redirectLegacyArticle(request: NextRequest) {
+  const param = decodeURIComponent(
+    request.nextUrl.pathname.slice("/articles/".length),
+  );
+  if (parseArticleNumber(param) !== null) {
+    return NextResponse.next();
+  }
+  const rows = await getDb()
+    .select({ number: articles.number })
+    .from(articles)
+    .where(and(eq(articles.slug, param), eq(articles.status, "published")))
+    .limit(1);
+  const number = rows[0]?.number;
+  if (number === undefined) {
+    return NextResponse.next();
+  }
+  return NextResponse.redirect(new URL(`/articles/${number}`, request.url), 308);
+}
+```
+
+In `proxy()`, before the admin logic: `if (request.nextUrl.pathname.startsWith("/articles/")) { return redirectLegacyArticle(request); }` and change the config to `matcher: ["/admin/:path*", "/articles/:slug"]`.
+
+- [ ] **Step 2: Verify against a production server**
+
+Run: `npm run build && npm run start &`, then:
+- `curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" http://localhost:3000/articles/kmh-ngmr-sykvm-hshbv-2-6-8` → expect `308 http://localhost:3000/articles/2`
+- `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/articles/2` → expect `200`
+- `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/articles/no-such-slug` → expect `200` (streamed not-found, pre-existing behavior)
+- `/admin` still redirects to `/admin/login` when logged out.
+Then `npx tsc --noEmit && npm test`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/proxy.ts
+git commit -m "feat: issue real 308 redirects for legacy article slugs in the proxy"
+```
