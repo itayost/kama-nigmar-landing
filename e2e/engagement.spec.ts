@@ -9,21 +9,30 @@ async function login(page: Page) {
   await expect(page).toHaveURL(/\/admin$/);
 }
 
+async function findArticleUrl(page: Page, title: string): Promise<string> {
+  await page.goto("/articles");
+  const href = await page
+    .getByRole("link")
+    .filter({ has: page.getByRole("heading", { name: title, exact: true }) })
+    .first()
+    .getAttribute("href");
+  expect(href).toMatch(/^\/articles\/\d+$/);
+  return href!;
+}
+
 async function createArticle(
   page: Page,
   options: {
     title: string;
-    slug: string;
     tag: string;
     paragraphs: number;
     episodeUrl?: string;
     pollLabel?: string;
   },
-) {
+): Promise<string> {
   await page.goto("/admin/articles/new");
   await page.locator('input[name="title"]').fill(options.title);
   await page.locator('input[name="authorName"]').fill("בודק אוטומטי");
-  await page.locator('input[name="slug"]').fill(options.slug);
   if (options.episodeUrl) {
     await page.locator('input[name="episodeUrl"]').fill(options.episodeUrl);
   }
@@ -43,6 +52,7 @@ async function createArticle(
   }
   await page.getByRole("button", { name: "שמירה" }).click();
   await expect(page).toHaveURL(/\/admin$/);
+  return findArticleUrl(page, options.title);
 }
 
 async function deleteArticle(page: Page, title: string) {
@@ -60,17 +70,17 @@ test.describe("engagement surfaces", () => {
   test("recirculation modules, player bar, and share button", async ({ page }) => {
     const ts = Date.now();
     const tag = `בדיקה-${ts}`;
-    const long = { title: `כתבה ארוכה ${ts}`, slug: `e2e-long-${ts}`, tag, paragraphs: 4 };
-    const shortA = { title: `כתבה קצרה א ${ts}`, slug: `e2e-short-a-${ts}`, tag, paragraphs: 1 };
-    const shortB = { title: `כתבה קצרה ב ${ts}`, slug: `e2e-short-b-${ts}`, tag, paragraphs: 1 };
+    const long = { title: `כתבה ארוכה ${ts}`, tag, paragraphs: 4 };
+    const shortA = { title: `כתבה קצרה א ${ts}`, tag, paragraphs: 1 };
+    const shortB = { title: `כתבה קצרה ב ${ts}`, tag, paragraphs: 1 };
 
     await login(page);
-    await createArticle(page, shortA);
+    const shortAUrl = await createArticle(page, shortA);
     await createArticle(page, shortB);
-    await createArticle(page, long);
+    const longUrl = await createArticle(page, long);
 
     // Long article: mid-article module with the two same-tag articles.
-    await page.goto(`/articles/${long.slug}`);
+    await page.goto(longUrl);
     const midModule = page.locator('aside[aria-label="עוד באותו נושא"]');
     await expect(midModule).toBeVisible();
     await expect(midModule.getByRole("link")).toHaveCount(2);
@@ -89,11 +99,11 @@ test.describe("engagement surfaces", () => {
     await expect(page.getByText(/דק(ת|ות) קריאה/)).toBeVisible();
 
     // Short article: no mid-article module.
-    await page.goto(`/articles/${shortA.slug}`);
+    await page.goto(shortAUrl);
     await expect(page.locator('aside[aria-label="עוד באותו נושא"]')).toHaveCount(0);
 
     // Player bar on public pages, absent on admin login.
-    for (const path of ["/", "/articles", `/articles/${long.slug}`]) {
+    for (const path of ["/", "/articles", longUrl]) {
       await page.goto(path);
       await expect(page.getByTestId("player-bar")).toBeVisible();
     }
@@ -122,7 +132,6 @@ test.describe("engagement surfaces", () => {
     const mainQuestion = `סקר ראשי ${ts}`;
     const article = {
       title: `כתבה עם סקר ${ts}`,
-      slug: `e2e-poll-link-${ts}`,
       tag: `בדיקה-${ts}`,
       paragraphs: 3,
       pollLabel: `${linkedQuestion} ● פעיל`,
@@ -145,10 +154,10 @@ test.describe("engagement surfaces", () => {
     await mainRow.getByRole("button", { name: "הצגה בעמוד הבית" }).click();
     await expect(mainRow.getByText("ראשי")).toBeVisible();
 
-    await createArticle(page, article);
+    const articleUrl = await createArticle(page, article);
 
     // Article: the linked poll renders mid-article, and the main poll is absent.
-    await page.goto(`/articles/${article.slug}`);
+    await page.goto(articleUrl);
     await expect(page.getByText("מה דעתכם?")).toBeVisible();
     await expect(page.getByText(linkedQuestion)).toBeVisible();
     await expect(page.getByText(mainQuestion)).toHaveCount(0);
@@ -162,7 +171,7 @@ test.describe("engagement surfaces", () => {
     const linkedRow = page.getByRole("listitem").filter({ hasText: linkedQuestion });
     await linkedRow.getByRole("button", { name: "סגירה" }).click();
     await expect(linkedRow.getByText("סגור")).toBeVisible();
-    await page.goto(`/articles/${article.slug}`);
+    await page.goto(articleUrl);
     await expect(page.getByText(mainQuestion)).toBeVisible();
     await expect(page.getByText(linkedQuestion)).toHaveCount(0);
 
@@ -187,7 +196,6 @@ test.describe("engagement surfaces", () => {
     const question = `מי מנצח הערב? ${ts}`;
     const article = {
       title: `כתבה עם פרק ${ts}`,
-      slug: `e2e-episode-${ts}`,
       tag: `בדיקה-${ts}`,
       paragraphs: 1,
       episodeUrl: "https://open.spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk",
@@ -206,10 +214,10 @@ test.describe("engagement surfaces", () => {
     await pollRow.getByRole("button", { name: "הפעלה" }).click();
     await expect(pollRow.getByText("פעיל")).toBeVisible();
 
-    await createArticle(page, article);
+    const articleUrl = await createArticle(page, article);
 
     // Article shows the episode callout and the poll; voting reveals results.
-    await page.goto(`/articles/${article.slug}`);
+    await page.goto(articleUrl);
     await expect(
       page.locator('aside[aria-label="האזינו לפרק על הסיפור הזה"]'),
     ).toBeVisible();

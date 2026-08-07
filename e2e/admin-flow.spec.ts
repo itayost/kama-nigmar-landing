@@ -1,8 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 // Requires a dev server pointed at a Neon dev branch (never production)
 // and the admin password exported as an E2E env var.
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
+
+async function findArticleUrl(page: Page, title: string): Promise<string> {
+  await page.goto("/articles");
+  const href = await page
+    .getByRole("link")
+    .filter({ has: page.getByRole("heading", { name: title, exact: true }) })
+    .first()
+    .getAttribute("href");
+  expect(href).toMatch(/^\/articles\/\d+$/);
+  return href!;
+}
 
 test.describe("admin flow", () => {
   test.skip(!ADMIN_PASSWORD, "Set E2E_ADMIN_PASSWORD to run the admin E2E flow");
@@ -17,7 +28,6 @@ test.describe("admin flow", () => {
   test("logs in, creates, publishes, views and deletes an article", async ({
     page,
   }) => {
-    const slug = `e2e-test-${Date.now()}`;
     const title = `בדיקת מערכת ${Date.now()}`;
     const paragraph = "פסקת בדיקה שנוצרה אוטומטית על ידי הבדיקה.";
 
@@ -29,7 +39,6 @@ test.describe("admin flow", () => {
     await page.getByRole("link", { name: "+ כתבה חדשה" }).click();
     await page.locator('input[name="title"]').fill(title);
     await page.locator('input[name="authorName"]').fill("בודק אוטומטי");
-    await page.locator('input[name="slug"]').fill(slug);
     await page.getByRole("radio", { name: "פורסם" }).check();
     await page.getByRole("button", { name: "+ פסקה" }).click();
     await page.getByPlaceholder("כתבו כאן את הפסקה...").fill(paragraph);
@@ -37,7 +46,9 @@ test.describe("admin flow", () => {
     await expect(page).toHaveURL(/\/admin$/);
     await expect(page.getByText(title)).toBeVisible();
 
-    await page.goto(`/articles/${slug}`);
+    const articleUrl = await findArticleUrl(page, title);
+    await page.goto(articleUrl);
+    await expect(page).toHaveURL(/\/articles\/\d+$/);
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(paragraph)).toBeVisible();
 
@@ -48,7 +59,7 @@ test.describe("admin flow", () => {
     await row.getByRole("button", { name: "מחיקה" }).last().click();
     await expect(page.getByText(title)).toHaveCount(0);
 
-    await page.goto(`/articles/${slug}`);
+    await page.goto(articleUrl);
     await expect(page.getByText("הכתבה לא נמצאה")).toBeVisible();
   });
 
