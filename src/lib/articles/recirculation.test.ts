@@ -10,7 +10,7 @@ function make(
   tags: string[],
   publishedAt: Date | null = new Date("2026-07-01"),
 ): RecircInput {
-  return { id: `id-${slug}`, slug, tags, publishedAt };
+  return { id: `id-${slug}`, tags, publishedAt };
 }
 
 function views(entries: Record<string, number>): Record<string, number> {
@@ -19,11 +19,11 @@ function views(entries: Record<string, number>): Record<string, number> {
   );
 }
 
-const longCurrent = { slug: "current", tags: ["כדורגל", "ליגת העל"], blockCount: 6 };
+const longCurrent = { id: "id-current", tags: ["כדורגל", "ליגת העל"], blockCount: 6 };
 const shortCurrent = { ...longCurrent, blockCount: 3 };
 
 function slugs(list: readonly RecircInput[]): string[] {
-  return list.map((item) => item.slug);
+  return list.map((item) => item.id);
 }
 
 describe("planRecirculation", () => {
@@ -43,21 +43,21 @@ describe("planRecirculation", () => {
     const one = make("one", ["כדורגל"]);
     const none = make("none", ["טניס"]);
     const plan = planRecirculation(longCurrent, [none, one, both], {});
-    expect(slugs(plan.midArticle)).toEqual(["both", "one"]);
+    expect(slugs(plan.midArticle)).toEqual(["id-both", "id-one"]);
   });
 
   test("mid-article is empty for short articles", () => {
     const both = make("both", ["כדורגל", "ליגת העל"]);
     const plan = planRecirculation(shortCurrent, [both], {});
     expect(plan.midArticle).toEqual([]);
-    expect(slugs(plan.related)).toEqual(["both"]);
+    expect(slugs(plan.related)).toEqual(["id-both"]);
   });
 
   test("mid-article never fills with non-overlapping articles", () => {
     const unrelated = make("unrelated", ["טניס"], new Date("2026-07-30"));
     const plan = planRecirculation(longCurrent, [unrelated], {});
     expect(plan.midArticle).toEqual([]);
-    expect(slugs(plan.related)).toEqual(["unrelated"]);
+    expect(slugs(plan.related)).toEqual(["id-unrelated"]);
   });
 
   test("weekly views break equal overlap, then recency", () => {
@@ -69,7 +69,7 @@ describe("planRecirculation", () => {
       [quiet, newer, popular],
       views({ popular: 50 }),
     );
-    expect(slugs(plan.midArticle)).toEqual(["popular", "newer"]);
+    expect(slugs(plan.midArticle)).toEqual(["id-popular", "id-newer"]);
   });
 
   test("no article appears in two placements", () => {
@@ -98,7 +98,7 @@ describe("planRecirculation", () => {
     const newest = make("newest", ["טניס"], new Date("2026-07-30"));
     const older = make("older", ["NBA"], new Date("2026-05-01"));
     const plan = planRecirculation(shortCurrent, [older, newest, related], {});
-    expect(slugs(plan.related)).toEqual(["related", "newest", "older"]);
+    expect(slugs(plan.related)).toEqual(["id-related", "id-newest", "id-older"]);
   });
 
   test("trending only includes articles with weekly views", () => {
@@ -114,7 +114,7 @@ describe("planRecirculation", () => {
       [seen, unseen, overlap1, overlap2, overlap3, overlap4, overlap5],
       views({ seen: 3 }),
     );
-    expect(slugs(plan.trending)).toEqual(["seen"]);
+    expect(slugs(plan.trending)).toEqual(["id-seen"]);
   });
 
   test("trending is empty when nothing has views", () => {
@@ -143,7 +143,7 @@ describe("planRecirculation", () => {
     });
     const noDate = make("no-date", ["כדורגל"], null);
     const plan = planRecirculation(longCurrent, [noDate], {});
-    expect(slugs(plan.midArticle)).toEqual(["no-date"]);
+    expect(slugs(plan.midArticle)).toEqual(["id-no-date"]);
   });
 });
 
@@ -154,7 +154,7 @@ describe("rankTrending", () => {
     const c = make("c", [], new Date("2026-07-15"));
     const zero = make("zero", []);
     const result = rankTrending([a, b, c, zero], views({ a: 5, b: 5, c: 9 }), 3);
-    expect(slugs(result)).toEqual(["c", "b", "a"]);
+    expect(slugs(result)).toEqual(["id-c", "id-b", "id-a"]);
   });
 
   test("respects the limit and empty input", () => {

@@ -1,12 +1,11 @@
 export interface RecircInput {
   readonly id: string;
-  readonly slug: string;
   readonly tags: readonly string[];
   readonly publishedAt: Date | null;
 }
 
 export interface RecircCurrent {
-  readonly slug: string;
+  readonly id: string;
   readonly tags: readonly string[];
   readonly blockCount: number;
 }
@@ -50,7 +49,7 @@ export function planRecirculation<T extends RecircInput>(
 ): RecirculationPlan<T> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const weekly = (candidate: T) => weeklyViews[candidate.id] ?? 0;
-  const others = candidates.filter((candidate) => candidate.slug !== current.slug);
+  const others = candidates.filter((candidate) => candidate.id !== current.id);
   const currentTags = new Set(current.tags);
 
   const byRelevance = others
@@ -71,24 +70,24 @@ export function planRecirculation<T extends RecircInput>(
     current.blockCount >= opts.minBlocksForMid
       ? byRelevance.slice(0, opts.midCount)
       : [];
-  const taken = new Set(midArticle.map((candidate) => candidate.slug));
+  const taken = new Set(midArticle.map((candidate) => candidate.id));
 
   const relatedScored = byRelevance
-    .filter((candidate) => !taken.has(candidate.slug))
+    .filter((candidate) => !taken.has(candidate.id))
     .slice(0, opts.relatedCount);
   const relatedFill = others
     .filter(
       (candidate) =>
-        !taken.has(candidate.slug) &&
-        !relatedScored.some((picked) => picked.slug === candidate.slug),
+        !taken.has(candidate.id) &&
+        !relatedScored.some((picked) => picked.id === candidate.id),
     )
     .sort((a, b) => publishedTime(b) - publishedTime(a))
     .slice(0, opts.relatedCount - relatedScored.length);
   const related = [...relatedScored, ...relatedFill];
-  for (const candidate of related) taken.add(candidate.slug);
+  for (const candidate of related) taken.add(candidate.id);
 
   const trending = others
-    .filter((candidate) => !taken.has(candidate.slug) && weekly(candidate) > 0)
+    .filter((candidate) => !taken.has(candidate.id) && weekly(candidate) > 0)
     .sort((a, b) => weekly(b) - weekly(a) || publishedTime(b) - publishedTime(a))
     .slice(0, opts.trendingCount);
 

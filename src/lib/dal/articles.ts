@@ -76,7 +76,7 @@ export async function getRecirculation(
   const current = published.find((article) => article.slug === slug);
   if (!current) return { midArticle: [], related: [], trending: [] };
   return planRecirculation(
-    { slug: current.slug, tags: current.tags, blockCount: current.content.length },
+    { id: current.id, tags: current.tags, blockCount: current.content.length },
     published,
     weeklyViews,
   );
