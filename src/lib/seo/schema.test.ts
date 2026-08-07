@@ -10,6 +10,7 @@ import {
 
 const baseArticle: Article = {
   id: "00000000-0000-0000-0000-000000000000",
+  number: 1,
   slug: "test-article",
   title: "כותרת בדיקה",
   subtitle: "כותרת משנה",

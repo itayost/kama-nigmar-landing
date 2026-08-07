@@ -31,6 +31,7 @@ export const articles = pgTable(
   "articles",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    number: integer("number").generatedAlwaysAsIdentity().unique(),
     slug: text("slug").notNull().unique(),
     title: text("title").notNull(),
     subtitle: text("subtitle"),
