@@ -5,7 +5,7 @@ import { articleViewsDaily, articles } from "@/lib/db/schema";
 
 const RETENTION_DAYS = 30;
 
-const viewPayloadSchema = z.object({ number: z.number().int().min(1) });
+const viewPayloadSchema = z.object({ number: z.number().int().min(1).max(2147483647) });
 
 // Public view-count beacon. Deliberately does NOT invalidate any cache
 // (ADR 0001): views are a ranking signal read by the recirculation planner,
