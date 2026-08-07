@@ -32,7 +32,9 @@ export const articles = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     number: integer("number").generatedAlwaysAsIdentity().unique(),
-    slug: text("slug").notNull().unique(),
+    // Legacy transliterated slugs kept only for permanent redirects; new
+    // articles are addressed by number and never receive one.
+    slug: text("slug").unique(),
     title: text("title").notNull(),
     subtitle: text("subtitle"),
     coverImageUrl: text("cover_image_url"),

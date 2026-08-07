@@ -4,7 +4,6 @@ import {
   blockSchema,
   blocksSchema,
   isBlobUrl,
-  slugSchema,
   tagNameSchema,
 } from "./blocks";
 
@@ -74,19 +73,6 @@ describe("blocksSchema", () => {
   });
 });
 
-describe("slugSchema", () => {
-  const valid = ["a", "abc", "abc-def", "a1-b2-c3", "nba-2026"];
-  const invalid = ["", "-abc", "abc-", "ab--cd", "ABC", "עברית", "a b", "a_b", "a".repeat(101)];
-
-  test.each(valid)("accepts %s", (slug) => {
-    expect(slugSchema.safeParse(slug).success).toBe(true);
-  });
-
-  test.each(invalid)("rejects %j", (slug) => {
-    expect(slugSchema.safeParse(slug).success).toBe(false);
-  });
-});
-
 describe("tagNameSchema", () => {
   test("trims and accepts a valid name", () => {
     const result = tagNameSchema.safeParse("  כדורגל  ");
@@ -113,7 +99,6 @@ describe("articleInputSchema", () => {
   const validInput = {
     title: "מכבי ניצחה בדרבי",
     subtitle: "סיכום המשחק",
-    slug: "maccabi-derby",
     authorName: "יוסי",
     tags: ["כדורגל"],
     status: "draft",

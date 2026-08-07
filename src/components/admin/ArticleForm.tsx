@@ -7,11 +7,9 @@ import type { ArticleBlock } from "@/lib/articles/blocks";
 import { toDatetimeLocalIsrael } from "@/lib/datetime";
 import type { PollChoice } from "@/lib/dal/polls";
 import type { Article } from "@/lib/db/schema";
-import { suggestSlug } from "@/lib/slug/transliterate";
 import { BlockEditor } from "./BlockEditor";
 import { Field, inputClass } from "./Field";
 import { ImageUploadField } from "./ImageUploadField";
-import { SlugField } from "./SlugField";
 import { TagsInput } from "./TagsInput";
 
 const initialState: ArticleFormState = { errors: {} };
@@ -40,20 +38,11 @@ export function ArticleForm({ article, tagSuggestions, pollChoices }: ArticleFor
   const [publishedAtLocal, setPublishedAtLocal] = useState(() =>
     toDatetimeLocalIsrael(article?.publishedAt),
   );
-  const [slug, setSlug] = useState(article?.slug ?? "");
-  const [isSlugTouched, setIsSlugTouched] = useState(Boolean(article));
   const [tags, setTags] = useState<string[]>(article?.tags ?? []);
   const [coverImageUrl, setCoverImageUrl] = useState(article?.coverImageUrl ?? "");
   const [blocks, setBlocks] = useState<ArticleBlock[]>(article?.content ?? []);
 
   const hasErrors = Object.keys(state.errors).length > 0;
-
-  function handleTitleChange(value: string) {
-    setTitle(value);
-    if (!isSlugTouched) {
-      setSlug(suggestSlug(value));
-    }
-  }
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
@@ -73,7 +62,7 @@ export function ArticleForm({ article, tagSuggestions, pollChoices }: ArticleFor
           type="text"
           name="title"
           value={title}
-          onChange={(event) => handleTitleChange(event.target.value)}
+          onChange={(event) => setTitle(event.target.value)}
           placeholder="כותרת הכתבה"
           className={inputClass}
         />
@@ -147,16 +136,6 @@ export function ArticleForm({ article, tagSuggestions, pollChoices }: ArticleFor
       <Field label="תגיות" group error={state.errors.tags}>
         <TagsInput value={tags} onChange={setTags} suggestions={tagSuggestions} />
       </Field>
-
-      <SlugField
-        value={slug}
-        onChange={(value) => {
-          setIsSlugTouched(true);
-          setSlug(value);
-        }}
-        error={state.errors.slug}
-        showPublishedWarning={article?.status === "published"}
-      />
 
       <Field label="סטטוס" group error={state.errors.status}>
         <div className="flex gap-4">

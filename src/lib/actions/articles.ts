@@ -12,7 +12,6 @@ import {
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { parseDatetimeLocalIsrael } from "@/lib/datetime";
 import { getDb } from "@/lib/db";
-import { isUniqueViolation } from "@/lib/db/errors";
 import { articles, tags as tagsTable } from "@/lib/db/schema";
 import { isUuid } from "@/lib/uuid";
 import { parseVideoUrl } from "@/lib/video/parseVideoUrl";
@@ -82,7 +81,6 @@ export async function saveArticle(
   const parsed = articleInputSchema.safeParse({
     title: formData.get("title"),
     subtitle: typeof subtitleRaw === "string" ? subtitleRaw : undefined,
-    slug: formData.get("slug"),
     authorName: formData.get("authorName"),
     tags,
     status: formData.get("status"),
@@ -144,15 +142,6 @@ export async function saveArticle(
     previousPublishedAt = existing[0].publishedAt;
   }
 
-  const slugTaken = await db
-    .select({ id: articles.id })
-    .from(articles)
-    .where(eq(articles.slug, parsed.data.slug))
-    .limit(1);
-  if (slugTaken[0] && slugTaken[0].id !== articleId) {
-    return { errors: { slug: "הכתובת הזו כבר בשימוש בכתבה אחרת" } };
-  }
-
   const isPublished = parsed.data.status === "published";
   const publishedAt =
     parsed.data.publishedAt ??
@@ -160,7 +149,6 @@ export async function saveArticle(
     (isPublished ? new Date() : null);
 
   const values = {
-    slug: parsed.data.slug,
     title: parsed.data.title,
     subtitle: parsed.data.subtitle || null,
     coverImageUrl: parsed.data.coverImageUrl || null,
@@ -182,23 +170,14 @@ export async function saveArticle(
       .onConflictDoNothing();
   }
 
-  try {
-    if (articleId) {
-      await db.update(articles).set(values).where(eq(articles.id, articleId));
-    } else {
-      const inserted = await db
-        .insert(articles)
-        .values(values)
-        .returning({ number: articles.number });
-      updateTag(`article-${inserted[0].number}`);
-    }
-  } catch (error) {
-    // The slug check above races concurrent saves; the unique constraint
-    // is the real guard, so surface its violation as a friendly slug error.
-    if (isUniqueViolation(error)) {
-      return { errors: { slug: "הכתובת הזו כבר בשימוש בכתבה אחרת" } };
-    }
-    throw error;
+  if (articleId) {
+    await db.update(articles).set(values).where(eq(articles.id, articleId));
+  } else {
+    const inserted = await db
+      .insert(articles)
+      .values(values)
+      .returning({ number: articles.number });
+    updateTag(`article-${inserted[0].number}`);
   }
 
   updateTag("articles");

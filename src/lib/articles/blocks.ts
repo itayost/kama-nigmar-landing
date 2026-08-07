@@ -88,12 +88,6 @@ export const blocksSchema = z
   .array(blockSchema)
   .min(1, "חובה להוסיף לפחות בלוק תוכן אחד");
 
-export const slugSchema = z
-  .string()
-  .min(1, "חובה למלא כתובת (slug)")
-  .max(100, "הכתובת ארוכה מדי")
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "הכתובת יכולה להכיל רק אותיות באנגלית, מספרים ומקפים");
-
 export const tagNameSchema = z
   .string()
   .trim()
@@ -103,7 +97,6 @@ export const tagNameSchema = z
 export const articleInputSchema = z.object({
   title: z.string().min(1, "חובה למלא כותרת").max(200, "הכותרת ארוכה מדי"),
   subtitle: z.string().max(300, "כותרת המשנה ארוכה מדי").optional(),
-  slug: slugSchema,
   authorName: z.string().min(1, "חובה למלא שם כותב").max(100, "שם הכותב ארוך מדי"),
   tags: z.array(tagNameSchema).max(10, "אפשר להוסיף עד 10 תגיות"),
   status: z.enum(["draft", "published"]),
