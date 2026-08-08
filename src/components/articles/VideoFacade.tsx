@@ -20,6 +20,27 @@ function playbackSrc(block: VideoBlock): string {
   return block.embedUrl;
 }
 
+interface VideoFrameProps {
+  readonly src: string;
+  readonly title: string;
+  readonly className: string;
+}
+
+function VideoFrame({ src, title, className }: VideoFrameProps) {
+  return (
+    <div className={`${className} overflow-hidden rounded-xl`}>
+      <iframe
+        src={src}
+        title={title}
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
+        allowFullScreen
+        loading="lazy"
+        className="h-full w-full border-0"
+      />
+    </div>
+  );
+}
+
 interface VideoFacadeProps {
   readonly block: VideoBlock;
 }
@@ -28,18 +49,19 @@ export function VideoFacade({ block }: VideoFacadeProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const frameClass = FRAME_CLASSES[block.provider];
 
+  // Spotify gets no facade. It has no thumbnail to show behind one, and its
+  // embed cannot autoplay the way YouTube can, so the facade click buys
+  // nothing and leaves the reader pressing two play buttons in a row. The
+  // compact player carries its own artwork, title and control.
+  if (block.provider === "spotify") {
+    return (
+      <VideoFrame src={block.embedUrl} title="נגן פרק ספוטיפיי" className={frameClass} />
+    );
+  }
+
   if (isPlaying) {
     return (
-      <div className={`${frameClass} overflow-hidden rounded-xl`}>
-        <iframe
-          src={playbackSrc(block)}
-          title="נגן וידאו"
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; clipboard-write"
-          allowFullScreen
-          loading="lazy"
-          className="h-full w-full border-0"
-        />
-      </div>
+      <VideoFrame src={playbackSrc(block)} title="נגן וידאו" className={frameClass} />
     );
   }
 
