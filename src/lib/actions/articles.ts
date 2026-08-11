@@ -1,6 +1,6 @@
 "use server";
 
-import { updateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { del } from "@vercel/blob";
 import { eq } from "drizzle-orm";
@@ -18,6 +18,23 @@ import { parseVideoUrl } from "@/lib/video/parseVideoUrl";
 
 export interface ArticleFormState {
   readonly errors: Record<string, string>;
+}
+
+// updateTag() expires the cached DAL reads, but a page rendered for a param that
+// generateStaticParams did not cover is saved to disk as its own artifact — including a
+// notFound() render produced while the article was still a draft. Tag invalidation does
+// not reach that artifact, so without revalidatePath an article published after the last
+// deploy serves "הכתבה לא נמצאה" forever (at a 200, so nothing surfaces it).
+// A literal path takes no type argument; only a pattern like /articles/[slug] would.
+function revalidateArticle(number: number): void {
+  updateTag("articles");
+  updateTag(`article-${number}`);
+  revalidatePath(`/articles/${number}`);
+  revalidatePath("/articles");
+  revalidatePath("/");
+  // Route handlers built from the same list, and so stale by the same mechanism.
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/feed.xml");
 }
 
 function parseContentField(
@@ -170,6 +187,8 @@ export async function saveArticle(
       .onConflictDoNothing();
   }
 
+  // Set by the lookup above when editing, by the insert when creating.
+  let savedNumber = previousNumber;
   if (articleId) {
     await db.update(articles).set(values).where(eq(articles.id, articleId));
   } else {
@@ -177,12 +196,11 @@ export async function saveArticle(
       .insert(articles)
       .values(values)
       .returning({ number: articles.number });
-    updateTag(`article-${inserted[0].number}`);
+    savedNumber = inserted[0].number;
   }
 
-  updateTag("articles");
-  if (previousNumber !== null) {
-    updateTag(`article-${previousNumber}`);
+  if (savedNumber !== null) {
+    revalidateArticle(savedNumber);
   }
 
   redirect("/admin");
@@ -214,8 +232,7 @@ export async function deleteArticle(formData: FormData): Promise<void> {
     }
   }
 
-  updateTag("articles");
-  updateTag(`article-${article.number}`);
+  revalidateArticle(article.number);
 }
 
 export async function toggleArticleStatus(formData: FormData): Promise<void> {
@@ -239,6 +256,5 @@ export async function toggleArticleStatus(formData: FormData): Promise<void> {
     })
     .where(eq(articles.id, id));
 
-  updateTag("articles");
-  updateTag(`article-${article.number}`);
+  revalidateArticle(article.number);
 }
