@@ -63,6 +63,57 @@ test.describe("admin flow", () => {
     await expect(page.getByText("הכתבה לא נמצאה")).toBeVisible();
   });
 
+  // Regression: a page rendered for a param that generateStaticParams did not cover is
+  // saved to disk, so viewing an article while it is a draft persists the notFound()
+  // render. updateTag() alone never clears that artifact and the article stayed at
+  // "הכתבה לא נמצאה" after publishing, until the next deploy. Visiting the URL while
+  // unpublished is what arms the bug - without that step this passes either way.
+  test("republishing clears a not-found page cached while the article was a draft", async ({
+    page,
+  }) => {
+    const title = `בדיקת פרסום מחדש ${Date.now()}`;
+    const paragraph = "פסקה לבדיקת ניקוי המטמון לאחר פרסום מחדש.";
+
+    await page.goto("/admin/login");
+    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
+    await page.getByRole("button", { name: "כניסה" }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+
+    await page.getByRole("link", { name: "+ כתבה חדשה" }).click();
+    await page.locator('input[name="title"]').fill(title);
+    await page.locator('input[name="authorName"]').fill("בודק אוטומטי");
+    await page.getByRole("radio", { name: "פורסם" }).check();
+    await page.getByRole("button", { name: "+ פסקה" }).click();
+    await page.getByPlaceholder("כתבו כאן את הפסקה...").fill(paragraph);
+    await page.getByRole("button", { name: "שמירה" }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+
+    // Published first because a draft has no public URL to discover.
+    const articleUrl = await findArticleUrl(page, title);
+
+    await page.goto("/admin");
+    const row = page.getByRole("listitem").filter({ hasText: title });
+    await row.getByRole("button", { name: "הסרת פרסום" }).click();
+    await expect(row.getByRole("button", { name: "פרסום" })).toBeVisible();
+
+    // Arms the bug: this render is what gets persisted.
+    await page.goto(articleUrl);
+    await expect(page.getByText("הכתבה לא נמצאה")).toBeVisible();
+
+    await page.goto("/admin");
+    await row.getByRole("button", { name: "פרסום" }).click();
+    await expect(row.getByRole("button", { name: "הסרת פרסום" })).toBeVisible();
+
+    await page.goto(articleUrl);
+    await expect(page.getByRole("heading", { name: title })).toBeVisible();
+    await expect(page.getByText(paragraph)).toBeVisible();
+
+    await page.goto("/admin");
+    await row.getByRole("button", { name: "מחיקה" }).click();
+    await row.getByRole("button", { name: "מחיקה" }).last().click();
+    await expect(page.getByText(title)).toHaveCount(0);
+  });
+
   test("manages tags centrally and offers them in the article form", async ({
     page,
   }) => {

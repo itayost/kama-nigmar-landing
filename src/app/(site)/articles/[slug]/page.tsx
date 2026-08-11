@@ -31,6 +31,10 @@ const MID_MODULE_AFTER_BLOCKS = 2;
 // Every published article gets its own prerendered entry. Without this the route
 // falls back to a single slug-agnostic shell shared by every [slug], which can be
 // written once with a not-found render and then served for all articles.
+// This only covers articles that exist at build time. Anything published later renders
+// at request time and is then saved to disk, so a notFound() produced while the article
+// was still a draft would stick; revalidateArticle() in lib/actions/articles.ts clears
+// that artifact on publish.
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
   return articles.map((article) => ({ slug: String(article.number) }));
