@@ -20,11 +20,11 @@ export interface ArticleFormState {
   readonly errors: Record<string, string>;
 }
 
-// updateTag() expires the cached DAL reads, but a page rendered for a param that
-// generateStaticParams did not cover is saved to disk as its own artifact — including a
-// notFound() render produced while the article was still a draft. Tag invalidation does
-// not reach that artifact, so without revalidatePath an article published after the last
-// deploy serves "הכתבה לא נמצאה" forever (at a 200, so nothing surfaces it).
+// updateTag() expires the cached DAL reads; the revalidatePath calls also drop the
+// prerendered output built from them, for the surfaces that list articles rather than
+// render one. The article page itself no longer needs a path here — resolveArticle() is
+// request-time (see articles/[slug]/page.tsx), so there is no per-article artifact left to
+// go stale — but the literal path is kept because it is free and self-documenting.
 // A literal path takes no type argument; only a pattern like /articles/[slug] would.
 function revalidateArticle(number: number): void {
   updateTag("articles");
