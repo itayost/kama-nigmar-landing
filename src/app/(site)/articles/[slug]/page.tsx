@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
@@ -16,7 +17,6 @@ import { parseArticleNumber } from "@/lib/articles/article-param";
 import { readingTimeLabel } from "@/lib/articles/reading-time";
 import {
   getArticleByNumber,
-  getArticleNumberBySlug,
   getPublishedArticles,
   getRecirculation,
 } from "@/lib/dal/articles";
@@ -28,30 +28,42 @@ const UPDATED_LABEL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
 const MID_MODULE_AFTER_BLOCKS = 2;
 
-// Every published article gets its own prerendered entry. Without this the route
-// falls back to a single slug-agnostic shell shared by every [slug], which can be
-// written once with a not-found render and then served for all articles.
-// This only covers articles that exist at build time. Anything published later renders
-// at request time and is then saved to disk, so a notFound() produced while the article
-// was still a draft would stick; revalidateArticle() in lib/actions/articles.ts clears
-// that artifact on publish.
+// Prerenders every article that exists at build time as its own fully static entry. Articles
+// published later get the same treatment on their first request, keyed on their own path.
+// Correctness no longer rests on this: a render that cannot resolve its param stalls instead
+// of being stored (see stallNotFoundOutsidePrerender), so an uncovered article can no longer
+// inherit the shared /articles/[slug] entry. This is now purely about serving articles 1..N
+// from the CDN with no function invocation.
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
   return articles.map((article) => ({ slug: String(article.number) }));
 }
 
-// Numeric params are canonical; anything else is a legacy transliterated
-// slug that permanently redirects to the numeric URL (or 404s).
+// Numeric params are canonical. Legacy transliterated slugs are turned into a real 308 by
+// the proxy (src/proxy.ts, matcher "/articles/:slug") before they ever reach this route, so
+// anything non-numeric that survives to here is genuinely unresolvable.
 async function resolveArticle(slugParam: string) {
   const number = parseArticleNumber(slugParam);
-  if (number !== null) {
-    return getArticleByNumber(number);
+  if (number === null) {
+    return null;
   }
-  const target = await getArticleNumberBySlug(slugParam);
-  if (target !== null) {
-    permanentRedirect(`/articles/${target}`);
-  }
-  return null;
+  return getArticleByNumber(number);
+}
+
+// A "not found" outcome must never be prerenderable, and it is the only outcome that needs
+// the guard. A render with a concrete param is keyed on its own path (/articles/7), but a
+// render with unresolved fallback params is keyed on the shared /articles/[slug] entry and
+// degrades the param to a placeholder - which parseArticleNumber rejects, so it always lands
+// here. Without stalling, that complete not-found page is stored under the shared key and
+// replayed at a 200 for every param generateStaticParams did not cover: every article
+// published since the last deploy, served a not-found body and a noindex head. The shared
+// entry deliberately carries none of the path or "articles" cache tags, so neither
+// updateTag nor revalidatePath can clear it afterwards.
+//
+// Under a real request connection() resolves immediately, so genuine 404s are unaffected,
+// and articles keep rendering as fully static per-path entries.
+async function stallNotFoundOutsidePrerender(): Promise<void> {
+  await connection();
 }
 
 // Not marked "use cache": the params promise is not a stable cache key, and metadata
@@ -64,6 +76,9 @@ export async function generateMetadata({
 
   const article = await resolveArticle(slug);
   if (!article) {
+    // Must pair with the guard in ArticleContent: metadata is baked into the same shared
+    // entry as the body, so patching only one leaves every uncovered article a noindex head.
+    await stallNotFoundOutsidePrerender();
     // notFound() streams with a 200 status, so Next never adds noindex itself.
     return { title: "הכתבה לא נמצאה", robots: { index: false } };
   }
@@ -115,6 +130,7 @@ async function ArticleContent({
   const { slug } = await params;
   const article = await resolveArticle(slug);
   if (!article) {
+    await stallNotFoundOutsidePrerender();
     notFound();
   }
   const [plan, linkedPoll] = await Promise.all([
