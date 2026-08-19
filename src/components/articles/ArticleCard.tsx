@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { formatDateLong } from "@/lib/datetime";
 import type { Article } from "@/lib/db/schema";
 
@@ -44,9 +45,7 @@ export function ArticleCard({ article, phEvent }: ArticleCardProps) {
           <p className="line-clamp-2 text-sm text-text-muted">{article.subtitle}</p>
         ) : null}
         <div className="mt-auto flex items-center gap-2 pt-2 text-xs text-text-muted">
-          <span className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-accent/20 text-[0.65rem] font-extrabold text-accent">
-            {article.authorName.charAt(0)}
-          </span>
+          <AuthorAvatar name={article.authorName} size={20} />
           <span>{article.authorName}</span>
           {article.publishedAt ? (
             <>

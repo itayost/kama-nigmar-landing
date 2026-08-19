@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
 import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
@@ -189,9 +190,7 @@ async function ArticleContent({
           </p>
         ) : null}
         <div className="flex flex-wrap items-center gap-3 border-y border-surface-border py-3.5 text-sm text-text-muted">
-          <span className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-accent/20 font-extrabold text-accent">
-            {article.authorName.charAt(0)}
-          </span>
+          <AuthorAvatar name={article.authorName} size={34} />
           <span className="flex flex-col leading-snug">
             <span className="text-[0.85rem] font-bold text-white">{article.authorName}</span>
             <span className="text-xs">

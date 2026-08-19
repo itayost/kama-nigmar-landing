@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { readingTimeLabel } from "@/lib/articles/reading-time";
 import { formatDateLong } from "@/lib/datetime";
 import type { Article } from "@/lib/db/schema";
@@ -47,9 +48,7 @@ export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
           <p className="mb-3 max-w-[52ch] text-white/75">{article.subtitle}</p>
         ) : null}
         <div className="flex items-center gap-2 text-xs text-text-muted">
-          <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-accent/20 text-[0.7rem] font-extrabold text-accent">
-            {article.authorName.charAt(0)}
-          </span>
+          <AuthorAvatar name={article.authorName} size={22} />
           <span>{article.authorName}</span>
           {article.publishedAt ? (
             <>
