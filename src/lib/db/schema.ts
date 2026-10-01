@@ -11,7 +11,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import type { ArticleBlock } from "@/lib/articles/blocks";
+import type { StoredBlock } from "@/lib/articles/blocks";
 import type { PollOption } from "@/lib/polls/schema";
 
 export const articleStatus = pgEnum("article_status", ["draft", "published"]);
@@ -38,7 +38,7 @@ export const articles = pgTable(
     title: text("title").notNull(),
     subtitle: text("subtitle"),
     coverImageUrl: text("cover_image_url"),
-    content: jsonb("content").$type<ArticleBlock[]>().notNull().default([]),
+    content: jsonb("content").$type<StoredBlock[]>().notNull().default([]),
     authorName: text("author_name").notNull(),
     episodeUrl: text("episode_url"),
     pollId: uuid("poll_id").references(() => polls.id, { onDelete: "set null" }),

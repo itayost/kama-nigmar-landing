@@ -46,7 +46,7 @@ async function createArticle(
   for (let i = 0; i < options.paragraphs; i += 1) {
     await page.getByRole("button", { name: "+ פסקה" }).click();
     await page
-      .getByPlaceholder("כתבו כאן את הפסקה...")
+      .getByRole("textbox", { name: "טקסט הפסקה" })
       .nth(i)
       .fill(`פסקת בדיקה מספר ${i + 1} עם קצת תוכן כדי שתהיה אמיתית.`);
   }

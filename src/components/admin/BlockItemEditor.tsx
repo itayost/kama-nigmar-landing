@@ -1,21 +1,44 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useState } from "react";
 import type {
   ArticleBlock,
   HeadingBlock,
   ImageBlock,
+  ListBlock,
   ParagraphBlock,
+  QuoteBlock,
   VideoBlock,
 } from "@/lib/articles/blocks";
+import {
+  docToList,
+  docToRichText,
+  listToDoc,
+  richTextToDoc,
+} from "@/lib/articles/rich-text-doc";
 import { parseVideoUrl } from "@/lib/video/parseVideoUrl";
 import { inputClass } from "./Field";
 import { ImageUploadField } from "./ImageUploadField";
 
+// Client-only: Tiptap needs the DOM and generates ids during render, which
+// would break prerendering. Also keeps the editor out of the initial bundle.
+const RichTextEditor = dynamic(
+  () => import("./rich-text/RichTextEditor").then((mod) => mod.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[9.5rem] rounded-lg border border-surface-border bg-surface" />
+    ),
+  },
+);
+
 const BLOCK_LABELS: Readonly<Record<ArticleBlock["type"], string>> = {
   paragraph: "פסקה",
   heading: "כותרת",
+  quote: "ציטוט",
+  list: "רשימה",
   image: "תמונה",
   video: "סרטון",
 };
@@ -45,12 +68,58 @@ function ParagraphEditor({
   readonly onChange: (block: ArticleBlock) => void;
 }) {
   return (
-    <textarea
-      value={block.text}
-      onChange={(event) => onChange({ ...block, text: event.target.value })}
+    <RichTextEditor
+      variant="inline"
+      initialContent={() => richTextToDoc(block.content)}
+      onChange={(doc) => onChange({ ...block, content: docToRichText(doc) })}
+      label="טקסט הפסקה"
       placeholder="כתבו כאן את הפסקה..."
-      rows={4}
-      className={inputClass}
+    />
+  );
+}
+
+function QuoteEditor({
+  block,
+  onChange,
+}: {
+  readonly block: QuoteBlock;
+  readonly onChange: (block: ArticleBlock) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <RichTextEditor
+        variant="inline"
+        initialContent={() => richTextToDoc(block.content)}
+        onChange={(doc) => onChange({ ...block, content: docToRichText(doc) })}
+        label="טקסט הציטוט"
+        placeholder="הציטוט עצמו..."
+      />
+      <input
+        type="text"
+        value={block.attribution ?? ""}
+        onChange={(event) => onChange({ ...block, attribution: event.target.value })}
+        placeholder="מי אמר? (לא חובה)"
+        aria-label="שם המצוטט"
+        className={inputClass}
+      />
+    </div>
+  );
+}
+
+function ListEditor({
+  block,
+  onChange,
+}: {
+  readonly block: ListBlock;
+  readonly onChange: (block: ArticleBlock) => void;
+}) {
+  return (
+    <RichTextEditor
+      variant="list"
+      initialContent={() => listToDoc(block)}
+      onChange={(doc) => onChange({ ...block, ...docToList(doc) })}
+      label="פריטי הרשימה"
+      placeholder="פריט ברשימה (Enter לפריט חדש)"
     />
   );
 }
@@ -230,6 +299,8 @@ export function BlockItemEditor({
       {block.type === "heading" ? (
         <HeadingEditor block={block} onChange={onChange} />
       ) : null}
+      {block.type === "quote" ? <QuoteEditor block={block} onChange={onChange} /> : null}
+      {block.type === "list" ? <ListEditor block={block} onChange={onChange} /> : null}
       {block.type === "image" ? <ImageEditor block={block} onChange={onChange} /> : null}
       {block.type === "video" ? <VideoEditor block={block} onChange={onChange} /> : null}
     </div>

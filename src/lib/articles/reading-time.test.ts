@@ -3,7 +3,7 @@ import type { ArticleBlock } from "./blocks";
 import { readingTimeLabel, readingTimeMinutes } from "./reading-time";
 
 function paragraph(text: string): ArticleBlock {
-  return { id: "p", type: "paragraph", text };
+  return { id: "p", type: "paragraph", content: [{ text }] };
 }
 
 describe("readingTimeMinutes", () => {
@@ -43,6 +43,23 @@ describe("readingTimeMinutes", () => {
 
   test("handles multiple whitespace runs", () => {
     expect(readingTimeMinutes([paragraph("  מילה   אחת\n\nשתיים  ")])).toBe(1);
+  });
+});
+
+describe("readingTimeMinutes with rich blocks", () => {
+  test("counts words in quotes and list items", () => {
+    const words100 = Array.from({ length: 100 }, () => "מילה").join(" ");
+    const blocks: ArticleBlock[] = [
+      paragraph(words100),
+      { id: "q", type: "quote", content: [{ text: words100, marks: ["italic"] }] },
+      { id: "l", type: "list", style: "bullet", items: [[{ text: "אחת" }], [{ text: "שתיים" }]] },
+    ];
+    expect(readingTimeMinutes(blocks)).toBe(2);
+  });
+
+  test("counts legacy plain-text paragraphs", () => {
+    const words201 = Array.from({ length: 201 }, () => "מילה").join(" ");
+    expect(readingTimeMinutes([{ id: "p", type: "paragraph", text: words201 }])).toBe(2);
   });
 });
 

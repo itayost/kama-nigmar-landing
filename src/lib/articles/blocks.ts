@@ -1,11 +1,30 @@
 import { z } from "zod";
+import { richTextSchema, type RichText } from "./rich-text";
+
+export const LIST_STYLES = ["bullet", "ordered"] as const;
+
+export type ListStyle = (typeof LIST_STYLES)[number];
 
 export type VideoProvider = "youtube" | "instagram" | "tiktok" | "spotify";
 
 export interface ParagraphBlock {
   readonly id: string;
   readonly type: "paragraph";
-  readonly text: string;
+  readonly content: RichText;
+}
+
+export interface QuoteBlock {
+  readonly id: string;
+  readonly type: "quote";
+  readonly content: RichText;
+  readonly attribution?: string;
+}
+
+export interface ListBlock {
+  readonly id: string;
+  readonly type: "list";
+  readonly style: ListStyle;
+  readonly items: readonly RichText[];
 }
 
 export interface HeadingBlock {
@@ -32,7 +51,34 @@ export interface VideoBlock {
   readonly thumbnailUrl?: string;
 }
 
-export type ArticleBlock = ParagraphBlock | HeadingBlock | ImageBlock | VideoBlock;
+export type ArticleBlock =
+  | ParagraphBlock
+  | HeadingBlock
+  | QuoteBlock
+  | ListBlock
+  | ImageBlock
+  | VideoBlock;
+
+// Articles saved before rich text stored paragraphs as plain strings. They are
+// still in the database and are converted on read; saving rewrites them.
+export interface LegacyParagraphBlock {
+  readonly id: string;
+  readonly type: "paragraph";
+  readonly text: string;
+}
+
+export type StoredBlock = ArticleBlock | LegacyParagraphBlock;
+
+function normalizeBlock(block: StoredBlock): ArticleBlock {
+  if ("text" in block && block.type === "paragraph") {
+    return { id: block.id, type: "paragraph", content: [{ text: block.text }] };
+  }
+  return block as ArticleBlock;
+}
+
+export function normalizeBlocks(blocks: readonly StoredBlock[]): ArticleBlock[] {
+  return blocks.map(normalizeBlock);
+}
 
 const BLOB_HOSTNAME_SUFFIX = ".public.blob.vercel-storage.com";
 
@@ -50,7 +96,23 @@ const blockId = z.string().min(1);
 export const paragraphBlockSchema = z.object({
   id: blockId,
   type: z.literal("paragraph"),
-  text: z.string().min(1, "חובה למלא טקסט בפסקה"),
+  content: richTextSchema("חובה למלא טקסט בפסקה"),
+});
+
+export const quoteBlockSchema = z.object({
+  id: blockId,
+  type: z.literal("quote"),
+  content: richTextSchema("חובה למלא טקסט בציטוט"),
+  attribution: z.string().trim().max(100, "שם המצוטט ארוך מדי").optional(),
+});
+
+export const listBlockSchema = z.object({
+  id: blockId,
+  type: z.literal("list"),
+  style: z.enum(LIST_STYLES),
+  items: z
+    .array(richTextSchema("פריט ברשימה אינו יכול להיות ריק"))
+    .min(1, "חובה להוסיף לפחות פריט אחד ברשימה"),
 });
 
 export const headingBlockSchema = z.object({
@@ -80,6 +142,8 @@ export const videoBlockSchema = z.object({
 export const blockSchema = z.discriminatedUnion("type", [
   paragraphBlockSchema,
   headingBlockSchema,
+  quoteBlockSchema,
+  listBlockSchema,
   imageBlockSchema,
   videoBlockSchema,
 ]);
