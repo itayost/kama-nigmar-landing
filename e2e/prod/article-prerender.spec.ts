@@ -25,7 +25,7 @@ async function publishArticle(
   await page.locator('input[name="authorName"]').fill("בודק אוטומטי");
   await page.getByRole("radio", { name: "פורסם" }).check();
   await page.getByRole("button", { name: "+ פסקה" }).click();
-  await page.getByPlaceholder("כתבו כאן את הפסקה...").fill(paragraph);
+  await page.getByRole("textbox", { name: "טקסט הפסקה" }).fill(paragraph);
   await page.getByRole("button", { name: "שמירה" }).click();
   await expect(page).toHaveURL(/\/admin$/);
 

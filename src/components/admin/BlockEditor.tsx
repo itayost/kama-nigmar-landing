@@ -14,6 +14,8 @@ type BlockType = ArticleBlock["type"];
 const ADD_BUTTONS: ReadonlyArray<{ type: BlockType; label: string }> = [
   { type: "paragraph", label: "+ פסקה" },
   { type: "heading", label: "+ כותרת" },
+  { type: "quote", label: "+ ציטוט" },
+  { type: "list", label: "+ רשימה" },
   { type: "image", label: "+ תמונה" },
   { type: "video", label: "+ סרטון" },
 ];
@@ -22,9 +24,13 @@ function createBlock(type: BlockType): ArticleBlock {
   const id = crypto.randomUUID();
   switch (type) {
     case "paragraph":
-      return { id, type: "paragraph", text: "" };
+      return { id, type: "paragraph", content: [] };
     case "heading":
       return { id, type: "heading", level: 2, text: "" };
+    case "quote":
+      return { id, type: "quote", content: [] };
+    case "list":
+      return { id, type: "list", style: "bullet", items: [] };
     case "image":
       return { id, type: "image", url: "", alt: "" };
     case "video":

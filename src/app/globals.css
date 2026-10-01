@@ -39,3 +39,59 @@ body {
     transform: scaleY(0.6);
   }
 }
+
+/* Admin rich-text editor (Tiptap). Mirrors the public article styling closely
+   enough that what the writer sees is what readers get. */
+.rich-editor-content {
+  min-height: 6.5rem;
+  padding: 0.625rem 0.75rem;
+  line-height: 1.75;
+  color: var(--color-text);
+  outline: none;
+}
+
+.rich-editor-content strong {
+  font-weight: 700;
+}
+
+.rich-editor-content u {
+  text-underline-offset: 4px;
+}
+
+.rich-editor-content mark {
+  border-radius: 2px;
+  padding-inline: 2px;
+  background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  color: inherit;
+}
+
+.rich-editor-content a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.rich-editor-content ul,
+.rich-editor-content ol {
+  padding-inline-start: 1.5rem;
+}
+
+.rich-editor-content ul {
+  list-style: disc;
+}
+
+.rich-editor-content ol {
+  list-style: decimal;
+}
+
+.rich-editor-content li::marker {
+  color: var(--color-accent);
+}
+
+.rich-editor-content p.is-empty::before {
+  content: attr(data-placeholder);
+  float: inline-start;
+  height: 0;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}

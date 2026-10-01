@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { saveArticle, type ArticleFormState } from "@/lib/actions/articles";
-import type { ArticleBlock } from "@/lib/articles/blocks";
+import { normalizeBlocks, type ArticleBlock } from "@/lib/articles/blocks";
 import { toDatetimeLocalIsrael } from "@/lib/datetime";
 import type { PollChoice } from "@/lib/dal/polls";
 import type { Article } from "@/lib/db/schema";
@@ -40,7 +40,9 @@ export function ArticleForm({ article, tagSuggestions, pollChoices }: ArticleFor
   );
   const [tags, setTags] = useState<string[]>(article?.tags ?? []);
   const [coverImageUrl, setCoverImageUrl] = useState(article?.coverImageUrl ?? "");
-  const [blocks, setBlocks] = useState<ArticleBlock[]>(article?.content ?? []);
+  const [blocks, setBlocks] = useState<ArticleBlock[]>(() =>
+    normalizeBlocks(article?.content ?? []),
+  );
 
   const hasErrors = Object.keys(state.errors).length > 0;
 

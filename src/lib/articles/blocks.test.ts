@@ -4,12 +4,20 @@ import {
   blockSchema,
   blocksSchema,
   isBlobUrl,
+  normalizeBlocks,
   tagNameSchema,
 } from "./blocks";
 
 const BLOB_URL = "https://abc123.public.blob.vercel-storage.com/articles/pic.jpg";
 
-const paragraph = { id: "1", type: "paragraph", text: "טקסט" };
+const paragraph = { id: "1", type: "paragraph", content: [{ text: "טקסט" }] };
+const quote = {
+  id: "5",
+  type: "quote",
+  content: [{ text: "ציטוט", marks: ["bold"] }],
+  attribution: "גיא",
+};
+const list = { id: "6", type: "list", style: "bullet", items: [[{ text: "פריט" }]] };
 const heading = { id: "2", type: "heading", level: 2, text: "כותרת" };
 const image = { id: "3", type: "image", url: BLOB_URL, alt: "תמונה" };
 const video = {
@@ -36,6 +44,8 @@ describe("blockSchema", () => {
     expect(blockSchema.safeParse(heading).success).toBe(true);
     expect(blockSchema.safeParse(image).success).toBe(true);
     expect(blockSchema.safeParse(video).success).toBe(true);
+    expect(blockSchema.safeParse(quote).success).toBe(true);
+    expect(blockSchema.safeParse(list).success).toBe(true);
   });
 
   test("rejects unknown block types", () => {
@@ -43,11 +53,42 @@ describe("blockSchema", () => {
   });
 
   test("rejects empty paragraph text with a Hebrew message", () => {
-    const result = blockSchema.safeParse({ ...paragraph, text: "" });
+    const result = blockSchema.safeParse({ ...paragraph, content: [] });
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0].message).toBe("חובה למלא טקסט בפסקה");
     }
+  });
+
+  test("rejects legacy plain-text paragraphs on save", () => {
+    expect(blockSchema.safeParse({ id: "1", type: "paragraph", text: "טקסט" }).success).toBe(
+      false,
+    );
+  });
+
+  test("rejects unsafe links inside paragraphs", () => {
+    const result = blockSchema.safeParse({
+      ...paragraph,
+      content: [{ text: "x", href: "javascript:alert(1)" }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  test("rejects an empty quote and a list without items in Hebrew", () => {
+    const emptyQuote = blockSchema.safeParse({ ...quote, content: [{ text: " " }] });
+    expect(emptyQuote.success).toBe(false);
+    if (!emptyQuote.success) {
+      expect(emptyQuote.error.issues[0].message).toBe("חובה למלא טקסט בציטוט");
+    }
+    const emptyList = blockSchema.safeParse({ ...list, items: [] });
+    expect(emptyList.success).toBe(false);
+    if (!emptyList.success) {
+      expect(emptyList.error.issues[0].message).toBe("חובה להוסיף לפחות פריט אחד ברשימה");
+    }
+  });
+
+  test("rejects unknown list styles", () => {
+    expect(blockSchema.safeParse({ ...list, style: "roman" }).success).toBe(false);
   });
 
   test("rejects heading level outside 2-3", () => {
@@ -70,6 +111,19 @@ describe("blocksSchema", () => {
   test("requires at least one block", () => {
     expect(blocksSchema.safeParse([]).success).toBe(false);
     expect(blocksSchema.safeParse([paragraph]).success).toBe(true);
+  });
+});
+
+describe("normalizeBlocks", () => {
+  test("converts legacy plain-text paragraphs to rich text", () => {
+    expect(normalizeBlocks([{ id: "1", type: "paragraph", text: "שורה\nשנייה" }])).toEqual([
+      { id: "1", type: "paragraph", content: [{ text: "שורה\nשנייה" }] },
+    ]);
+  });
+
+  test("leaves current blocks untouched", () => {
+    const blocks = [paragraph, quote, list] as Parameters<typeof normalizeBlocks>[0];
+    expect(normalizeBlocks(blocks)).toEqual(blocks);
   });
 });
 
