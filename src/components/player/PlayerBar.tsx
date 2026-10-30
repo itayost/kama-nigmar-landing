@@ -60,11 +60,9 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
   const [mode, setMode] = useState<PlayerMode>("idle");
   const [isPaused, setIsPaused] = useState(true);
   const [progress, setProgress] = useState(0);
-  // A one-way latch, deliberately not `mode`: the effect must run exactly once.
-  // Depending on `mode` re-runs it when the controller sets "custom", which
-  // re-arms the timeout below, and since onSpotifyIframeApiReady only ever
-  // fires once, that second timeout would drop a working player to "fallback".
-  const [hasActivated, setHasActivated] = useState(false);
+  // A one-way latch, deliberately not `mode`: the loading effect must run
+  // exactly once, since onSpotifyIframeApiReady only ever fires once.
+  const [shouldLoad, setShouldLoad] = useState(false);
   // Set when the user pressed play before the controller existed, so playback
   // starts as soon as it does rather than needing a second press.
   const shouldAutoPlayRef = useRef(false);
@@ -73,21 +71,18 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
   // page's own images and scripts.
   useEffect(() => {
     if (spotifyShowId === "") return;
-    const activate = () => setHasActivated(true);
+    const load = () => setShouldLoad(true);
     if (document.readyState === "complete") {
-      activate();
+      load();
       return;
     }
-    window.addEventListener("load", activate, { once: true });
-    return () => window.removeEventListener("load", activate);
+    window.addEventListener("load", load, { once: true });
+    return () => window.removeEventListener("load", load);
   }, [spotifyShowId]);
 
   useEffect(() => {
-    if (spotifyShowId === "" || !hasActivated) return;
+    if (spotifyShowId === "" || !shouldLoad) return;
     let isCancelled = false;
-    const timeout = setTimeout(() => {
-      if (!isCancelled && !controllerRef.current) setMode("fallback");
-    }, READY_TIMEOUT_MS);
 
     window.onSpotifyIframeApiReady = (api) => {
       if (isCancelled || !hostRef.current) return;
@@ -106,7 +101,6 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
                   : 0,
               );
             });
-            clearTimeout(timeout);
             setMode("custom");
             if (shouldAutoPlayRef.current) {
               shouldAutoPlayRef.current = false;
@@ -115,7 +109,6 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
           },
         );
       } catch {
-        clearTimeout(timeout);
         setMode("fallback");
       }
     };
@@ -125,7 +118,6 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
       script.src = API_SCRIPT_SRC;
       script.async = true;
       script.onerror = () => {
-        clearTimeout(timeout);
         if (!isCancelled) setMode("fallback");
       };
       document.body.appendChild(script);
@@ -133,9 +125,18 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
 
     return () => {
       isCancelled = true;
-      clearTimeout(timeout);
     };
-  }, [spotifyShowId, hasActivated]);
+  }, [spotifyShowId, shouldLoad]);
+
+  // A listener who pressed play waits at most READY_TIMEOUT_MS for the player;
+  // loading in the background alone never gives up on it.
+  useEffect(() => {
+    if (mode !== "loading") return;
+    const timeout = setTimeout(() => {
+      if (!controllerRef.current) setMode("fallback");
+    }, READY_TIMEOUT_MS);
+    return () => clearTimeout(timeout);
+  }, [mode]);
 
   // Stable, so other controls can hold it: toggles a ready player, otherwise
   // asks for playback to start as soon as the player is up.
@@ -146,7 +147,7 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
       return;
     }
     shouldAutoPlayRef.current = true;
-    setHasActivated(true);
+    setShouldLoad(true);
     setMode((current) => (current === "idle" ? "loading" : current));
   }, []);
 
