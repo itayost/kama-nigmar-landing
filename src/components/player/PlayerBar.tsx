@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { PlayToggle } from "./icons";
+import { playerControl, type Playback } from "./player-control";
 
 const API_SCRIPT_SRC = "https://open.spotify.com/embed/iframe-api/v1";
 const READY_TIMEOUT_MS = 5000;
@@ -116,26 +118,41 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
     };
   }, [spotifyShowId, hasActivated]);
 
-  if (spotifyShowId === "") return null;
-
-  function handlePlayClick() {
-    if (!hasActivated) {
-      shouldAutoPlayRef.current = true;
-      setHasActivated(true);
-      setMode("loading");
+  // Stable, so other controls can hold it: toggles a ready player, otherwise
+  // asks for playback to start as soon as the player is up.
+  const handlePlayClick = useCallback(() => {
+    const controller = controllerRef.current;
+    if (controller) {
+      controller.togglePlay();
       return;
     }
-    controllerRef.current?.togglePlay();
-  }
+    shouldAutoPlayRef.current = true;
+    setHasActivated(true);
+    setMode((current) => (current === "idle" ? "loading" : current));
+  }, []);
 
-  const isPlaying = mode === "custom" && !isPaused;
+  const playback: Playback =
+    mode === "loading" ? "loading" : mode !== "custom" ? "idle" : isPaused ? "paused" : "playing";
+  useEffect(() => playerControl.report(playback), [playback]);
+
+  // The stock embed that replaces a failed player cannot be driven from outside.
+  const canTakeRequests = spotifyShowId !== "" && mode !== "fallback";
+  useEffect(
+    () => (canTakeRequests ? playerControl.connect(handlePlayClick) : undefined),
+    [canTakeRequests, handlePlayClick],
+  );
+
+  if (spotifyShowId === "") return null;
+
+  const isPlaying = playback === "playing";
 
   return (
     <div
       data-testid="player-bar"
+      data-dockable={canTakeRequests || undefined}
       role="region"
       aria-label="נגן הפודקאסט"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-surface-border bg-bg-start/95 backdrop-blur-md"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-surface-border bg-bg-start/95 backdrop-blur-md transition-[translate,visibility] duration-300 ease-out docked:invisible docked:translate-y-full motion-reduce:transition-none"
     >
       {/* The API controller replaces this host with its own iframe; it must
           stay mounted (but visually hidden) for audio to keep playing. */}
@@ -167,23 +184,7 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
               style={{ transform: `scaleX(${progress})` }}
             />
           ) : null}
-          <button
-            type="button"
-            onClick={handlePlayClick}
-            aria-busy={mode === "loading"}
-            aria-label={isPlaying ? "השהה את הפרק" : "נגן את הפרק האחרון"}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent shadow-[0_0_24px_rgba(46,204,64,0.3)] transition-transform hover:scale-105 active:scale-95 motion-reduce:transform-none"
-          >
-            {!isPlaying ? (
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 translate-x-[1px] fill-bg-start">
-                <path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l10.54-6.86a1.04 1.04 0 0 0 0-1.76L9.56 4.26A1.04 1.04 0 0 0 8 5.14Z" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-bg-start">
-                <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
-              </svg>
-            )}
-          </button>
+          <PlayToggle playback={playback} onClick={handlePlayClick} playLabel="נגן את הפרק האחרון" />
           <span className="min-w-0">
             <span className="block text-[0.7rem] font-extrabold text-accent">
               הפרק האחרון

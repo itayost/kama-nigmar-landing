@@ -8,7 +8,7 @@ import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
 import { coverPosition, subjectStyle, SubjectKicker } from "@/components/articles/subject";
 import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
-import { HeaderSolidity } from "@/components/layout/HeaderSolidity";
+import { CoverSheet } from "@/components/layout/CoverSheet";
 import { PollSection } from "@/components/polls/PollSection";
 import { getPollById } from "@/lib/dal/polls";
 import { RecirculationSections } from "@/components/articles/RecirculationSections";
@@ -209,46 +209,50 @@ function TagsBySubject({ article }: { readonly article: ArticleDetail }) {
 }
 
 // Full-bleed cover with the headline on the photo; the article rides up over
-// it on a sheet with rounded top corners. The sheet overlaps the cover by
-// --sheet-overlap, and the headline and credit sit just above it.
-function CoverSheet({ article, children }: { readonly article: ArticleDetail; readonly children: ReactNode }) {
-  return (
-    <main data-cover-sheet className="-mt-header [--sheet-overlap:1.875rem] md:[--sheet-overlap:7.5rem]">
-      <figure className="sticky top-0 m-0 h-[68svh] min-h-[26rem] overflow-hidden bg-bg-start md:h-[72vh]">
-        <Image
-          src={article.coverImageUrl ?? ""}
-          alt=""
-          fill
-          sizes="100vw"
-          loading="eager"
-          fetchPriority="high"
-          style={{ objectPosition: coverPosition(article) }}
-          className="cover-photo object-cover"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,13,24,0.94)_0%,rgba(6,13,24,0.45)_34%,transparent_62%)]"
-        />
-        <div className="cover-headline absolute inset-x-0 bottom-[calc(var(--sheet-overlap)+1.25rem)] md:bottom-[calc(var(--sheet-overlap)+2rem)]">
-          <div className="mx-auto flex max-w-[47.5rem] flex-col gap-3 px-6 md:px-12">
-            <Kicker article={article} />
-            <Headline article={article} className="text-[clamp(1.9rem,1.3rem+3.2vw,3.25rem)] [text-shadow:0_2px_18px_rgba(0,0,0,0.45)]" />
-          </div>
+// it on a sheet with rounded top corners. The headline and credit sit just
+// above the sheet's overlap.
+function CoverLayout({ article, children }: { readonly article: ArticleDetail; readonly children: ReactNode }) {
+  const cover = (
+    <figure className="sticky top-0 m-0 h-[68svh] min-h-[26rem] overflow-hidden bg-bg-start md:h-[72vh]">
+      <Image
+        src={article.coverImageUrl ?? ""}
+        alt=""
+        fill
+        sizes="100vw"
+        loading="eager"
+        fetchPriority="high"
+        style={{ objectPosition: coverPosition(article) }}
+        className="cover-photo object-cover"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,13,24,0.94)_0%,rgba(6,13,24,0.45)_34%,transparent_62%)]"
+      />
+      <div className="cover-headline absolute inset-x-0 bottom-[calc(var(--sheet-overlap)+1.25rem)] md:bottom-[calc(var(--sheet-overlap)+2rem)]">
+        <div className="mx-auto flex max-w-[47.5rem] flex-col gap-3 px-6 md:px-12">
+          <Kicker article={article} />
+          <Headline article={article} className="text-[clamp(1.9rem,1.3rem+3.2vw,3.25rem)] [text-shadow:0_2px_18px_rgba(0,0,0,0.45)]" />
         </div>
-        {article.coverCredit ? (
-          <figcaption className="absolute end-4 bottom-[calc(var(--sheet-overlap)+0.5rem)] text-[0.72rem] text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.75)] md:bottom-[calc(var(--sheet-overlap)+0.75rem)]">
-            {article.coverCredit}
-          </figcaption>
-        ) : null}
-      </figure>
-      <article className="relative z-10 mt-[calc(var(--sheet-overlap)*-1)] flex flex-col gap-6 rounded-t-[1.625rem] bg-[linear-gradient(180deg,#0c1a30_0%,var(--color-bg-start)_15rem,var(--color-bg-end)_100%)] px-6 pt-6 pb-12 shadow-[0_-24px_48px_-20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.09)] md:mx-auto md:max-w-[47.5rem] md:rounded-t-[1.75rem] md:px-12 md:pt-10">
-        <HeaderSolidity />
-        {article.subtitle ? (
-          <p className="text-xl leading-relaxed font-light text-white/75">{article.subtitle}</p>
-        ) : null}
-        {children}
-      </article>
-    </main>
+      </div>
+      {article.coverCredit ? (
+        <figcaption className="absolute end-4 bottom-[calc(var(--sheet-overlap)+0.5rem)] text-[0.72rem] text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.75)] md:bottom-[calc(var(--sheet-overlap)+0.75rem)]">
+          {article.coverCredit}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+  return (
+    <CoverSheet
+      cover={cover}
+      overlapClassName="[--sheet-overlap:1.875rem] md:[--sheet-overlap:7.5rem]"
+      sheetAs="article"
+      sheetClassName="flex flex-col gap-6 px-6 pt-6 pb-12 md:mx-auto md:max-w-[47.5rem] md:px-12 md:pt-10"
+    >
+      {article.subtitle ? (
+        <p className="text-xl leading-relaxed font-light text-white/75">{article.subtitle}</p>
+      ) : null}
+      {children}
+    </CoverSheet>
   );
 }
 
@@ -292,7 +296,7 @@ async function ArticleContent({
   const subjectCrumb = article.subject
     ? { name: article.subject.name, url: `${SITE_URL}${subjectPath(article.subject.slug)}` }
     : { name: "כתבות", url: `${SITE_URL}/articles` };
-  const Layout = article.coverImageUrl ? CoverSheet : PlainLayout;
+  const Layout = article.coverImageUrl ? CoverLayout : PlainLayout;
 
   return (
     <Layout article={article}>

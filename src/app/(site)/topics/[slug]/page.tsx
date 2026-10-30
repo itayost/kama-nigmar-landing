@@ -89,7 +89,7 @@ async function SubjectContent({ params, searchParams }: PageProps<"/topics/[slug
           {latest?.publishedAt ? ` · עודכן ${formatDateLong(latest.publishedAt)}` : ""}
         </p>
       </ArchiveHeader>
-      {lead ? <ArticleLeadCard article={lead} as="h2" priority showKicker={false} /> : <p className="text-text-muted">עדיין אין כתבות בנושא הזה.</p>}
+      {lead ? <ArticleLeadCard article={lead} /> : <p className="text-text-muted">עדיין אין כתבות בנושא הזה.</p>}
       <Suspense fallback={<ListSkeleton />}>
         <SubjectList subject={subject} searchParams={searchParams} />
       </Suspense>

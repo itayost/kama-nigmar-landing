@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Hero } from "@/components/hero/Hero";
-import { PollSection } from "@/components/polls/PollSection";
-import { getMainPoll } from "@/lib/dal/polls";
 import { HomeSections } from "@/components/articles/HomeSections";
+import { EpisodeRow } from "@/components/home/EpisodeRow";
+import { HomeCover } from "@/components/home/HomeCover";
+import { CoverSheet } from "@/components/layout/CoverSheet";
+import { PollSection } from "@/components/polls/PollSection";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { getPublishedArticles } from "@/lib/dal/articles";
+import { getLatestEpisode } from "@/lib/dal/podcast";
+import { getMainPoll } from "@/lib/dal/polls";
+import { getSubjects } from "@/lib/dal/taxonomy";
 import { FEED_ALTERNATE, podcastSeriesSchema, webSiteSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
+import { planHomepage } from "@/lib/taxonomy/public";
 
 const spotifyShowUrl = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_URL ?? "#";
 const applePodcastUrl = process.env.NEXT_PUBLIC_APPLE_PODCAST_URL ?? "#";
@@ -22,26 +28,58 @@ async function HomePollSlot() {
   if (!poll) return null;
 
   return (
-    <div className="mx-auto w-full max-w-2xl pb-10">
+    <div className="mx-auto w-full max-w-2xl px-6 pb-10">
       <PollSection placement="homepage" poll={poll} />
     </div>
   );
 }
 
-export default function Home() {
-  return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col px-6">
+const PAGE_HEADING = <h1 className="sr-only">כמה נגמר? התקציר היומי שלכם</h1>;
+
+export default async function Home() {
+  const [articles, subjects, episode] = await Promise.all([
+    getPublishedArticles(),
+    getSubjects(),
+    getLatestEpisode(),
+  ]);
+  const plan = planHomepage(articles, subjects);
+
+  const content = (
+    <>
       <JsonLd data={webSiteSchema()} />
-      <JsonLd
-        data={podcastSeriesSchema({ spotifyUrl: spotifyShowUrl, applePodcastUrl })}
-      />
-      <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
-      <div className="pb-10 pt-9">
-        <HomeSections />
+      <JsonLd data={podcastSeriesSchema({ spotifyUrl: spotifyShowUrl, applePodcastUrl })} />
+      <EpisodeRow episode={episode} spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
+      <div className="mx-auto w-full max-w-5xl px-6 pt-9 pb-10">
+        <HomeSections plan={plan} />
       </div>
       <Suspense fallback={null}>
         <HomePollSlot />
       </Suspense>
-    </main>
+    </>
+  );
+
+  // With no story yet there is no cover, and the content stands on its own.
+  if (!plan.lead) {
+    return (
+      <main>
+        {PAGE_HEADING}
+        {content}
+      </main>
+    );
+  }
+  // The lead story opens the page as a full-bleed cover under the floating
+  // header, and the sheet with everything else rides up over it.
+  return (
+    <CoverSheet
+      cover={
+        <>
+          {PAGE_HEADING}
+          <HomeCover article={plan.lead} />
+        </>
+      }
+      overlapClassName="[--sheet-overlap:1.75rem]"
+    >
+      {content}
+    </CoverSheet>
   );
 }

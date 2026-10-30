@@ -21,7 +21,8 @@ export default defineConfig({
   webServer: {
     command: `npm run build && npm run start -- --port ${E2E_PROD_PORT}`,
     // Built and served against the local Docker database; see above.
-    env: local.env,
+    // The podcast feed is switched off so no run depends on the network.
+    env: { ...local.env, PODCAST_FEED_URL: "" },
     url: `http://localhost:${E2E_PROD_PORT}`,
     // Never reuse: the point of these specs is what the build produced from current source.
     reuseExistingServer: false,

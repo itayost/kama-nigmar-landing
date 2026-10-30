@@ -48,6 +48,14 @@ test.describe("admin flow", () => {
     await expect(page.getByRole("heading", { name: title })).toBeVisible();
     await expect(page.getByText(paragraph)).toBeVisible();
 
+    // The newest story opens the homepage as its cover: one link to it, named
+    // by its headline and the read button. Other specs publish in parallel,
+    // so the newest story may not be this one.
+    await page.goto("/");
+    const cover = page.getByRole("link", { name: /לקריאת הכתבה$/ });
+    await expect(cover).toHaveAttribute("href", /^\/articles\/\d+$/);
+    await expect(cover.getByRole("heading", { level: 2 })).toBeVisible();
+
     await page.goto("/admin");
     const row = page.getByRole("listitem").filter({ hasText: title });
     await row.getByRole("button", { name: "מחיקה" }).click();

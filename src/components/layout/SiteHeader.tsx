@@ -19,6 +19,7 @@ export async function SiteHeader({ spotifyUrl, applePodcastUrl }: SiteHeaderProp
   const links: NavLink[] = [
     { href: "/", label: "בית" },
     ...navigation.sections.map((section) => (section.href === ROUNDUPS.href ? { href: section.href, label: section.label } : section)),
+    { href: "/articles", label: "כל הכתבות" },
   ];
 
   return (

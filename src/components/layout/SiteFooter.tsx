@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlatformButton } from "@/components/hero/PlatformButton";
+import { PlatformButton } from "./PlatformButton";
 import { Wordmark } from "./Wordmark";
 import { SOCIAL_LINKS, getCurrentYear } from "@/lib/site";
 

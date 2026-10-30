@@ -1,31 +1,21 @@
 import Link from "next/link";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getPublishedArticles, type ArticleView } from "@/lib/dal/articles";
-import { getSubjects } from "@/lib/dal/taxonomy";
-import { planHomepage, ROUNDUPS, subjectPath, type HomeSection } from "@/lib/taxonomy/public";
+import type { ArticleView } from "@/lib/dal/articles";
+import { ROUNDUPS, subjectPath, type HomepagePlan, type HomeSection } from "@/lib/taxonomy/public";
 import { ArticleCard } from "./ArticleCard";
-import { ArticleLeadCard } from "./ArticleLeadCard";
 import { ArticleRow } from "./ArticleRow";
 import { ArticleTile } from "./ArticleTile";
 import { RoundupCard } from "./RoundupCard";
 import { subjectStyle } from "./subject";
 
-// The front page: the lead story, then one section per subject in the
-// admin's order, with the roundups in a strip after the first section.
-export async function HomeSections() {
-  const [articles, subjects] = await Promise.all([getPublishedArticles(), getSubjects()]);
-  const plan = planHomepage(articles, subjects);
-  if (!plan.lead && plan.sections.length === 0 && plan.roundups.length === 0) return null;
+// The front page under its cover: one section per subject in the admin's
+// order, with the roundups in a strip after the first section.
+export function HomeSections({ plan }: { readonly plan: HomepagePlan<ArticleView> }) {
+  if (plan.sections.length === 0 && plan.roundups.length === 0) return null;
   const [first, ...others] = plan.sections;
 
   return (
     <div className="flex w-full flex-col gap-12">
-      {plan.lead ? (
-        <section aria-labelledby="lead-heading">
-          <SectionHeading title="הסיפור הגדול" id="lead-heading" linkHref="/articles" linkLabel="לכל הכתבות" />
-          <ArticleLeadCard article={plan.lead} />
-        </section>
-      ) : null}
       {first ? <SubjectSection section={first} /> : null}
       {plan.roundups.length > 0 ? (
         <section aria-labelledby="roundups-heading">

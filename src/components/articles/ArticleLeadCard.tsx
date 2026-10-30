@@ -3,20 +3,12 @@ import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { minutesLabel } from "@/lib/articles/reading-time";
 import { formatDateLong } from "@/lib/datetime";
 import type { ArticleView } from "@/lib/dal/articles";
-import { CoverImage, subjectStyle, SubjectKicker } from "./subject";
+import { CoverImage, LEAD_PLACEHOLDER, subjectStyle } from "./subject";
 
-interface ArticleLeadCardProps {
-  readonly article: ArticleView;
-  // h2 where the card leads a page directly under its h1.
-  readonly as?: "h2" | "h3";
-  // The page's largest image, e.g. the lead on a subject page.
-  readonly priority?: boolean;
-  // Off on the subject's own page, where the label would only repeat it.
-  readonly showKicker?: boolean;
-}
-
-// Magazine cover card: the headline sits ON the image under a bottom scrim.
-export function ArticleLeadCard({ article, as: Heading = "h3", priority = false, showKicker = true }: ArticleLeadCardProps) {
+// A subject page's newest story, under the page's h1: a magazine cover card
+// with the headline ON the image under a bottom scrim. No subject label, as
+// it would only repeat the page, and the page's largest image loads first.
+export function ArticleLeadCard({ article }: { readonly article: ArticleView }) {
   return (
     <Link
       href={`/articles/${article.number}`}
@@ -27,9 +19,9 @@ export function ArticleLeadCard({ article, as: Heading = "h3", priority = false,
         <CoverImage
           article={article}
           sizes="(max-width: 1024px) 100vw, 972px"
-          priority={priority}
+          priority
           className="transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transform-none"
-          placeholderClassName="bg-[radial-gradient(80%_100%_at_70%_20%,rgba(46,204,64,0.15),transparent_55%),linear-gradient(150deg,#14311f_0%,#0d1d33_60%,#101a3a_100%)]"
+          placeholderClassName={LEAD_PLACEHOLDER}
           labelClassName="text-5xl font-black text-white/5"
         />
       </div>
@@ -38,10 +30,9 @@ export function ArticleLeadCard({ article, as: Heading = "h3", priority = false,
         className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,13,24,0.96)_0%,rgba(6,13,24,0.55)_45%,transparent_75%)]"
       />
       <div className="absolute inset-x-0 bottom-0 p-6 md:p-7">
-        {showKicker ? <SubjectKicker subject={article.subject} format={article.format} className="mb-3 text-xs" /> : null}
-        <Heading className="mb-2 max-w-[22ch] text-[clamp(1.6rem,1.2rem+2.2vw,2.5rem)] font-black leading-[1.12] text-balance">
+        <h2 className="mb-2 max-w-[22ch] text-[clamp(1.6rem,1.2rem+2.2vw,2.5rem)] font-black leading-[1.12] text-balance">
           {article.title}
-        </Heading>
+        </h2>
         {article.subtitle ? (
           <p className="mb-3 max-w-[52ch] text-white/75">{article.subtitle}</p>
         ) : null}
