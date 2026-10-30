@@ -1,5 +1,6 @@
 import { cacheLife } from "next/cache";
-import { parseLatestEpisode, readFirstItem, type Episode } from "@/lib/podcast/feed";
+import type { Episode } from "@/lib/podcast/episode";
+import { parseLatestEpisode, readFirstItem } from "@/lib/podcast/feed";
 
 // The show's RSS feed, as its Apple Podcasts listing names it. PODCAST_FEED_URL
 // overrides it, and an empty value switches the feed off: E2E runs do that so

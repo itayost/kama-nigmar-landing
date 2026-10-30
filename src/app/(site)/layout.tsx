@@ -4,14 +4,17 @@ import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { PlayerBar } from "@/components/player/PlayerBar";
+import { getLatestEpisode } from "@/lib/dal/podcast";
 
 const spotifyShowUrl = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_URL ?? "#";
 const spotifyShowId = process.env.NEXT_PUBLIC_SPOTIFY_SHOW_ID ?? "";
 const applePodcastUrl = process.env.NEXT_PUBLIC_APPLE_PODCAST_URL ?? "#";
 
-export default function SiteLayout({
+export default async function SiteLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // The same cached feed read the homepage makes, so the bar names the episode.
+  const episode = await getLatestEpisode();
   return (
     <>
       <SiteHeader spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
@@ -20,7 +23,7 @@ export default function SiteLayout({
         {children}
         <SiteFooter spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
       </div>
-      <PlayerBar spotifyShowId={spotifyShowId} />
+      <PlayerBar spotifyShowId={spotifyShowId} episode={episode} />
       <Suspense fallback={null}>
         <AnalyticsProvider />
       </Suspense>
