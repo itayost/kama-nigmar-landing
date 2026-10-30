@@ -2,10 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { formatDateLong } from "@/lib/datetime";
-import type { Article } from "@/lib/db/schema";
+import type { ArticleView } from "@/lib/dal/articles";
+import { AlsoIn, coverPosition, subjectStyle, SubjectKicker } from "./subject";
 
 interface ArticleCardProps {
-  readonly article: Article;
+  readonly article: ArticleView;
   readonly phEvent?: string;
 }
 
@@ -15,7 +16,8 @@ export function ArticleCard({ article, phEvent }: ArticleCardProps) {
       href={`/articles/${article.number}`}
       data-ph-event={phEvent}
       data-ph-slug={article.number}
-      className="group flex flex-col overflow-hidden rounded-xl border border-surface-border bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_0_30px_rgba(46,204,64,0.12)] active:scale-[0.98] motion-reduce:transform-none"
+      style={subjectStyle(article.subject?.color)}
+      className="group flex flex-col overflow-hidden rounded-xl border border-surface-border bg-surface transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--subject)]/45 active:scale-[0.98] motion-reduce:transform-none"
     >
       <div className="relative aspect-video w-full overflow-hidden">
         {article.coverImageUrl ? (
@@ -24,6 +26,7 @@ export function ArticleCard({ article, phEvent }: ArticleCardProps) {
             alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            style={{ objectPosition: coverPosition(article) }}
             className="object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transform-none"
           />
         ) : (
@@ -31,14 +34,10 @@ export function ArticleCard({ article, phEvent }: ArticleCardProps) {
             <span className="text-xl font-extrabold text-accent/40">כמה נגמר?</span>
           </div>
         )}
-        {article.tags[0] ? (
-          <span className="absolute start-2.5 top-2.5 rounded-md bg-accent px-2 py-0.5 text-[0.7rem] font-extrabold text-bg-start">
-            {article.tags[0]}
-          </span>
-        ) : null}
+        <SubjectKicker subject={article.subject} format={article.format} className="absolute start-2.5 top-2.5" />
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
-        <h3 className="font-bold leading-snug transition-colors group-hover:text-accent">
+        <h3 className="font-bold leading-snug text-balance transition-colors group-hover:text-[var(--subject)]">
           {article.title}
         </h3>
         {article.subtitle ? (
@@ -56,6 +55,7 @@ export function ArticleCard({ article, phEvent }: ArticleCardProps) {
             </>
           ) : null}
         </div>
+        <AlsoIn subject={article.subject} alsoIn={article.alsoIn} />
       </div>
     </Link>
   );

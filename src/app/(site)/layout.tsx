@@ -13,7 +13,7 @@ export default function SiteLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
-      <SiteHeader spotifyUrl={spotifyShowUrl} />
+      <SiteHeader spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
       {/* Bottom padding keeps content and footer clear of the fixed Player bar. */}
       <div className="pb-28">
         {children}

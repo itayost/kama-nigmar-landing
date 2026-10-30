@@ -40,6 +40,90 @@ body {
   }
 }
 
+/* Phone menu: grows out of the menu button's corner (top right in RTL). */
+.site-menu {
+  clip-path: circle(0 at calc(100% - 2.75rem) 1.875rem);
+  visibility: hidden;
+  transition: clip-path 0.45s cubic-bezier(0.7, 0, 0.84, 0), visibility 0s linear 0.45s;
+}
+
+.site-menu[data-open] {
+  clip-path: circle(150% at calc(100% - 2.75rem) 1.875rem);
+  visibility: visible;
+  transition: clip-path 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+}
+
+.site-menu-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
+}
+
+.site-menu[data-open] .site-menu-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(140ms + var(--i, 0) * 40ms), calc(140ms + var(--i, 0) * 40ms), 0s;
+}
+
+/* Over an article's cover the header floats on a soft shade until the
+   article's sheet reaches it (HeaderSolidity sets data-solid). */
+body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) {
+  border-color: transparent;
+  background: linear-gradient(to bottom, rgb(6 13 24 / 0.72), rgb(6 13 24 / 0));
+  backdrop-filter: none;
+}
+
+body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) .menu-button {
+  background: rgb(6 13 24 / 0.45);
+  backdrop-filter: blur(6px);
+}
+
+body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) .site-logo {
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.55);
+}
+
+/* The cover dims and the headline fades as the sheet slides over them.
+   Browsers without scroll timelines keep the cover as it is. */
+@supports (animation-timeline: scroll()) {
+  .cover-photo {
+    animation: cover-dim linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 60svh;
+  }
+
+  .cover-headline {
+    animation: cover-fade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 34svh;
+  }
+}
+
+@keyframes cover-dim {
+  to {
+    transform: scale(1.08);
+    filter: brightness(0.5);
+  }
+}
+
+@keyframes cover-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-menu,
+  .site-menu[data-open],
+  .site-menu-item {
+    transition: none;
+  }
+
+  .cover-photo,
+  .cover-headline {
+    animation: none;
+  }
+}
+
 /* Admin rich-text editor (Tiptap). Mirrors the public article styling closely
    enough that what the writer sees is what readers get. */
 .rich-editor-content {

@@ -3,10 +3,11 @@ import Link from "next/link";
 import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { readingTimeLabel } from "@/lib/articles/reading-time";
 import { formatDateLong } from "@/lib/datetime";
-import type { Article } from "@/lib/db/schema";
+import type { ArticleView } from "@/lib/dal/articles";
+import { coverPosition, subjectStyle, SubjectKicker } from "./subject";
 
 interface ArticleLeadCardProps {
-  readonly article: Article;
+  readonly article: ArticleView;
 }
 
 // Magazine cover card: the headline sits ON the image under a bottom scrim.
@@ -14,7 +15,8 @@ export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
   return (
     <Link
       href={`/articles/${article.number}`}
-      className="group relative block min-h-[340px] overflow-hidden rounded-[20px] border border-surface-border transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-[0_0_44px_rgba(46,204,64,0.14)] active:scale-[0.99] motion-reduce:transform-none md:min-h-[380px]"
+      style={subjectStyle(article.subject?.color)}
+      className="group relative block min-h-[340px] overflow-hidden rounded-[20px] border border-surface-border transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--subject)]/45 active:scale-[0.99] motion-reduce:transform-none md:min-h-[380px]"
     >
       <div className="absolute inset-0">
         {article.coverImageUrl ? (
@@ -23,6 +25,7 @@ export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
             alt=""
             fill
             sizes="(max-width: 1024px) 100vw, 972px"
+            style={{ objectPosition: coverPosition(article) }}
             className="object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transform-none"
           />
         ) : (
@@ -36,11 +39,7 @@ export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
         className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,13,24,0.96)_0%,rgba(6,13,24,0.55)_45%,transparent_75%)]"
       />
       <div className="absolute inset-x-0 bottom-0 p-6 md:p-7">
-        {article.tags[0] ? (
-          <span className="mb-3 inline-block rounded-md bg-accent px-2.5 py-0.5 text-xs font-extrabold text-bg-start">
-            {article.tags[0]}
-          </span>
-        ) : null}
+        <SubjectKicker subject={article.subject} format={article.format} className="mb-3 text-xs" />
         <h3 className="mb-2 max-w-[22ch] text-[clamp(1.6rem,1.2rem+2.2vw,2.5rem)] font-black leading-[1.12] text-balance">
           {article.title}
         </h3>

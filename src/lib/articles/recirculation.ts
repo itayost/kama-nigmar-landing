@@ -1,12 +1,14 @@
 export interface RecircInput {
   readonly id: string;
   readonly tags: readonly string[];
+  readonly subjects?: readonly string[];
   readonly publishedAt: Date | null;
 }
 
 export interface RecircCurrent {
   readonly id: string;
   readonly tags: readonly string[];
+  readonly subjects?: readonly string[];
   readonly blockCount: number;
 }
 
@@ -39,7 +41,8 @@ function publishedTime(candidate: RecircInput): number {
 // twice on the same page.
 // - Mid-article is same-topic ONLY (no fill): a random article mid-read
 //   would feel broken; the end rows are where fill is acceptable.
-// - Relevance = tag overlap, then trailing-7-day views, then recency.
+// - Relevance = shared tags (each worth two) plus one for sharing a subject,
+//   then trailing-7-day views, then recency.
 // - Trending = 7-day views only; hidden entirely when nothing has views.
 export function planRecirculation<T extends RecircInput>(
   current: RecircCurrent,
@@ -51,11 +54,14 @@ export function planRecirculation<T extends RecircInput>(
   const weekly = (candidate: T) => weeklyViews[candidate.id] ?? 0;
   const others = candidates.filter((candidate) => candidate.id !== current.id);
   const currentTags = new Set(current.tags);
+  const currentSubjects = new Set(current.subjects ?? []);
 
   const byRelevance = others
     .map((candidate) => ({
       candidate,
-      overlap: candidate.tags.filter((tag) => currentTags.has(tag)).length,
+      overlap:
+        candidate.tags.filter((tag) => currentTags.has(tag)).length * 2 +
+        ((candidate.subjects ?? []).some((subject) => currentSubjects.has(subject)) ? 1 : 0),
     }))
     .filter((entry) => entry.overlap > 0)
     .sort(

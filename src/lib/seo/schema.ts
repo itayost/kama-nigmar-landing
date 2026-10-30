@@ -37,7 +37,14 @@ export function podcastSeriesSchema({ spotifyUrl, applePodcastUrl }: PodcastPlat
   };
 }
 
-export function newsArticleSchema(article: Article) {
+export interface ArticleTaxonomyMeta {
+  // The primary subject's name.
+  readonly section?: string;
+  readonly keywords?: readonly string[];
+}
+
+export function newsArticleSchema(article: Article, taxonomy: ArticleTaxonomyMeta = {}) {
+  const keywords = taxonomy.keywords ?? [];
   return {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -54,8 +61,8 @@ export function newsArticleSchema(article: Article) {
     },
     mainEntityOfPage: `${SITE_URL}/articles/${article.number}`,
     inLanguage: "he",
-    articleSection: article.tags[0],
-    keywords: article.tags.length > 0 ? article.tags.join(", ") : undefined,
+    articleSection: taxonomy.section,
+    keywords: keywords.length > 0 ? keywords.join(", ") : undefined,
   };
 }
 

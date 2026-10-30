@@ -1,8 +1,8 @@
-import type { Article } from "@/lib/db/schema";
+import type { ArticleView } from "@/lib/dal/articles";
 import { ArticleMiniCard } from "./ArticleMiniCard";
 
 interface MidArticleRelatedProps {
-  readonly articles: readonly Article[];
+  readonly articles: readonly ArticleView[];
 }
 
 // The in-body recirculation module, placed near the first screen where

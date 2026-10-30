@@ -3,10 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
+import { coverPosition, subjectStyle, SubjectKicker } from "@/components/articles/subject";
 import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
 import { PollSection } from "@/components/polls/PollSection";
 import { getPollById } from "@/lib/dal/polls";
@@ -20,6 +21,7 @@ import {
   getArticleByNumber,
   getPublishedArticles,
   getRecirculation,
+  type ArticleView,
 } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
 import { FEED_ALTERNATE, breadcrumbSchema, newsArticleSchema } from "@/lib/seo/schema";
@@ -100,8 +102,8 @@ export async function generateMetadata({
       publishedTime: article.publishedAt?.toISOString(),
       modifiedTime: article.updatedAt.toISOString(),
       authors: [article.authorName],
-      section: article.tags[0],
-      tags: article.tags,
+      section: article.subject?.name,
+      tags: article.tagList.map((tag) => tag.name),
     },
     twitter: {
       card: "summary_large_image",
@@ -114,12 +116,159 @@ export async function generateMetadata({
 
 function ArticleSkeleton() {
   return (
-    <div className="flex animate-pulse flex-col gap-6" aria-hidden="true">
-      <div className="h-10 w-3/4 rounded-lg bg-surface" />
-      <div className="h-5 w-1/2 rounded-lg bg-surface" />
-      <div className="aspect-video w-full rounded-2xl bg-surface" />
-      <div className="h-32 w-full rounded-lg bg-surface" />
+    <main className="mx-auto w-full max-w-2xl px-6 py-10">
+      <div className="flex animate-pulse flex-col gap-6" aria-hidden="true">
+        <div className="h-10 w-3/4 rounded-lg bg-surface" />
+        <div className="h-5 w-1/2 rounded-lg bg-surface" />
+        <div className="aspect-video w-full rounded-2xl bg-surface" />
+        <div className="h-32 w-full rounded-lg bg-surface" />
+      </div>
+    </main>
+  );
+}
+
+// The label above the headline, linking to the subject's page.
+function Kicker({ article }: { readonly article: ArticleView }) {
+  const label = <SubjectKicker subject={article.subject} format={article.format} className="text-xs" />;
+  if (!article.subject) return label;
+  return (
+    <Link href={`/topics/${article.subject.slug}`} className="self-start transition-opacity hover:opacity-85">
+      {label}
+    </Link>
+  );
+}
+
+function Headline({ article, className = "" }: { readonly article: ArticleView; readonly className?: string }) {
+  return (
+    <h1 className={`font-black leading-[1.1] tracking-tight text-balance ${className}`}>{article.title}</h1>
+  );
+}
+
+function Byline({ article }: { readonly article: ArticleView }) {
+  const articleUrl = `${SITE_URL}/articles/${article.number}`;
+  const wasUpdated =
+    article.publishedAt !== null &&
+    article.updatedAt.getTime() - article.publishedAt.getTime() > UPDATED_LABEL_THRESHOLD_MS;
+  return (
+    <div className="flex flex-wrap items-center gap-3 border-y border-surface-border py-3.5 text-sm text-text-muted">
+      <AuthorAvatar name={article.authorName} size={34} />
+      <span className="flex flex-col leading-snug">
+        <span className="text-[0.85rem] font-bold text-white">{article.authorName}</span>
+        <span className="text-xs">
+          {article.publishedAt ? `${formatDateLong(article.publishedAt)} · ` : ""}
+          {readingTimeLabel(article.content)}
+          {wasUpdated ? ` · עודכן: ${formatDateLong(article.updatedAt)}` : ""}
+        </span>
+      </span>
+      <span className="ms-auto">
+        <ShareButton title={article.title} url={articleUrl} articleNumber={article.number} />
+      </span>
     </div>
+  );
+}
+
+// The article's tags grouped by the subject they belong to, then a door to
+// every other subject the article appears in.
+function TagsBySubject({ article }: { readonly article: ArticleView }) {
+  const subjects = [...(article.subject ? [article.subject] : []), ...article.alsoIn];
+  const groups = subjects
+    .map((subject) => ({ subject, tags: article.tagList.filter((tag) => tag.subjectId === subject.id) }))
+    .filter((group) => group.tags.length > 0);
+  if (groups.length === 0 && article.alsoIn.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-4 border-t border-surface-border pt-5">
+      {groups.map(({ subject, tags }) => (
+        <div key={subject.id} style={subjectStyle(subject.color)} className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="flex min-w-28 items-center gap-2 text-text-muted">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[var(--subject)]" />
+            {subject.name}
+          </span>
+          {tags.map((tag) => (
+            <Link
+              key={tag.id}
+              href={`/topics/${subject.slug}?tag=${encodeURIComponent(tag.name)}`}
+              className="rounded-full border border-[var(--subject)]/45 px-3 py-1 text-xs transition-colors hover:bg-[var(--subject)]/15"
+            >
+              {tag.name}
+            </Link>
+          ))}
+        </div>
+      ))}
+      {article.alsoIn.map((subject) => (
+        <Link
+          key={subject.id}
+          href={`/topics/${subject.slug}`}
+          style={subjectStyle(subject.color)}
+          className="flex items-center gap-2.5 rounded-xl border border-[var(--subject)]/35 bg-[var(--subject)]/[0.08] px-4 py-3 text-sm transition-colors hover:bg-[var(--subject)]/15"
+        >
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-[var(--subject)]" />
+          הכתבה מופיעה גם ב<b className="text-[var(--subject)]">{subject.name}</b>
+          <span className="ms-auto font-bold text-[var(--subject)]">לנושא</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+// Full-bleed cover with the headline on the photo; the article rides up over
+// it on a sheet with rounded top corners.
+function CoverSheet({ article, children }: { readonly article: ArticleView; readonly children: ReactNode }) {
+  return (
+    <main data-cover-sheet className="-mt-15">
+      <figure className="sticky top-0 m-0 h-[68svh] min-h-[26rem] overflow-hidden bg-bg-start md:h-[72vh]">
+        <Image
+          src={article.coverImageUrl ?? ""}
+          alt=""
+          fill
+          sizes="100vw"
+          loading="eager"
+          fetchPriority="high"
+          style={{ objectPosition: coverPosition(article) }}
+          className="cover-photo object-cover"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,13,24,0.94)_0%,rgba(6,13,24,0.45)_34%,transparent_62%)]"
+        />
+        <div className="cover-headline absolute inset-x-0 bottom-[calc(1.875rem+1.25rem)] md:bottom-[calc(7.5rem+2rem)]">
+          <div className="mx-auto flex max-w-[47.5rem] flex-col gap-3 px-6 md:px-12">
+            <Kicker article={article} />
+            <Headline article={article} className="text-[clamp(1.9rem,1.3rem+3.2vw,3.25rem)] [text-shadow:0_2px_18px_rgba(0,0,0,0.45)]" />
+          </div>
+        </div>
+        {article.coverCredit ? (
+          <figcaption className="absolute end-4 bottom-[calc(1.875rem+0.5rem)] text-[0.72rem] text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.75)] md:bottom-[calc(7.5rem+0.75rem)]">
+            {article.coverCredit}
+          </figcaption>
+        ) : null}
+      </figure>
+      <article className="relative z-10 -mt-[1.875rem] flex flex-col gap-6 rounded-t-[1.625rem] bg-[linear-gradient(180deg,#0c1a30_0%,var(--color-bg-start)_15rem,var(--color-bg-end)_100%)] px-6 pt-6 pb-12 shadow-[0_-24px_48px_-20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.09)] md:mx-auto md:-mt-[7.5rem] md:max-w-[47.5rem] md:rounded-t-[1.75rem] md:px-12 md:pt-10">
+        <span data-sheet-top aria-hidden="true" className="absolute top-0" />
+        {article.subtitle ? (
+          <p className="text-xl leading-relaxed font-light text-white/75">{article.subtitle}</p>
+        ) : null}
+        {children}
+      </article>
+    </main>
+  );
+}
+
+// Articles without a cover keep the classic column.
+function PlainLayout({ article, children }: { readonly article: ArticleView; readonly children: ReactNode }) {
+  return (
+    <main className="mx-auto w-full max-w-2xl px-6 py-10">
+      <article className="flex flex-col gap-6">
+        <header className="flex flex-col gap-4">
+          <Kicker article={article} />
+          <Headline article={article} className="text-[clamp(2rem,1.4rem+3vw,3.2rem)]" />
+          {article.subtitle ? (
+            <p className="text-xl leading-relaxed font-light text-white/70">{article.subtitle}</p>
+          ) : null}
+        </header>
+        {children}
+      </article>
+    </main>
   );
 }
 
@@ -142,131 +291,50 @@ async function ArticleContent({
   // fold); the generic main poll stays at the bottom. Never both.
   const midPoll = linkedPoll?.status === "active" ? linkedPoll : null;
   const shouldSplitBlocks = plan.midArticle.length > 0 || midPoll !== null;
-  const articleUrl = `${SITE_URL}/articles/${article.number}`;
-  const wasUpdated =
-    article.publishedAt !== null &&
-    article.updatedAt.getTime() - article.publishedAt.getTime() >
-      UPDATED_LABEL_THRESHOLD_MS;
-
-  const crumbTitle =
-    article.title.length > 40 ? `${article.title.slice(0, 40)}…` : article.title;
+  const subjectCrumb = article.subject
+    ? { name: article.subject.name, url: `${SITE_URL}/topics/${article.subject.slug}` }
+    : { name: "כתבות", url: `${SITE_URL}/articles` };
+  const Layout = article.coverImageUrl ? CoverSheet : PlainLayout;
 
   return (
-    <article className="flex flex-col gap-6">
-      <JsonLd data={newsArticleSchema(article)} />
+    <Layout article={article}>
+      <JsonLd
+        data={newsArticleSchema(article, {
+          section: article.subject?.name,
+          keywords: article.tagList.map((tag) => tag.name),
+        })}
+      />
       <JsonLd
         data={breadcrumbSchema([
           { name: "בית", url: SITE_URL },
-          { name: "כתבות", url: `${SITE_URL}/articles` },
+          subjectCrumb,
           { name: article.title, url: `${SITE_URL}/articles/${article.number}` },
         ])}
       />
-      <header className="flex flex-col gap-4">
-        <nav aria-label="פירורי לחם" className="flex flex-wrap gap-1.5 text-xs text-text-muted">
-          <Link href="/" className="transition-colors hover:text-white">
-            בית
-          </Link>
-          <span aria-hidden="true">‹</span>
-          <Link href="/articles" className="transition-colors hover:text-white">
-            כתבות
-          </Link>
-          <span aria-hidden="true">‹</span>
-          <span>{crumbTitle}</span>
-        </nav>
-        {article.tags[0] ? (
-          <Link
-            href={`/articles?tag=${encodeURIComponent(article.tags[0])}`}
-            className="self-start rounded-md bg-accent px-2.5 py-0.5 text-xs font-extrabold text-bg-start transition-opacity hover:opacity-85"
-          >
-            {article.tags[0]}
-          </Link>
-        ) : null}
-        <h1 className="text-[clamp(2rem,1.4rem+3vw,3.2rem)] font-black leading-[1.12] tracking-tight text-balance">
-          {article.title}
-        </h1>
-        {article.subtitle ? (
-          <p className="text-xl font-light leading-relaxed text-white/70">
-            {article.subtitle}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-3 border-y border-surface-border py-3.5 text-sm text-text-muted">
-          <AuthorAvatar name={article.authorName} size={34} />
-          <span className="flex flex-col leading-snug">
-            <span className="text-[0.85rem] font-bold text-white">{article.authorName}</span>
-            <span className="text-xs">
-              {article.publishedAt ? `${formatDateLong(article.publishedAt)} · ` : ""}
-              {readingTimeLabel(article.content)}
-              {wasUpdated ? ` · עודכן: ${formatDateLong(article.updatedAt)}` : ""}
-            </span>
-          </span>
-          <span className="ms-auto">
-            <ShareButton title={article.title} url={articleUrl} articleNumber={article.number} />
-          </span>
-        </div>
-        {article.coverImageUrl ? (
-          <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-surface-border">
-            <Image
-              src={article.coverImageUrl}
-              alt=""
-              fill
-              sizes="(max-width: 768px) 100vw, 672px"
-              loading="eager"
-              fetchPriority="high"
-              className="object-cover"
-            />
-          </div>
-        ) : null}
-      </header>
+      <Byline article={article} />
       {article.episodeUrl ? <EpisodeCallout url={article.episodeUrl} /> : null}
       {shouldSplitBlocks ? (
         <>
-          <BlockRenderer
-            blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)}
-            emphasizeOpener
-          />
+          <BlockRenderer blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)} emphasizeOpener />
           {midPoll ? <PollSection poll={midPoll} placement="article-mid" /> : null}
-          {plan.midArticle.length > 0 ? (
-            <MidArticleRelated articles={plan.midArticle} />
-          ) : null}
+          {plan.midArticle.length > 0 ? <MidArticleRelated articles={plan.midArticle} /> : null}
           <BlockRenderer blocks={article.content.slice(MID_MODULE_AFTER_BLOCKS)} />
         </>
       ) : (
         <BlockRenderer blocks={article.content} emphasizeOpener />
       )}
-      {article.tags.length > 1 ? (
-        <div className="flex flex-wrap gap-2 border-t border-surface-border pt-5">
-          {article.tags.map((tag) => (
-            <Link
-              key={tag}
-              href={`/articles?tag=${encodeURIComponent(tag)}`}
-              className="rounded-full border border-surface-border px-3 py-1 text-xs text-text-muted transition-colors hover:border-accent/50 hover:text-white"
-            >
-              {tag}
-            </Link>
-          ))}
-        </div>
-      ) : null}
+      <TagsBySubject article={article} />
       {midPoll ? null : <PollSection placement="article-bottom" />}
-      <RecirculationSections plan={plan} />
+      <RecirculationSections plan={plan} subject={article.subject} />
       <ViewTracker articleNumber={article.number} />
-    </article>
+    </Layout>
   );
 }
 
 export default function ArticlePage({ params }: PageProps<"/articles/[slug]">) {
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-10">
-      <Suspense fallback={<ArticleSkeleton />}>
-        <ArticleContent params={params} />
-      </Suspense>
-      <footer className="mt-12 border-t border-surface-border pt-6">
-        <Link
-          href="/articles"
-          className="text-sm text-accent transition-opacity hover:opacity-80"
-        >
-          חזרה לכל הכתבות
-        </Link>
-      </footer>
-    </main>
+    <Suspense fallback={<ArticleSkeleton />}>
+      <ArticleContent params={params} />
+    </Suspense>
   );
 }

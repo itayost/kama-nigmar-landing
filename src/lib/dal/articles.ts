@@ -1,5 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { and, arrayContains, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import {
   planRecirculation,
   rankTrending,
@@ -7,34 +7,28 @@ import {
 } from "@/lib/articles/recirculation";
 import { getDb } from "@/lib/db";
 import { articleViewsDaily, articles, type Article } from "@/lib/db/schema";
+import type { WithTaxonomy } from "@/lib/taxonomy/public";
+import { decorate } from "./taxonomy";
 
-export async function getPublishedArticles(tag?: string): Promise<Article[]> {
-  "use cache";
-  cacheLife("article");
-  cacheTag("articles");
-  const where = tag
-    ? and(eq(articles.status, "published"), arrayContains(articles.tags, [tag]))
-    : eq(articles.status, "published");
-  return getDb()
-    .select()
-    .from(articles)
-    .where(where)
-    .orderBy(desc(articles.publishedAt));
-}
+// An article as the public site shows it: with its subject and tags.
+export type ArticleView = WithTaxonomy<Article>;
 
-export async function getLatestArticles(count: number): Promise<Article[]> {
-  "use cache";
-  cacheLife("article");
-  cacheTag("articles");
+async function selectPublished(): Promise<Article[]> {
   return getDb()
     .select()
     .from(articles)
     .where(eq(articles.status, "published"))
-    .orderBy(desc(articles.publishedAt))
-    .limit(count);
+    .orderBy(desc(articles.publishedAt));
 }
 
-export async function getArticleByNumber(number: number): Promise<Article | null> {
+export async function getPublishedArticles(): Promise<ArticleView[]> {
+  "use cache";
+  cacheLife("article");
+  cacheTag("articles");
+  return decorate(await selectPublished());
+}
+
+export async function getArticleByNumber(number: number): Promise<ArticleView | null> {
   "use cache";
   cacheLife("article");
   cacheTag("articles", `article-${number}`);
@@ -43,7 +37,9 @@ export async function getArticleByNumber(number: number): Promise<Article | null
     .from(articles)
     .where(and(eq(articles.number, number), eq(articles.status, "published")))
     .limit(1);
-  return rows[0] ?? null;
+  if (!rows[0]) return null;
+  const [article] = await decorate(rows);
+  return article;
 }
 
 // Views received in the trailing 7 days, keyed by article id (ADR 0001).
@@ -59,50 +55,42 @@ async function fetchWeeklyViews(): Promise<Record<string, number>> {
   return Object.fromEntries(rows.map((row) => [row.articleId, row.total]));
 }
 
-// cacheLife("hours") instead of "max": rankings blend in view counts, which
-// accumulate without cache invalidation, so results refresh periodically
-// in addition to instantly on publish (the "articles" tag).
-export async function getRecirculation(
-  number: number,
-): Promise<RecirculationPlan<Article>> {
+// Recirculation ranks by shared tags and subjects, so it plans over tag ids.
+function forRanking(article: ArticleView) {
+  return {
+    ...article,
+    tags: article.tagList.map((tag) => tag.id),
+    subjects: article.subjectIds,
+  };
+}
+
+// cacheLife("hours") instead of the article profile: rankings blend in view
+// counts, which accumulate without cache invalidation, so results refresh
+// periodically in addition to instantly on publish (the "articles" tag).
+export async function getRecirculation(number: number): Promise<RecirculationPlan<ArticleView>> {
   "use cache";
   cacheLife("hours");
   cacheTag("articles");
-  const db = getDb();
   const [published, weeklyViews] = await Promise.all([
-    db.select().from(articles).where(eq(articles.status, "published")),
+    decorate(await selectPublished()),
     fetchWeeklyViews(),
   ]);
   const current = published.find((article) => article.number === number);
   if (!current) return { midArticle: [], related: [], trending: [] };
-  return planRecirculation(
-    { id: current.id, tags: current.tags, blockCount: current.content.length },
-    published,
+  const byId = new Map(published.map((article) => [article.id, article]));
+  const plan = planRecirculation(
+    { ...forRanking(current), blockCount: current.content.length },
+    published.map(forRanking),
     weeklyViews,
   );
+  const back = (list: readonly { readonly id: string }[]) => list.flatMap((item) => byId.get(item.id) ?? []);
+  return { midArticle: back(plan.midArticle), related: back(plan.related), trending: back(plan.trending) };
 }
 
-export async function getTrendingArticles(limit: number): Promise<Article[]> {
+export async function getTrendingArticles(limit: number): Promise<ArticleView[]> {
   "use cache";
   cacheLife("hours");
   cacheTag("articles");
-  const db = getDb();
-  const [published, weeklyViews] = await Promise.all([
-    db.select().from(articles).where(eq(articles.status, "published")),
-    fetchWeeklyViews(),
-  ]);
+  const [published, weeklyViews] = await Promise.all([decorate(await selectPublished()), fetchWeeklyViews()]);
   return rankTrending(published, weeklyViews, limit);
-}
-
-export async function getAllTags(): Promise<string[]> {
-  "use cache";
-  cacheLife("article");
-  cacheTag("articles");
-  const rows = await getDb()
-    .select({ tags: articles.tags })
-    .from(articles)
-    .where(eq(articles.status, "published"));
-  return [...new Set(rows.flatMap((row) => row.tags))].sort((a, b) =>
-    a.localeCompare(b, "he"),
-  );
 }

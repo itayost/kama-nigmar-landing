@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { ArticleMiniCard } from "@/components/articles/ArticleMiniCard";
 import { ArticlesGrid } from "@/components/articles/ArticlesGrid";
-import { TagFilterBar } from "@/components/articles/TagFilterBar";
+import { subjectStyle } from "@/components/articles/subject";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import {
-  getAllTags,
-  getPublishedArticles,
-  getTrendingArticles,
-} from "@/lib/dal/articles";
+import { getPublishedArticles, getTrendingArticles } from "@/lib/dal/articles";
+import { getNavigation } from "@/lib/dal/navigation";
 import { FEED_ALTERNATE, breadcrumbSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 
@@ -19,7 +17,6 @@ const pageUrl = `${SITE_URL}/articles`;
 export const metadata: Metadata = {
   title: "כתבות",
   description: pageDescription,
-  // Static canonical also folds ?tag= filtered views into the index page.
   alternates: { canonical: pageUrl, types: FEED_ALTERNATE },
   openGraph: {
     title: "כתבות | כמה נגמר?",
@@ -71,38 +68,45 @@ async function TrendingStrip() {
   );
 }
 
-async function FilteredArticles({
-  searchParams,
-}: {
-  readonly searchParams: PageProps<"/articles">["searchParams"];
-}) {
-  const { tag } = await searchParams;
-  const requestedTag = typeof tag === "string" && tag !== "" ? tag : undefined;
-  // Only known tags reach the per-tag query: getPublishedArticles caches one
-  // entry per distinct argument with cacheLife("max"), so arbitrary ?tag=
-  // values must not be allowed to mint unbounded cache entries.
-  const tags = await getAllTags();
-  const activeTag =
-    requestedTag !== undefined && tags.includes(requestedTag)
-      ? requestedTag
-      : undefined;
-  const articles = await getPublishedArticles(activeTag);
+// The archive's only filter is the subject: each chip opens that subject's page.
+async function SubjectChips() {
+  const { subjects, roundups } = await getNavigation();
+  const chips = [
+    ...subjects.map((subject) => ({ href: `/topics/${subject.slug}`, label: subject.name, color: subject.color, count: subject.count })),
+    { href: "/roundups", label: "סיכומים", color: "#ffffff", count: roundups.count },
+  ];
 
   return (
-    <div className="flex flex-col gap-6">
-      <TagFilterBar tags={tags} activeTag={activeTag} />
-      {articles.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-surface-border p-12 text-center text-text-muted">
-          {activeTag ? "אין כתבות בתגית הזו" : "עדיין אין כתבות — חזרו בקרוב"}
-        </p>
-      ) : (
-        <ArticlesGrid articles={articles} />
-      )}
-    </div>
+    <nav aria-label="נושאים" className="mb-8 flex flex-wrap gap-2">
+      {chips.map((chip) => (
+        <Link
+          key={chip.href}
+          href={chip.href}
+          style={subjectStyle(chip.color)}
+          className="flex items-center gap-2 rounded-full border border-surface-border px-3.5 py-1.5 text-sm transition-colors hover:border-[var(--subject)]/60 hover:bg-[var(--subject)]/10"
+        >
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-[3px] bg-[var(--subject)]" />
+          {chip.label}
+          <span className="text-[0.8em] tabular-nums text-text-muted">{chip.count}</span>
+        </Link>
+      ))}
+    </nav>
   );
 }
 
-export default function ArticlesPage({ searchParams }: PageProps<"/articles">) {
+async function AllArticles() {
+  const articles = await getPublishedArticles();
+  if (articles.length === 0) {
+    return (
+      <p className="rounded-xl border border-dashed border-surface-border p-12 text-center text-text-muted">
+        עדיין אין כתבות — חזרו בקרוב
+      </p>
+    );
+  }
+  return <ArticlesGrid articles={articles} />;
+}
+
+export default function ArticlesPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-10">
       <JsonLd
@@ -111,10 +115,11 @@ export default function ArticlesPage({ searchParams }: PageProps<"/articles">) {
           { name: "כתבות", url: pageUrl },
         ])}
       />
-      <SectionHeading title="כתבות" as="h1" />
+      <SectionHeading title="כל הכתבות" as="h1" />
+      <SubjectChips />
       <TrendingStrip />
       <Suspense fallback={<ArticlesSkeleton />}>
-        <FilteredArticles searchParams={searchParams} />
+        <AllArticles />
       </Suspense>
     </main>
   );
