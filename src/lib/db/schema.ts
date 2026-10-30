@@ -7,15 +7,29 @@ import {
   pgEnum,
   pgTable,
   primaryKey,
+  smallint,
   text,
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
 import type { StoredBlock } from "@/lib/articles/blocks";
 import type { PollOption } from "@/lib/polls/schema";
+import { ARTICLE_FORMATS } from "@/lib/taxonomy/format";
 
 export const articleStatus = pgEnum("article_status", ["draft", "published"]);
 export const pollStatus = pgEnum("poll_status", ["draft", "active", "closed"]);
+export const articleFormat = pgEnum("article_format", ARTICLE_FORMATS);
+
+// The short, admin-curated list of sections readers navigate by.
+export const subjects = pgTable("subjects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  position: integer("position").notNull(),
+  onHomepage: boolean("on_homepage").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
 
 export const polls = pgTable("polls", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -42,7 +56,14 @@ export const articles = pgTable(
     authorName: text("author_name").notNull(),
     episodeUrl: text("episode_url"),
     pollId: uuid("poll_id").references(() => polls.id, { onDelete: "set null" }),
+    // Legacy flat tag list; still what the site reads until article_tags goes live.
     tags: text("tags").array().notNull().default([]),
+    // Drives the label above the headline, the breadcrumb and the SEO section.
+    // Null for a roundup that spans several subjects.
+    primarySubjectId: uuid("primary_subject_id").references(() => subjects.id, {
+      onDelete: "set null",
+    }),
+    format: articleFormat("format").notNull().default("story"),
     status: articleStatus("status").notNull().default("draft"),
     views: integer("views").notNull().default(0),
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -52,6 +73,7 @@ export const articles = pgTable(
   (table) => [
     index("articles_status_published_at_idx").on(table.status, table.publishedAt),
     index("articles_tags_idx").using("gin", table.tags),
+    index("articles_primary_subject_id_idx").on(table.primarySubjectId),
   ],
 );
 
@@ -68,11 +90,36 @@ export const articleViewsDaily = pgTable(
   (table) => [primaryKey({ columns: [table.articleId, table.day] })],
 );
 
-export const tags = pgTable("tags", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const tags = pgTable(
+  "tags",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull().unique(),
+    // Set by the admin; null leaves the tag waiting in the inbox.
+    subjectId: uuid("subject_id").references(() => subjects.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("tags_subject_id_idx").on(table.subjectId)],
+);
+
+// An article's tags in display order. An article belongs to its primary
+// subject and to every subject its tags belong to.
+export const articleTags = pgTable(
+  "article_tags",
+  {
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => articles.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+    position: smallint("position").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.articleId, table.tagId] }),
+    index("article_tags_tag_id_idx").on(table.tagId),
+  ],
+);
 
 export const pollVotes = pgTable(
   "poll_votes",
@@ -89,4 +136,6 @@ export const pollVotes = pgTable(
 export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;
 export type Tag = typeof tags.$inferSelect;
+export type Subject = typeof subjects.$inferSelect;
+export type ArticleTag = typeof articleTags.$inferSelect;
 export type Poll = typeof polls.$inferSelect;

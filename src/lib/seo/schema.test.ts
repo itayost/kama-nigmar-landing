@@ -20,6 +20,8 @@ const baseArticle: Article = {
   episodeUrl: null,
   pollId: null,
   tags: ["כדורגל", "ליגת העל"],
+  primarySubjectId: null,
+  format: "story",
   status: "published",
   views: 0,
   publishedAt: new Date("2026-07-30T10:00:00Z"),
