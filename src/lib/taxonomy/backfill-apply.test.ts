@@ -5,7 +5,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import * as schema from "@/lib/db/schema";
-import { applyBackfillPlan, countArticleTags, loadBackfillInput } from "./backfill-apply";
+import { applyBackfillPlan, loadBackfillInput } from "./backfill-apply";
 import { planBackfill, type TaxonomyMapping } from "./backfill-plan";
 import { PUBLISHED_2026_10_30 } from "./fixtures/published-2026-10-30";
 import { TAXONOMY_MAPPING } from "./mapping";
@@ -32,7 +32,6 @@ beforeEach(async () => {
       .values({
         number: a.number,
         title: a.title,
-        subtitle: a.subtitle,
         authorName: "גיא צינקר",
         tags: [...a.tags],
         status: "published",
@@ -88,15 +87,15 @@ describe("loadBackfillInput", () => {
 });
 
 describe("applyBackfillPlan", () => {
-  it("seeds the five subjects with motorsport off the homepage", async () => {
+  it("seeds the five subjects with their colors, motorsport off the homepage", async () => {
     await run();
     const rows = await db.select().from(schema.subjects).orderBy(asc(schema.subjects.position));
-    expect(rows.map((s) => [s.slug, s.onHomepage])).toEqual([
-      ["israeli-football", true],
-      ["world-football", true],
-      ["basketball", true],
-      ["olympic-sports", true],
-      ["motorsport", false],
+    expect(rows.map((s) => [s.slug, s.onHomepage, s.color])).toEqual([
+      ["israeli-football", true, "#4cb8ff"],
+      ["world-football", true, "#f2b53a"],
+      ["basketball", true, "#ff7b3a"],
+      ["olympic-sports", true, "#c58cff"],
+      ["motorsport", false, "#ff5a6a"],
     ]);
   });
 
@@ -148,16 +147,16 @@ describe("applyBackfillPlan", () => {
     const broken: TaxonomyMapping = { ...TAXONOMY_MAPPING, overrides: { 14: { primarySubject: "curling" } } };
     await expect(run(broken)).rejects.toThrow(/curling/);
     expect(await db.select().from(schema.subjects)).toEqual([]);
-    expect(await countArticleTags(db)).toBe(0);
+    expect(await db.$count(schema.articleTags)).toBe(0);
     expect(Object.keys(await registry())).toContain("כדורגל");
   });
 });
 
-describe("countArticleTags", () => {
-  it("counts the links written by the backfill", async () => {
-    expect(await countArticleTags(db)).toBe(0);
+describe("article tag links", () => {
+  it("are written by the backfill", async () => {
+    expect(await db.$count(schema.articleTags)).toBe(0);
     await run();
     // #15 has five tags, #14 and #11 one each, #24 none.
-    expect(await countArticleTags(db)).toBe(7);
+    expect(await db.$count(schema.articleTags)).toBe(7);
   });
 });

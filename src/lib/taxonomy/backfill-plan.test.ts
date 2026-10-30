@@ -7,9 +7,9 @@ import {
 
 const mapping: TaxonomyMapping = {
   subjects: [
-    { slug: "il", name: "כדורגל ישראלי", position: 1, onHomepage: true },
-    { slug: "wf", name: "כדורגל עולמי", position: 2, onHomepage: true },
-    { slug: "bb", name: "כדורסל", position: 3, onHomepage: true },
+    { slug: "il", name: "כדורגל ישראלי", position: 1, onHomepage: true, color: "#111111" },
+    { slug: "wf", name: "כדורגל עולמי", position: 2, onHomepage: true, color: "#222222" },
+    { slug: "bb", name: "כדורסל", position: 3, onHomepage: true, color: "#333333" },
   ],
   tags: {
     "כדורגל": { kind: "retire", impliedBy: ["il", "wf"] },
@@ -21,16 +21,15 @@ const mapping: TaxonomyMapping = {
     "כדורסל": { kind: "tag", subject: "bb" },
     "ליגיונרים": { kind: "tag", subject: null },
   },
-  overrides: { 6: { primarySubject: "il" } },
+  formatKeywords: [
+    { keyword: "מדריך", format: "guide" },
+    { keyword: "סיכום", format: "roundup" },
+  ],
+  overrides: { 6: { primarySubject: "il" }, 7: { format: "roundup" } },
 };
 
-function article(
-  number: number,
-  tags: string[],
-  title = "כתבה",
-  subtitle: string | null = null,
-): BackfillArticle {
-  return { id: `id-${number}`, number, title, subtitle, tags };
+function article(number: number, tags: string[], title = "כתבה"): BackfillArticle {
+  return { id: `id-${number}`, number, title, tags };
 }
 
 function planOne(a: BackfillArticle) {
@@ -68,15 +67,12 @@ describe("planBackfill: articles", () => {
     expect(plan.tags.map((tag) => tag.name)).toEqual(["כדורסל"]);
   });
 
-  it("treats a title or subtitle mentioning סיכום as a roundup", () => {
-    const plan = planOne(
-      article(1, ["ליגת אלופות"], "מחזור ראשון באלופות", "סיכום תוצאות המחזור"),
-    );
-    expect(plan.format).toBe("roundup");
+  it("takes the format from the first matching title keyword", () => {
+    expect(planOne(article(1, ["ליגת אלופות"], "סיכום השבוע")).format).toBe("roundup");
   });
 
-  it("keeps a story whose subtitle only uses סיכום in passing", () => {
-    expect(planOne(article(1, ["ליגת העל"], "כתבה", "לסיכום, העונה רק מתחילה")).format).toBe("story");
+  it("takes the format from an override when the title does not say it", () => {
+    expect(planOne(article(7, ["ליגת אלופות"], "מחזור ראשון באלופות")).format).toBe("roundup");
   });
 
   it("treats a title mentioning מדריך as a guide", () => {

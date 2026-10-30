@@ -9,6 +9,7 @@ export interface SubjectSeed {
   readonly name: string;
   readonly position: number;
   readonly onHomepage: boolean;
+  readonly color: string;
 }
 
 export type TagRule =
@@ -29,6 +30,8 @@ export interface ArticleOverride {
 export interface TaxonomyMapping {
   readonly subjects: readonly SubjectSeed[];
   readonly tags: Readonly<Record<string, TagRule>>;
+  // Title keywords that set the format when no tag does; the first match wins.
+  readonly formatKeywords?: readonly { readonly keyword: string; readonly format: ArticleFormat }[];
   readonly overrides?: Readonly<Record<number, ArticleOverride>>;
 }
 
@@ -36,7 +39,6 @@ export interface BackfillArticle {
   readonly id: string;
   readonly number: number;
   readonly title: string;
-  readonly subtitle: string | null;
   readonly tags: readonly string[];
 }
 
@@ -81,99 +83,119 @@ export interface BackfillPlan {
   readonly articles: readonly ArticlePlan[];
 }
 
-type Resolved = TagRule | { readonly kind: "unmapped" };
+// A tag name resolved once: what it becomes, under which name and subject.
+type Resolved =
+  | Exclude<TagRule, { kind: "tag" }>
+  | { readonly kind: "tag"; readonly final: string; readonly subject: string | null; readonly mapped: boolean };
 
-function buildResolver(mapping: TaxonomyMapping): (name: string) => Resolved {
+type Resolver = (name: string) => Resolved;
+
+function buildResolver(mapping: TaxonomyMapping): Resolver {
   // A tag's new name resolves like its old one, so re-running after the
   // registry was renamed plans the same result.
-  const byFinalName = new Map<string, TagRule>();
+  const byFinalName = new Map<string, string | null>();
   for (const [name, rule] of Object.entries(mapping.tags)) {
-    if (rule.kind === "tag") {
-      byFinalName.set(rule.rename ?? name, { kind: "tag", subject: rule.subject });
-    }
+    if (rule.kind === "tag") byFinalName.set(rule.rename ?? name, rule.subject);
   }
-  return (name) =>
-    (Object.hasOwn(mapping.tags, name) ? mapping.tags[name] : byFinalName.get(name)) ?? {
-      kind: "unmapped",
-    };
-}
-
-function finalName(name: string, rule: Resolved): string {
-  return rule.kind === "tag" ? (rule.rename ?? name) : name;
-}
-
-function formatFromText(title: string, subtitle: string | null): ArticleFormat {
-  if (title.includes("מדריך")) return "guide";
-  // A roundup says so in its title, or opens its subtitle with it; "לסיכום"
-  // inside a story's subtitle does not count.
-  if (title.includes("סיכום") || (subtitle ?? "").trim().startsWith("סיכום")) return "roundup";
-  return "story";
+  return (name) => {
+    const rule = Object.hasOwn(mapping.tags, name) ? mapping.tags[name] : undefined;
+    if (rule && rule.kind !== "tag") return rule;
+    if (rule) return { kind: "tag", final: rule.rename ?? name, subject: rule.subject, mapped: true };
+    if (byFinalName.has(name)) {
+      return { kind: "tag", final: name, subject: byFinalName.get(name) ?? null, mapped: true };
+    }
+    return { kind: "tag", final: name, subject: null, mapped: false };
+  };
 }
 
 function unique<T>(values: readonly T[]): T[] {
   return [...new Set(values)];
 }
 
-function planArticle(
-  article: BackfillArticle,
-  mapping: TaxonomyMapping,
-  resolve: (name: string) => Resolved,
-  position: (slug: string) => number,
-): ArticlePlan {
-  const override = Object.hasOwn(mapping.overrides ?? {}, article.number)
-    ? mapping.overrides?.[article.number]
-    : undefined;
+interface ClassifiedTags {
+  readonly tags: PlannedTag[];
+  readonly unmapped: Set<string>;
+  readonly subjectTags: string[];
+  readonly retiredImplied: (readonly string[])[];
+  readonly format: ArticleFormat | null;
+}
 
-  const tags: PlannedTag[] = [];
-  const unmapped = new Set<string>();
-  const subjectTags: string[] = [];
-  const retiredImplied: (readonly string[])[] = [];
-  let tagFormat: ArticleFormat | null = null;
-
-  for (const name of article.tags) {
+function classifyTags(names: readonly string[], resolve: Resolver): ClassifiedTags {
+  const result: ClassifiedTags = {
+    tags: [],
+    unmapped: new Set(),
+    subjectTags: [],
+    retiredImplied: [],
+    format: null,
+  };
+  let format: ArticleFormat | null = null;
+  for (const name of names) {
     const rule = resolve(name);
-    if (rule.kind === "retire") retiredImplied.push(rule.impliedBy);
-    else if (rule.kind === "subject") subjectTags.push(rule.subject);
-    else if (rule.kind === "format") tagFormat ??= rule.format;
-    else {
-      const final = finalName(name, rule);
-      if (tags.some((tag) => tag.name === final)) continue;
-      tags.push({ name: final, subject: rule.kind === "tag" ? rule.subject : null });
-      if (rule.kind === "unmapped") unmapped.add(final);
+    if (rule.kind === "retire") result.retiredImplied.push(rule.impliedBy);
+    else if (rule.kind === "subject") result.subjectTags.push(rule.subject);
+    else if (rule.kind === "format") format ??= rule.format;
+    else if (!result.tags.some((tag) => tag.name === rule.final)) {
+      result.tags.push({ name: rule.final, subject: rule.subject });
+      if (!rule.mapped) result.unmapped.add(rule.final);
     }
   }
+  return { ...result, format };
+}
 
-  const format = override?.format ?? tagFormat ?? formatFromText(article.title, article.subtitle);
-  const tagSubjects = unique(tags.flatMap((tag) => (tag.subject ? [tag.subject] : [])));
+function formatFromTitle(title: string, mapping: TaxonomyMapping): ArticleFormat {
+  return mapping.formatKeywords?.find(({ keyword }) => title.includes(keyword))?.format ?? "story";
+}
 
-  let primarySubject: string | null;
-  if (override && "primarySubject" in override) {
-    primarySubject = override.primarySubject ?? null;
-  } else if (subjectTags.length > 0) {
-    primarySubject = subjectTags[0];
-  } else if (format === "roundup") {
-    // A roundup only gets a primary subject when it clearly lives in one.
-    primarySubject =
-      tagSubjects.length === 1 && retiredImplied.length === 0 ? tagSubjects[0] : null;
-  } else {
-    primarySubject = tagSubjects[0] ?? null;
-  }
+function pickPrimary(
+  classified: ClassifiedTags,
+  format: ArticleFormat,
+  tagSubjects: readonly string[],
+  override: ArticleOverride | undefined,
+): string | null {
+  if (override && "primarySubject" in override) return override.primarySubject ?? null;
+  if (classified.subjectTags.length > 0) return classified.subjectTags[0];
+  if (format !== "roundup") return tagSubjects[0] ?? null;
+  // A roundup only gets a primary subject when it clearly lives in one.
+  const singleSubject = tagSubjects.length === 1 && classified.retiredImplied.length === 0;
+  return singleSubject ? tagSubjects[0] : null;
+}
 
-  const subjects = unique([
-    ...(primarySubject ? [primarySubject] : []),
-    ...tagSubjects,
-  ]).sort((a, b) => position(a) - position(b));
-
+function flagsFor(
+  classified: ClassifiedTags,
+  format: ArticleFormat,
+  primarySubject: string | null,
+  subjects: readonly string[],
+): BackfillFlag[] {
   const lostCoverage =
-    retiredImplied.some((implied) => !implied.some((slug) => subjects.includes(slug))) ||
-    subjectTags.some((slug) => !subjects.includes(slug));
+    classified.retiredImplied.some((implied) => !implied.some((slug) => subjects.includes(slug))) ||
+    classified.subjectTags.some((slug) => !subjects.includes(slug));
+  const inbox = classified.tags.some(
+    (tag) => tag.subject === null && !classified.unmapped.has(tag.name),
+  );
 
   const flags: BackfillFlag[] = [];
   if (subjects.length === 0) flags.push("no-subject");
   if (primarySubject === null && format !== "roundup") flags.push("no-primary");
   if (lostCoverage) flags.push("lost-coverage");
-  if (tags.some((tag) => tag.subject === null && !unmapped.has(tag.name))) flags.push("inbox-tag");
-  if (unmapped.size > 0) flags.push("unmapped-tag");
+  if (inbox) flags.push("inbox-tag");
+  if (classified.unmapped.size > 0) flags.push("unmapped-tag");
+  return flags;
+}
+
+function planArticle(
+  article: BackfillArticle,
+  mapping: TaxonomyMapping,
+  resolve: Resolver,
+  position: (slug: string) => number,
+): ArticlePlan {
+  const override = mapping.overrides?.[article.number];
+  const classified = classifyTags(article.tags, resolve);
+  const format = override?.format ?? classified.format ?? formatFromTitle(article.title, mapping);
+  const tagSubjects = unique(classified.tags.flatMap((tag) => (tag.subject ? [tag.subject] : [])));
+  const primarySubject = pickPrimary(classified, format, tagSubjects, override);
+  const subjects = unique([...(primarySubject ? [primarySubject] : []), ...tagSubjects]).sort(
+    (a, b) => position(a) - position(b),
+  );
 
   return {
     id: article.id,
@@ -181,51 +203,43 @@ function planArticle(
     title: article.title,
     format,
     primarySubject,
-    tags,
+    tags: classified.tags,
     subjects,
-    flags,
+    flags: flagsFor(classified, format, primarySubject, subjects),
   };
 }
 
 function planTags(
   input: BackfillInput,
-  resolve: (name: string) => Resolved,
+  resolve: Resolver,
   position: (slug: string) => number,
 ): TagChanges {
   const inRegistry = new Set(input.registry);
   const names = unique([...input.registry, ...input.articles.flatMap((article) => article.tags)]);
-
   const keep = new Map<string, string | null>();
   const renames: { from: string; to: string }[] = [];
-  const renamed = new Set<string>();
   const deletes: string[] = [];
+  const renamedTo = (name: string) => renames.some((rename) => rename.to === name);
 
   for (const name of names) {
     const rule = resolve(name);
-    if (rule.kind === "retire" || rule.kind === "subject" || rule.kind === "format") {
+    if (rule.kind !== "tag") {
       if (inRegistry.has(name)) deletes.push(name);
       continue;
     }
-    const final = finalName(name, rule);
-    const subject = rule.kind === "tag" ? rule.subject : null;
-    if (!keep.has(final) || keep.get(final) === null) keep.set(final, subject);
-
-    if (final === name || !inRegistry.has(name)) continue;
-    if (inRegistry.has(final) || renamed.has(final)) {
-      deletes.push(name);
-    } else {
-      renames.push({ from: name, to: final });
-      renamed.add(final);
-    }
+    if ((keep.get(rule.final) ?? null) === null) keep.set(rule.final, rule.subject);
+    if (rule.final === name || !inRegistry.has(name)) continue;
+    // Merge into a tag that already has the new name; otherwise rename in place.
+    if (inRegistry.has(rule.final) || renamedTo(rule.final)) deletes.push(name);
+    else renames.push({ from: name, to: rule.final });
   }
 
-  const inserts = [...keep.keys()].filter((name) => !inRegistry.has(name) && !renamed.has(name));
   const kept = [...keep].map(([name, subject]) => ({ name, subject }));
   kept.sort(
     (a, b) =>
       position(a.subject ?? "") - position(b.subject ?? "") || a.name.localeCompare(b.name, "he"),
   );
-
+  const inserts = kept.map((tag) => tag.name).filter((name) => !inRegistry.has(name) && !renamedTo(name));
   return { keep: kept, renames, inserts, deletes };
 }
 

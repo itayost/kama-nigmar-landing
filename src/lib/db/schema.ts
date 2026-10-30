@@ -1,5 +1,6 @@
 import {
   boolean,
+  check,
   date,
   index,
   integer,
@@ -12,6 +13,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import type { StoredBlock } from "@/lib/articles/blocks";
 import type { PollOption } from "@/lib/polls/schema";
 import { ARTICLE_FORMATS } from "@/lib/taxonomy/format";
@@ -21,15 +23,21 @@ export const pollStatus = pgEnum("poll_status", ["draft", "active", "closed"]);
 export const articleFormat = pgEnum("article_format", ARTICLE_FORMATS);
 
 // The short, admin-curated list of sections readers navigate by.
-export const subjects = pgTable("subjects", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull().unique(),
-  slug: text("slug").notNull().unique(),
-  description: text("description"),
-  position: integer("position").notNull(),
-  onHomepage: boolean("on_homepage").notNull().default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const subjects = pgTable(
+  "subjects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull().unique(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    position: integer("position").notNull(),
+    onHomepage: boolean("on_homepage").notNull().default(true),
+    // The subject's line color: its label, section mark and nav dot.
+    color: text("color").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [check("subjects_color_hex", sql`${table.color} ~ '^#[0-9a-f]{6}$'`)],
+);
 
 export const polls = pgTable("polls", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -52,6 +60,12 @@ export const articles = pgTable(
     title: text("title").notNull(),
     subtitle: text("subtitle"),
     coverImageUrl: text("cover_image_url"),
+    // Shown as a caption on the cover; previously typed into author_name.
+    coverCredit: text("cover_credit"),
+    // Focal point of the cover in percent, so phone crops keep the subject.
+    // Null means centered.
+    coverFocusX: smallint("cover_focus_x"),
+    coverFocusY: smallint("cover_focus_y"),
     content: jsonb("content").$type<StoredBlock[]>().notNull().default([]),
     authorName: text("author_name").notNull(),
     episodeUrl: text("episode_url"),
@@ -74,6 +88,8 @@ export const articles = pgTable(
     index("articles_status_published_at_idx").on(table.status, table.publishedAt),
     index("articles_tags_idx").using("gin", table.tags),
     index("articles_primary_subject_id_idx").on(table.primarySubjectId),
+    check("articles_cover_focus_x_range", sql`${table.coverFocusX} between 0 and 100`),
+    check("articles_cover_focus_y_range", sql`${table.coverFocusY} between 0 and 100`),
   ],
 );
 

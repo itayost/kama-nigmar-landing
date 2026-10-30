@@ -27,13 +27,3 @@ export function checkConfirmedHost(
   }
   return { ok: true, host };
 }
-
-export function parseFlags(argv: readonly string[]): Record<string, string | true> {
-  const flags: Record<string, string | true> = {};
-  for (const arg of argv) {
-    if (!arg.startsWith("--")) continue;
-    const [key, ...rest] = arg.slice(2).split("=");
-    flags[key] = rest.length > 0 ? rest.join("=") : true;
-  }
-  return flags;
-}

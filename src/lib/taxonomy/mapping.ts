@@ -4,12 +4,12 @@ import type { TaxonomyMapping } from "./backfill-plan";
 // Tags created after that date are not listed and land in the admin's inbox.
 export const TAXONOMY_MAPPING: TaxonomyMapping = {
   subjects: [
-    { slug: "israeli-football", name: "כדורגל ישראלי", position: 1, onHomepage: true },
-    { slug: "world-football", name: "כדורגל עולמי", position: 2, onHomepage: true },
-    { slug: "basketball", name: "כדורסל", position: 3, onHomepage: true },
-    { slug: "olympic-sports", name: "ספורט אולימפי", position: 4, onHomepage: true },
+    { slug: "israeli-football", name: "כדורגל ישראלי", position: 1, onHomepage: true, color: "#4cb8ff" },
+    { slug: "world-football", name: "כדורגל עולמי", position: 2, onHomepage: true, color: "#f2b53a" },
+    { slug: "basketball", name: "כדורסל", position: 3, onHomepage: true, color: "#ff7b3a" },
+    { slug: "olympic-sports", name: "ספורט אולימפי", position: 4, onHomepage: true, color: "#c58cff" },
     // Hidden until it has articles of its own.
-    { slug: "motorsport", name: "מוטורספורט", position: 5, onHomepage: false },
+    { slug: "motorsport", name: "מוטורספורט", position: 5, onHomepage: false, color: "#ff5a6a" },
   ],
   tags: {
     "כדורגל": { kind: "retire", impliedBy: ["israeli-football", "world-football"] },
@@ -40,7 +40,13 @@ export const TAXONOMY_MAPPING: TaxonomyMapping = {
     "ליגיונרים": { kind: "tag", subject: null },
     "ספורט ישראלי": { kind: "tag", subject: null },
   },
+  formatKeywords: [
+    { keyword: "מדריך", format: "guide" },
+    { keyword: "סיכום", format: "roundup" },
+  ],
   overrides: {
+    // A round-by-round summary whose title does not say so.
+    21: { format: "roundup" },
     // Hapoel Beer Sheva in the Champions League: Israeli football first.
     14: { primarySubject: "israeli-football" },
     6: { primarySubject: "israeli-football" },

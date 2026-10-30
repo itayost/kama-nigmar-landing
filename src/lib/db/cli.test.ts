@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkConfirmedHost, parseFlags } from "./cli";
+import { checkConfirmedHost } from "./cli";
 
 const URL_PROD = "postgresql://user:secret@ep-quiet-sea-123.eu-central-1.aws.neon.tech/neondb?sslmode=require";
 
@@ -36,14 +36,5 @@ describe("checkConfirmedHost", () => {
   it("never echoes the password in its message", () => {
     const result = checkConfirmedHost(URL_PROD, undefined);
     expect(result.ok ? "" : result.message).not.toContain("secret");
-  });
-});
-
-describe("parseFlags", () => {
-  it("reads --key=value and bare --flag arguments", () => {
-    expect(parseFlags(["--confirm-host=db.example", "--apply", "positional"])).toEqual({
-      "confirm-host": "db.example",
-      apply: true,
-    });
   });
 });

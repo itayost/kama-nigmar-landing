@@ -5,7 +5,7 @@ import { readMigrationFiles } from "drizzle-orm/migrator";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { afterEach, describe, expect, it } from "vitest";
-import { adoptExistingDatabase, rowsOf } from "./migrate";
+import { adoptExistingDatabase, MIGRATIONS_CONFIG } from "./migrate";
 
 const migrationsFolder = fileURLToPath(new URL("../../../drizzle", import.meta.url));
 
@@ -31,6 +31,12 @@ async function emptyDatabase() {
 
 type Db = Awaited<ReturnType<typeof emptyDatabase>>;
 
+function rowsOf(result: unknown): Record<string, unknown>[] {
+  return (result as { rows: Record<string, unknown>[] }).rows;
+}
+
+const migrateAll = (db: Db) => migrate(db, { migrationsFolder, ...MIGRATIONS_CONFIG });
+
 async function tableExists(db: Db, name: string): Promise<boolean> {
   const rows = rowsOf(await db.execute(sql`select to_regclass(${`public.${name}`}) is not null as present`));
   return rows[0].present === true;
@@ -46,7 +52,7 @@ describe("adoptExistingDatabase", () => {
     const db = await pushedDatabase();
 
     expect(await adoptExistingDatabase(db, migrationsFolder)).toBe(true);
-    await migrate(db, { migrationsFolder });
+    await migrateAll(db);
 
     expect(await tableExists(db, "subjects")).toBe(true);
     expect(await tableExists(db, "article_tags")).toBe(true);
@@ -56,7 +62,7 @@ describe("adoptExistingDatabase", () => {
     const db = await emptyDatabase();
 
     expect(await adoptExistingDatabase(db, migrationsFolder)).toBe(false);
-    await migrate(db, { migrationsFolder });
+    await migrateAll(db);
 
     expect(await tableExists(db, "articles")).toBe(true);
     expect(await tableExists(db, "subjects")).toBe(true);
@@ -85,7 +91,7 @@ describe("adoptExistingDatabase", () => {
     );
 
     await adoptExistingDatabase(db, migrationsFolder);
-    await migrate(db, { migrationsFolder });
+    await migrateAll(db);
 
     const rows = rowsOf(await db.execute(sql`select tags, format, primary_subject_id from articles`));
     expect(rows[0]).toEqual({ tags: ["כדורגל", "ליגת העל"], format: "story", primary_subject_id: null });

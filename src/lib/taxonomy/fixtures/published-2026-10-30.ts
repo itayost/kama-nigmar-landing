@@ -1,14 +1,8 @@
 import type { BackfillArticle } from "../backfill-plan";
 
-// The published articles as of 2026-10-30, taken from the public feed and
-// /articles. Subtitles are only kept where they decide the format.
-function a(
-  number: number,
-  title: string,
-  tags: string[],
-  subtitle: string | null = null,
-): BackfillArticle {
-  return { id: `article-${number}`, number, title, subtitle, tags };
+// The published articles as of 2026-10-30, taken from the public feed.
+function a(number: number, title: string, tags: string[]): BackfillArticle {
+  return { id: `article-${number}`, number, title, tags };
 }
 
 export const PUBLISHED_2026_10_30: readonly BackfillArticle[] = [
@@ -18,12 +12,12 @@ export const PUBLISHED_2026_10_30: readonly BackfillArticle[] = [
   a(24, "את מה אתם אוהדים ?", ["כדורגל"]),
   a(23, "בפרקים הקודמים - נבחרת ישראל בליגת האומות", ["כדורגל ישראלי"]),
   a(22, "לכבוד השנה החדשה - 5 הישגים בכחול לבן מהשנה החולפת", ["ספורט ישראלי"]),
-  a(21, "כמה נגמר ? מחזור ראשון באלופות", ["ליגת אלופות"], "סיכום תוצאות המחזור הראשון והמספרים מאחורי המחזור - הכל לפניכם"),
+  a(21, "כמה נגמר ? מחזור ראשון באלופות", ["ליגת אלופות"]),
   a(20, "הנוער הישראלי", ["כדורגל ישראלי", "כדורגל"]),
   a(19, "המבצר האדום ביפו", ["כדורגל ישראלי"]),
   a(18, "ליגת אלופות חוזרת! המדריך המלא שיעשה לכם סדר, מזווית אחרת", ["ליגת אלופות"]),
   a(17, "המרתון רק התחיל. אז למה כבר צריך להסתכל על השעון ?", ["כדורגל ישראלי"]),
-  a(16, "כמה נגמר ? אם לא נגיע, לא נדע", ["כדורגל ישראלי"], "'הספורט הישראלי', כפי שאנו צורכים אותו, הוא למעשה רק קצה של מערכת גדולה בהרבה."),
+  a(16, "כמה נגמר ? אם לא נגיע, לא נדע", ["כדורגל ישראלי"]),
   a(15, "סיכום השבוע!  23-27.8", ["ליגת העל", "ליגת אלופות", "כדורסל", "פורמולה", "אתלטיקה"]),
   a(14, "הכי קרוב שיש, הכי כואב שיש", ["כדורגל", "ליגת אלופות"]),
   a(13, "סיכום הסופ''ש! 21/22.8", ["סוף שבוע", "כדורגל", "ארטיום דולגופיאט", "ליגיונרים", "ליגת העל"]),

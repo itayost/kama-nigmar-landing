@@ -1,5 +1,5 @@
 {
-  "id": "0c369277-9adc-4240-b13a-8bf4b0f7de22",
+  "id": "491cf1a7-5e88-44e3-9149-03252243aeb0",
   "prevId": "7b75bdd3-5b94-4480-8b83-96adc451397c",
   "version": "7",
   "dialect": "postgresql",
@@ -192,6 +192,24 @@
           "primaryKey": false,
           "notNull": false
         },
+        "cover_credit": {
+          "name": "cover_credit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_focus_x": {
+          "name": "cover_focus_x",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cover_focus_y": {
+          "name": "cover_focus_y",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "content": {
           "name": "content",
           "type": "jsonb",
@@ -373,7 +391,16 @@
         }
       },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "articles_cover_focus_x_range": {
+          "name": "articles_cover_focus_x_range",
+          "value": "\"articles\".\"cover_focus_x\" between 0 and 100"
+        },
+        "articles_cover_focus_y_range": {
+          "name": "articles_cover_focus_y_range",
+          "value": "\"articles\".\"cover_focus_y\" between 0 and 100"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.poll_votes": {
@@ -526,6 +553,12 @@
           "notNull": true,
           "default": true
         },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -554,7 +587,12 @@
         }
       },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "subjects_color_hex": {
+          "name": "subjects_color_hex",
+          "value": "\"subjects\".\"color\" ~ '^#[0-9a-f]{6}$'"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.tags": {
