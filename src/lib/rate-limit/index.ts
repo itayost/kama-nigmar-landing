@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { getDb } from "@/lib/db";
 import { consume, prune, reset, type Limit } from "./limiter";
 
@@ -17,8 +17,15 @@ export type Scope = keyof typeof LIMITS;
 
 const PRUNE_SHARE = 0.01;
 
+// Without the site secret, a random one per instance: limits then only hold
+// per instance, but a stored key can never be traced back to an address.
+const KEY_SECRET = process.env.AUTH_SECRET || randomBytes(32).toString("base64");
+
+let hasLoggedFailure = false;
+
 // Vercel sets both headers from the connection, overwriting anything the
-// client sent.
+// client sent. On a host that passes them through, a client could pick its own
+// bucket; the site only deploys to Vercel.
 export function clientAddress(headers: Headers): string {
   return headers.get("x-real-ip") ?? headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
 }
@@ -26,7 +33,7 @@ export function clientAddress(headers: Headers): string {
 // The address is hashed with the site secret, so the table never holds it.
 export function limitKey(scope: Scope, headers: Headers, subject = ""): string {
   const digest = createHash("sha256")
-    .update(`${process.env.AUTH_SECRET ?? ""}:${clientAddress(headers)}`)
+    .update(`${KEY_SECRET}:${clientAddress(headers)}`)
     .digest("base64url")
     .slice(0, 22);
   return subject ? `${scope}:${subject}:${digest}` : `${scope}:${digest}`;
@@ -42,7 +49,10 @@ export async function allow(scope: Scope, key: string): Promise<boolean> {
     if (Math.random() < PRUNE_SHARE) await prune(db);
     return allowed;
   } catch (error) {
-    console.error("rate limit check failed", error);
+    // Once per instance: a missing table (migration 0002 not applied) would
+    // otherwise log on every view.
+    if (!hasLoggedFailure) console.error("rate limit check failed; requests pass unlimited", error);
+    hasLoggedFailure = true;
     return true;
   }
 }
