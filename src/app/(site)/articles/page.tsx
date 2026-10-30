@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArticleMiniCard } from "@/components/articles/ArticleMiniCard";
 import { ArticlesGrid } from "@/components/articles/ArticlesGrid";
 import { subjectStyle } from "@/components/articles/subject";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getPublishedArticles, getTrendingArticles } from "@/lib/dal/articles";
+import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
+import { getPublishedArticles } from "@/lib/dal/articles";
 import { getNavigation } from "@/lib/dal/navigation";
 import { FEED_ALTERNATE, breadcrumbSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
@@ -48,38 +47,22 @@ function ArticlesSkeleton() {
   );
 }
 
-async function TrendingStrip() {
-  const trending = await getTrendingArticles(3);
-  if (trending.length === 0) return null;
-
-  return (
-    <section aria-labelledby="trending-strip-heading" className="mb-8">
-      <SectionHeading title="הנקראות ביותר" id="trending-strip-heading" />
-      <div className="grid gap-3 sm:grid-cols-3">
-        {trending.map((article) => (
-          <ArticleMiniCard
-            key={article.id}
-            article={article}
-            phEvent="trending_index_click"
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// The archive's only filter is the subject: each chip opens that subject's page.
+// The archive's only filter is the subject: each chip opens that subject's
+// page. One scrolling row on a phone, like the subject page's tag rail.
 async function SubjectChips() {
   const { sections } = await getNavigation();
 
   return (
-    <nav aria-label="נושאים" className="mb-8 flex flex-wrap gap-2">
+    <nav
+      aria-label="נושאים"
+      className="-mx-6 mb-8 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] md:mx-0 md:flex-wrap md:overflow-visible md:px-0"
+    >
       {sections.map((chip) => (
         <Link
           key={chip.href}
           href={chip.href}
           style={subjectStyle(chip.color)}
-          className="flex items-center gap-2 rounded-full border border-surface-border px-3.5 py-1.5 text-sm transition-colors hover:border-[var(--subject)]/60 hover:bg-[var(--subject)]/10"
+          className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-surface-border px-3.5 py-1.5 text-sm transition-colors hover:border-[var(--subject)]/60 hover:bg-[var(--subject)]/10"
         >
           <span aria-hidden="true" className="h-2.5 w-2.5 rounded-[3px] bg-[var(--subject)]" />
           {chip.label}
@@ -102,18 +85,26 @@ async function AllArticles() {
   return <ArticlesGrid articles={articles} />;
 }
 
+async function ArchiveMasthead() {
+  const { total } = await getNavigation();
+  return (
+    <ArchiveHeader title="כל הכתבות" description={pageDescription} color="var(--color-accent)">
+      <p className="mt-1 text-sm text-text-muted">{total} כתבות · מהחדשה לישנה</p>
+    </ArchiveHeader>
+  );
+}
+
 export default function ArticlesPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-10">
+    <main className="mx-auto w-full max-w-5xl px-6 pb-10">
       <JsonLd
         data={breadcrumbSchema([
           { name: "בית", url: SITE_URL },
           { name: "כתבות", url: pageUrl },
         ])}
       />
-      <SectionHeading title="כל הכתבות" as="h1" />
+      <ArchiveMasthead />
       <SubjectChips />
-      <TrendingStrip />
       <Suspense fallback={<ArticlesSkeleton />}>
         <AllArticles />
       </Suspense>
