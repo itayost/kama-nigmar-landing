@@ -109,7 +109,9 @@ export function TaxonomyBoard({ subjects, tags }: AdminTaxonomy) {
         </p>
       ) : null}
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(11.5rem,1fr))] gap-3">
+      {/* One row on a desktop, inbox first, as on the approved board; columns
+          wrap on narrower screens and scroll sideways if subjects outgrow it. */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(11.5rem,1fr))] gap-3 lg:auto-cols-[minmax(9.5rem,1fr)] lg:grid-flow-col lg:grid-cols-none lg:overflow-x-auto lg:pb-1">
         <TagColumn subject={null} tags={tagsOf(null)} actions={actions} />
         {subjects.map((subject, index) => (
           <TagColumn
