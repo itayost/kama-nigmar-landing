@@ -26,6 +26,23 @@ export function PauseIcon({ className = "" }: IconProps) {
   );
 }
 
+// Shown while a press waits for the player.
+export function LoadingIcon({ className = "" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.6}
+      strokeLinecap="round"
+      aria-hidden="true"
+      className={`animate-spin motion-reduce:animate-none ${className}`}
+    >
+      <path d="M12 3a9 9 0 1 1-9 9" />
+    </svg>
+  );
+}
+
 interface PlayToggleProps {
   readonly playback: Playback;
   readonly onClick: () => void;
@@ -47,7 +64,13 @@ export function PlayToggle({ playback, onClick, playLabel, phEvent }: PlayToggle
       data-ph-event={phEvent}
       className={PLAY_BUTTON}
     >
-      {isPlaying ? <PauseIcon className="h-5 w-5" /> : <PlayIcon className="h-5 w-5" />}
+      {playback === "loading" ? (
+        <LoadingIcon className="h-5 w-5" />
+      ) : isPlaying ? (
+        <PauseIcon className="h-5 w-5" />
+      ) : (
+        <PlayIcon className="h-5 w-5" />
+      )}
     </button>
   );
 }
