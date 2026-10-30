@@ -21,14 +21,12 @@ export type ArticleView = WithTaxonomy<
 // The article page's full article, body included.
 export type ArticleDetail = WithTaxonomy<Omit<Article, "tags">>;
 
-type ArticleColumns = ReturnType<typeof getTableColumns<typeof articles>>;
+function omitKey<T extends object, K extends keyof T>(source: T, key: K): Omit<T, K> {
+  return Object.fromEntries(Object.entries(source).filter(([name]) => name !== key)) as Omit<T, K>;
+}
 
 // Every column but the legacy `tags` mirror, which the site never reads.
-const siteColumns = (() => {
-  const columns: Partial<ArticleColumns> = { ...getTableColumns(articles) };
-  delete columns.tags;
-  return columns as Omit<ArticleColumns, "tags">;
-})();
+const siteColumns = omitKey(getTableColumns(articles), "tags");
 
 function toListed({ content, ...article }: Omit<Article, "tags">) {
   return { ...article, readingMinutes: readingTimeMinutes(content), blockCount: content.length };

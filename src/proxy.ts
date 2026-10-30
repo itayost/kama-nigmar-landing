@@ -4,9 +4,8 @@ import { parseArticleNumber } from "@/lib/articles/article-param";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/token";
 import { getDb } from "@/lib/db";
 import { articles, subjects, tags } from "@/lib/db/schema";
-import { legacyTagTarget } from "@/lib/taxonomy/legacy-tag";
+import { legacyTagRedirect, legacyTagTarget, type LegacyTagTarget } from "@/lib/taxonomy/legacy-tag";
 import { TAXONOMY_MAPPING } from "@/lib/taxonomy/mapping";
-import { ROUNDUPS, subjectPath } from "@/lib/taxonomy/public";
 
 // Malformed percent-encoding (e.g. "%" or a truncated escape) makes
 // decodeURIComponent throw. Treat that as "not a slug we can resolve" and
@@ -58,31 +57,38 @@ async function redirectLegacyArticle(request: NextRequest) {
 }
 
 // The archive's old tag filter (/articles?tag=<name>) now lives on subject
-// pages. A real 308 here, for the same streaming reason as legacy slugs. The
-// backfill mapping knows what each original tag became; a tag that is still
-// a tag goes wherever the admin has filed it since.
+// pages. A real redirect here, for the same streaming reason as legacy slugs.
+// The backfill mapping knows what each original tag became; the database says
+// whether that subject still exists, or where the admin has filed the tag.
+async function liveSubjectSlug(target: LegacyTagTarget): Promise<string | null> {
+  if (target.kind === "subject") {
+    const rows = await getDb().select({ slug: subjects.slug }).from(subjects).where(eq(subjects.slug, target.slug)).limit(1);
+    return rows[0]?.slug ?? null;
+  }
+  if (target.kind === "tag") {
+    const rows = await getDb()
+      .select({ slug: subjects.slug })
+      .from(tags)
+      .innerJoin(subjects, eq(subjects.id, tags.subjectId))
+      .where(eq(tags.name, target.name))
+      .limit(1);
+    return rows[0]?.slug ?? null;
+  }
+  return null;
+}
+
 async function redirectLegacyTag(request: NextRequest, name: string) {
   const target = legacyTagTarget(name, TAXONOMY_MAPPING);
-  const to = (path: string) => NextResponse.redirect(new URL(path, request.url), 308);
-  switch (target.kind) {
-    case "subject":
-      return to(subjectPath(target.slug));
-    case "roundups":
-      return to(ROUNDUPS.href);
-    case "archive":
-      return to("/articles");
-    case "tag": {
-      const rows = await getDb()
-        .select({ slug: subjects.slug })
-        .from(tags)
-        .innerJoin(subjects, eq(subjects.id, tags.subjectId))
-        .where(eq(tags.name, target.name))
-        .limit(1);
-      const slug = rows[0]?.slug;
-      if (!slug) return to("/articles");
-      return to(`${subjectPath(slug)}?${new URLSearchParams({ tag: target.name })}`);
-    }
+  let liveSlug: string | null;
+  try {
+    liveSlug = await liveSubjectSlug(target);
+  } catch (error) {
+    // A database hiccup should not turn an old link into a 500.
+    console.error("legacy tag redirect lookup failed", error);
+    return NextResponse.redirect(new URL("/articles", request.url), 307);
   }
+  const { path, permanent } = legacyTagRedirect(target, liveSlug);
+  return NextResponse.redirect(new URL(path, request.url), permanent ? 308 : 307);
 }
 
 // Signature check only: full authorization still happens in requireAdmin()
