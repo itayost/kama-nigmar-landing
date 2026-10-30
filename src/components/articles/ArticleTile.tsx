@@ -40,6 +40,12 @@ export function ArticleTile({ article, phEvent, sizes, showKicker = true }: Arti
           {article.title}
         </h3>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
+          {/* On a phone the label sits here; from sm up it is on the image. */}
+          {showKicker && (article.subject || article.format !== "story") ? (
+            <span className="sm:hidden">
+              <SubjectKicker subject={article.subject} format={article.format} />
+            </span>
+          ) : null}
           {article.publishedAt ? formatDateShort(article.publishedAt) : null}
           <AlsoIn subject={article.subject} alsoIn={article.alsoIn} />
         </div>

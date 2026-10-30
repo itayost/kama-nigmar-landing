@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
 import { getPublishedArticles } from "@/lib/dal/articles";
 import { getNavigation } from "@/lib/dal/navigation";
-import { FEED_ALTERNATE, breadcrumbSchema } from "@/lib/seo/schema";
+import { FEED_ALTERNATE, breadcrumbSchema, pageOpenGraph } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 
 const pageDescription = "כתבות, סיכומים וסרטונים מעולם הספורט — מהפודקאסט כמה נגמר?";
@@ -17,15 +17,7 @@ export const metadata: Metadata = {
   title: "כתבות",
   description: pageDescription,
   alternates: { canonical: pageUrl, types: FEED_ALTERNATE },
-  openGraph: {
-    title: "כתבות | כמה נגמר?",
-    description: pageDescription,
-    url: pageUrl,
-    siteName: "כמה נגמר?",
-    type: "website",
-    locale: "he_IL",
-    images: [{ url: "/og-wide.jpg", width: 1200, height: 630, alt: "כמה נגמר? פודקאסט" }],
-  },
+  openGraph: pageOpenGraph({ name: "כתבות", description: pageDescription, url: pageUrl }),
   twitter: {
     card: "summary_large_image",
     title: "כתבות | כמה נגמר?",
@@ -36,11 +28,11 @@ export const metadata: Metadata = {
 
 function ArticlesSkeleton() {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-hidden="true">
+    <div className="flex flex-col gap-3 sm:grid sm:grid-cols-2 sm:gap-5 lg:grid-cols-3" aria-hidden="true">
       {Array.from({ length: 6 }, (_, i) => (
         <div
           key={i}
-          className="aspect-[4/3] animate-pulse rounded-xl border border-surface-border bg-surface"
+          className="h-20 animate-pulse rounded-xl border border-surface-border bg-surface sm:aspect-[4/3] sm:h-auto"
         />
       ))}
     </div>
@@ -89,7 +81,7 @@ async function ArchiveMasthead() {
   const { total } = await getNavigation();
   return (
     <ArchiveHeader title="כל הכתבות" description={pageDescription} color="var(--color-accent)">
-      <p className="mt-1 text-sm text-text-muted">{total} כתבות · מהחדשה לישנה</p>
+      <p className="mt-1 text-sm text-text-muted">{total === 1 ? "כתבה אחת" : `${total} כתבות`} · מהחדשה לישנה</p>
     </ArchiveHeader>
   );
 }
