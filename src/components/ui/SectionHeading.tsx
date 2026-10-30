@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { subjectStyle } from "@/components/articles/subject";
 
 interface SectionHeadingProps {
@@ -9,6 +10,8 @@ interface SectionHeadingProps {
   readonly as?: "h1" | "h2";
   // A subject's color for its section mark; the brand green otherwise.
   readonly color?: string;
+  // Shown beside the title, e.g. a subject's most used tags.
+  readonly extra?: ReactNode;
 }
 
 export function SectionHeading({
@@ -18,9 +21,10 @@ export function SectionHeading({
   linkLabel,
   as: Tag = "h2",
   color,
+  extra,
 }: SectionHeadingProps) {
   return (
-    <div style={subjectStyle(color)} className="mb-6 flex items-baseline justify-between">
+    <div style={subjectStyle(color)} className="mb-6 flex flex-wrap items-baseline gap-x-4 gap-y-2">
       <Tag
         id={id}
         className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight"
@@ -31,10 +35,11 @@ export function SectionHeading({
         />
         {title}
       </Tag>
+      {extra}
       {linkHref && linkLabel ? (
         <Link
           href={linkHref}
-          className="text-sm font-semibold text-[var(--subject)] transition-opacity hover:opacity-80"
+          className="ms-auto text-sm font-semibold text-[var(--subject)] transition-opacity hover:opacity-80"
         >
           {linkLabel}
         </Link>

@@ -78,6 +78,8 @@ export interface HomeSection<T> {
   readonly articles: readonly T[];
   // Every published article in the subject, for the "all N" link.
   readonly total: number;
+  // The subject's most used tags, shown beside the heading.
+  readonly tags: readonly RailTag[];
 }
 
 export interface HomepagePlan<T> {
@@ -89,6 +91,7 @@ export interface HomepagePlan<T> {
 const FULL_SECTION_MIN = 3;
 const FULL_SECTION_MAX = 5;
 const ROUNDUPS_SHOWN = 3;
+const SECTION_TAGS = 3;
 
 // No article appears twice: the lead is skipped by every section, a story
 // appears only in its primary subject's section, and roundups have their
@@ -101,6 +104,7 @@ export function planHomepage<T extends Listed>(articles: readonly T[], subjects:
     .sort((a, b) => a.position - b.position)
     .flatMap((subject): HomeSection<T>[] => {
       const stories = rest.filter((article) => !isRoundup(article) && article.subject?.id === subject.id);
+      const members = membersOf(articles, subject);
       if (stories.length === 0) return [];
       const full = stories.length >= FULL_SECTION_MIN;
       return [
@@ -108,7 +112,8 @@ export function planHomepage<T extends Listed>(articles: readonly T[], subjects:
           subject,
           variant: full ? "full" : "compact",
           articles: stories.slice(0, full ? FULL_SECTION_MAX : 1),
-          total: articles.filter((article) => inSubject(article, subject.id)).length,
+          total: members.length,
+          tags: railFor(members, subject.id).slice(0, SECTION_TAGS),
         },
       ];
     });

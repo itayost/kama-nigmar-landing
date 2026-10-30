@@ -9,12 +9,15 @@ interface ArticleCardProps {
   readonly phEvent?: string;
   // The rendered width, for the cover image; defaults to the three-column grid.
   readonly sizes?: string;
+  // Off inside a subject's own section, where the label would only repeat it.
+  readonly showKicker?: boolean;
 }
 
 export function ArticleCard({
   article,
   phEvent,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 360px",
+  showKicker = true,
 }: ArticleCardProps) {
   return (
     <Link
@@ -31,7 +34,9 @@ export function ArticleCard({
           className="transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transform-none"
           labelClassName="text-xl"
         />
-        <SubjectKicker subject={article.subject} format={article.format} className="absolute start-2.5 top-2.5" />
+        {showKicker ? (
+          <SubjectKicker subject={article.subject} format={article.format} className="absolute start-2.5 top-2.5" />
+        ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="font-bold leading-snug text-balance transition-colors group-hover:text-[var(--subject)]">
