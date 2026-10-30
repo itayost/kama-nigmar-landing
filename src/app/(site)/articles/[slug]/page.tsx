@@ -315,7 +315,7 @@ async function ArticleContent({
         <>
           <BlockRenderer blocks={article.content.slice(0, MID_MODULE_AFTER_BLOCKS)} emphasizeOpener />
           {midPoll ? <PollSection poll={midPoll} placement="article-mid" /> : null}
-          {plan.midArticle.length > 0 ? <MidArticleRelated articles={plan.midArticle} /> : null}
+          {plan.midArticle.length > 0 ? <MidArticleRelated articles={plan.midArticle} subject={article.subject} /> : null}
           <BlockRenderer blocks={article.content.slice(MID_MODULE_AFTER_BLOCKS)} />
         </>
       ) : (

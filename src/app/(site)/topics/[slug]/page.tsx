@@ -88,7 +88,7 @@ async function SubjectContent({ params, searchParams }: PageProps<"/topics/[slug
           {latest?.publishedAt ? ` · עודכן ${formatDateLong(latest.publishedAt)}` : ""}
         </p>
       </ArchiveHeader>
-      {lead ? <ArticleLeadCard article={lead} /> : <p className="text-text-muted">עדיין אין כתבות בנושא הזה.</p>}
+      {lead ? <ArticleLeadCard article={lead} as="h2" priority /> : <p className="text-text-muted">עדיין אין כתבות בנושא הזה.</p>}
       <Suspense fallback={<ListSkeleton />}>
         <SubjectList subject={subject} searchParams={searchParams} />
       </Suspense>
@@ -120,7 +120,10 @@ async function SubjectList({
   };
 
   return (
-    <section aria-label={`כתבות ב${subject.name}`} className="mt-7">
+    <section aria-labelledby="subject-list-heading" className="mt-7">
+      <h2 id="subject-list-heading" className="sr-only">
+        כל הכתבות ב{subject.name}
+      </h2>
       {plan.rail.length > 0 ? (
         <nav
           id="subject-rail"

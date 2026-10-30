@@ -26,6 +26,18 @@
   --color-text: #ffffff;
 }
 
+/* Keyboard focus and selection follow the nearest subject color (cards,
+   chips and sections set --subject), falling back to the brand green. */
+:focus-visible {
+  outline: 2px solid var(--subject, var(--color-accent));
+  outline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--subject, var(--color-accent)) 40%, transparent);
+  color: #fff;
+}
+
 body {
   background: linear-gradient(135deg, var(--color-bg-start) 0%, var(--color-bg-end) 100%);
   color: var(--color-text);

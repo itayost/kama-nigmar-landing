@@ -5,11 +5,13 @@ import { CoverImage, subjectStyle } from "./subject";
 
 interface RoundupCardProps {
   readonly article: ArticleView;
+  // h2 on the roundups page, where the cards sit directly under its h1.
+  readonly as?: "h2" | "h3";
 }
 
 // A roundup leads with its date and lists the subjects it covers, so a
 // basketball fan can see there is basketball in this week's summary.
-export function RoundupCard({ article }: RoundupCardProps) {
+export function RoundupCard({ article, as: Heading = "h3" }: RoundupCardProps) {
   return (
     <Link
       href={`/articles/${article.number}`}
@@ -29,9 +31,9 @@ export function RoundupCard({ article }: RoundupCardProps) {
             {formatDateShort(article.publishedAt)}
           </time>
         ) : null}
-        <h3 className="line-clamp-2 text-sm font-medium text-white/80 transition-colors group-hover:text-white">
+        <Heading className="line-clamp-2 text-sm font-medium text-white/80 transition-colors group-hover:text-white">
           {article.title}
-        </h3>
+        </Heading>
         {article.subjects.length > 0 ? (
           <ul aria-label="נושאים בסיכום" className="mt-1 flex flex-wrap gap-x-2.5 gap-y-1 text-xs text-text-muted">
             {article.subjects.map((subject) => (

@@ -25,6 +25,8 @@ interface CoverImageProps {
   // Replaces the default navy wash behind the wordmark when there is no cover.
   readonly placeholderClassName?: string;
   readonly labelClassName?: string;
+  // For the page's largest image: load it first instead of lazily.
+  readonly priority?: boolean;
 }
 
 // A card's cover, cropped around its focal point, or the wordmark on a wash.
@@ -35,6 +37,7 @@ export function CoverImage({
   className = "",
   placeholderClassName = "bg-gradient-to-br from-bg-start to-bg-end",
   labelClassName = "",
+  priority = false,
 }: CoverImageProps) {
   if (!article.coverImageUrl) {
     return (
@@ -49,6 +52,8 @@ export function CoverImage({
       alt=""
       fill
       sizes={sizes}
+      loading={priority ? "eager" : undefined}
+      fetchPriority={priority ? "high" : undefined}
       style={{ objectPosition: coverPosition(article) }}
       className={`object-cover ${className}`}
     />

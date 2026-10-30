@@ -36,7 +36,7 @@ export default async function RoundupsPage() {
       {roundups.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {roundups.map((article) => (
-            <RoundupCard key={article.id} article={article} />
+            <RoundupCard key={article.id} article={article} as="h2" />
           ))}
         </div>
       ) : (
