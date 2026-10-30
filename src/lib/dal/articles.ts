@@ -11,24 +11,24 @@ import { articleViewsDaily, articles, type Article } from "@/lib/db/schema";
 import { type WithTaxonomy } from "@/lib/taxonomy/public";
 import { decorate } from "./taxonomy";
 
+// Every column but the legacy `tags` mirror, which the site never reads.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- dropped on purpose
+const { tags: legacyTags, ...siteColumns } = getTableColumns(articles);
+
+// An article row as the site reads it.
+export type SiteArticle = Omit<Article, "tags">;
+
 // An article as lists show it: with its subject and tags, and without its
 // body, which only the article page needs. Every list reads one cached copy
 // of the archive, so it stays small.
 export type ArticleView = WithTaxonomy<
-  Omit<Article, "content" | "tags"> & { readonly readingMinutes: number; readonly blockCount: number }
+  Omit<SiteArticle, "content"> & { readonly readingMinutes: number; readonly blockCount: number }
 >;
 
 // The article page's full article, body included.
-export type ArticleDetail = WithTaxonomy<Omit<Article, "tags">>;
+export type ArticleDetail = WithTaxonomy<SiteArticle>;
 
-function omitKey<T extends object, K extends keyof T>(source: T, key: K): Omit<T, K> {
-  return Object.fromEntries(Object.entries(source).filter(([name]) => name !== key)) as Omit<T, K>;
-}
-
-// Every column but the legacy `tags` mirror, which the site never reads.
-const siteColumns = omitKey(getTableColumns(articles), "tags");
-
-function toListed({ content, ...article }: Omit<Article, "tags">) {
+function toListed({ content, ...article }: SiteArticle) {
   return { ...article, readingMinutes: readingTimeMinutes(content), blockCount: content.length };
 }
 

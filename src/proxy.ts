@@ -79,14 +79,12 @@ async function liveSubjectSlug(target: LegacyTagTarget): Promise<string | null> 
 
 async function redirectLegacyTag(request: NextRequest, name: string) {
   const target = legacyTagTarget(name, TAXONOMY_MAPPING);
-  let liveSlug: string | null;
-  try {
-    liveSlug = await liveSubjectSlug(target);
-  } catch (error) {
-    // A database hiccup should not turn an old link into a 500.
+  // A database hiccup should not turn an old link into a 500: with no answer
+  // the redirect falls back to the archive, temporarily.
+  const liveSlug = await liveSubjectSlug(target).catch((error: unknown) => {
     console.error("legacy tag redirect lookup failed", error);
-    return NextResponse.redirect(new URL("/articles", request.url), 307);
-  }
+    return null;
+  });
   const { path, permanent } = legacyTagRedirect(target, liveSlug);
   return NextResponse.redirect(new URL(path, request.url), permanent ? 308 : 307);
 }
@@ -101,8 +99,8 @@ export async function proxy(request: NextRequest) {
     return redirectLegacyArticle(request);
   }
   if (request.nextUrl.pathname === "/articles") {
-    const tag = request.nextUrl.searchParams.get("tag");
-    return tag ? redirectLegacyTag(request, tag) : NextResponse.next();
+    // The matcher only sends /articles here when it carries ?tag=.
+    return redirectLegacyTag(request, request.nextUrl.searchParams.get("tag") ?? "");
   }
 
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -123,5 +121,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/articles", "/articles/:slug"],
+  matcher: [
+    "/admin/:path*",
+    "/articles/:slug",
+    // Only legacy tag links; the plain archive never runs the proxy.
+    { source: "/articles", has: [{ type: "query", key: "tag" }] },
+  ],
 };

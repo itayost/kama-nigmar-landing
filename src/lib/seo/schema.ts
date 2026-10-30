@@ -1,4 +1,4 @@
-import type { Article } from "@/lib/db/schema";
+import type { SiteArticle } from "@/lib/dal/articles";
 import { SITE_URL } from "@/lib/site";
 
 export const SITE_NAME = "כמה נגמר?";
@@ -43,7 +43,7 @@ export interface ArticleTaxonomyMeta {
   readonly keywords?: readonly string[];
 }
 
-export function newsArticleSchema(article: Omit<Article, "tags">, taxonomy: ArticleTaxonomyMeta = {}) {
+export function newsArticleSchema(article: SiteArticle, taxonomy: ArticleTaxonomyMeta = {}) {
   const keywords = taxonomy.keywords ?? [];
   return {
     "@context": "https://schema.org",
