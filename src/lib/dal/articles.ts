@@ -1,5 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { readingTimeMinutes } from "@/lib/articles/reading-time";
 import {
   planRecirculation,
@@ -15,13 +15,22 @@ import { decorate } from "./taxonomy";
 // body, which only the article page needs. Every list reads one cached copy
 // of the archive, so it stays small.
 export type ArticleView = WithTaxonomy<
-  Omit<Article, "content"> & { readonly readingMinutes: number; readonly blockCount: number }
+  Omit<Article, "content" | "tags"> & { readonly readingMinutes: number; readonly blockCount: number }
 >;
 
 // The article page's full article, body included.
-export type ArticleDetail = WithTaxonomy<Article>;
+export type ArticleDetail = WithTaxonomy<Omit<Article, "tags">>;
 
-function toListed({ content, ...article }: Article) {
+type ArticleColumns = ReturnType<typeof getTableColumns<typeof articles>>;
+
+// Every column but the legacy `tags` mirror, which the site never reads.
+const siteColumns = (() => {
+  const columns: Partial<ArticleColumns> = { ...getTableColumns(articles) };
+  delete columns.tags;
+  return columns as Omit<ArticleColumns, "tags">;
+})();
+
+function toListed({ content, ...article }: Omit<Article, "tags">) {
   return { ...article, readingMinutes: readingTimeMinutes(content), blockCount: content.length };
 }
 
@@ -30,7 +39,7 @@ export async function getPublishedArticles(): Promise<ArticleView[]> {
   cacheLife("article");
   cacheTag("articles");
   const rows = getDb()
-    .select()
+    .select(siteColumns)
     .from(articles)
     .where(eq(articles.status, "published"))
     .orderBy(desc(articles.publishedAt))
@@ -43,7 +52,7 @@ export async function getArticleByNumber(number: number): Promise<ArticleDetail 
   cacheLife("article");
   cacheTag("articles", `article-${number}`);
   const rows = getDb()
-    .select()
+    .select(siteColumns)
     .from(articles)
     .where(and(eq(articles.number, number), eq(articles.status, "published")))
     .limit(1);

@@ -3,7 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { parseArticleNumber } from "@/lib/articles/article-param";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/token";
 import { getDb } from "@/lib/db";
-import { articles } from "@/lib/db/schema";
+import { articles, subjects, tags } from "@/lib/db/schema";
+import { legacyTagTarget } from "@/lib/taxonomy/legacy-tag";
+import { TAXONOMY_MAPPING } from "@/lib/taxonomy/mapping";
+import { ROUNDUPS, subjectPath } from "@/lib/taxonomy/public";
 
 // Malformed percent-encoding (e.g. "%" or a truncated escape) makes
 // decodeURIComponent throw. Treat that as "not a slug we can resolve" and
@@ -54,6 +57,34 @@ async function redirectLegacyArticle(request: NextRequest) {
   return NextResponse.redirect(new URL(`/articles/${number}`, request.url), 308);
 }
 
+// The archive's old tag filter (/articles?tag=<name>) now lives on subject
+// pages. A real 308 here, for the same streaming reason as legacy slugs. The
+// backfill mapping knows what each original tag became; a tag that is still
+// a tag goes wherever the admin has filed it since.
+async function redirectLegacyTag(request: NextRequest, name: string) {
+  const target = legacyTagTarget(name, TAXONOMY_MAPPING);
+  const to = (path: string) => NextResponse.redirect(new URL(path, request.url), 308);
+  switch (target.kind) {
+    case "subject":
+      return to(subjectPath(target.slug));
+    case "roundups":
+      return to(ROUNDUPS.href);
+    case "archive":
+      return to("/articles");
+    case "tag": {
+      const rows = await getDb()
+        .select({ slug: subjects.slug })
+        .from(tags)
+        .innerJoin(subjects, eq(subjects.id, tags.subjectId))
+        .where(eq(tags.name, target.name))
+        .limit(1);
+      const slug = rows[0]?.slug;
+      if (!slug) return to("/articles");
+      return to(`${subjectPath(slug)}?${new URLSearchParams({ tag: target.name })}`);
+    }
+  }
+}
+
 // Signature check only: full authorization still happens in requireAdmin()
 // inside every admin page and Server Action. Verifying (rather than just
 // checking cookie presence) prevents a redirect loop between /admin and
@@ -62,6 +93,10 @@ async function redirectLegacyArticle(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/articles/")) {
     return redirectLegacyArticle(request);
+  }
+  if (request.nextUrl.pathname === "/articles") {
+    const tag = request.nextUrl.searchParams.get("tag");
+    return tag ? redirectLegacyTag(request, tag) : NextResponse.next();
   }
 
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -82,5 +117,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/articles/:slug"],
+  matcher: ["/admin/:path*", "/articles", "/articles/:slug"],
 };

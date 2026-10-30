@@ -43,7 +43,7 @@ export interface ArticleTaxonomyMeta {
   readonly keywords?: readonly string[];
 }
 
-export function newsArticleSchema(article: Article, taxonomy: ArticleTaxonomyMeta = {}) {
+export function newsArticleSchema(article: Omit<Article, "tags">, taxonomy: ArticleTaxonomyMeta = {}) {
   const keywords = taxonomy.keywords ?? [];
   return {
     "@context": "https://schema.org",
