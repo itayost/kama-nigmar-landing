@@ -111,7 +111,7 @@ function SubjectSection({ section }: { readonly section: HomeSection<ArticleView
           <ArticleTile
             article={second}
             phEvent="home_section_click"
-            sizes="(max-width: 640px) 96px, (max-width: 1024px) 50vw, 300px"
+            sizes="(max-width: 639px) 96px, (max-width: 1023px) 340px, 300px"
             showKicker={false}
           />
         ) : null}

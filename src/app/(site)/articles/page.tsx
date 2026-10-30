@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArticlesGrid } from "@/components/articles/ArticlesGrid";
+import { ArticleTile } from "@/components/articles/ArticleTile";
 import { subjectStyle } from "@/components/articles/subject";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
+import { articleCountLabel } from "@/lib/articles/count-label";
 import { getPublishedArticles } from "@/lib/dal/articles";
 import { getNavigation } from "@/lib/dal/navigation";
 import { FEED_ALTERNATE, breadcrumbSchema, pageOpenGraph } from "@/lib/seo/schema";
@@ -12,6 +13,9 @@ import { SITE_URL } from "@/lib/site";
 
 const pageDescription = "כתבות, סיכומים וסרטונים מעולם הספורט — מהפודקאסט כמה נגמר?";
 const pageUrl = `${SITE_URL}/articles`;
+// No vw values: a vw term makes Next drop the small srcset widths, and the
+// 96px phone thumbnail would download a 384px file.
+const ARCHIVE_TILE_SIZES = "(max-width: 639px) 96px, (max-width: 1023px) 340px, 312px";
 
 export const metadata: Metadata = {
   title: "כתבות",
@@ -74,14 +78,21 @@ async function AllArticles() {
       </p>
     );
   }
-  return <ArticlesGrid articles={articles} />;
+  // Compact rows on a phone, like the subject page; cards from sm up.
+  return (
+    <div className="flex flex-col sm:grid sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+      {articles.map((article) => (
+        <ArticleTile key={article.id} article={article} phEvent="archive_click" sizes={ARCHIVE_TILE_SIZES} />
+      ))}
+    </div>
+  );
 }
 
 async function ArchiveMasthead() {
   const { total } = await getNavigation();
   return (
     <ArchiveHeader title="כל הכתבות" description={pageDescription} color="var(--color-accent)">
-      <p className="mt-1 text-sm text-text-muted">{total === 1 ? "כתבה אחת" : `${total} כתבות`} · מהחדשה לישנה</p>
+      <p className="mt-1 text-sm text-text-muted">{articleCountLabel(total)} · מהחדשה לישנה</p>
     </ArchiveHeader>
   );
 }

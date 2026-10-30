@@ -8,6 +8,7 @@ import { RailFocus } from "@/components/articles/RailFocus";
 import { subjectStyle } from "@/components/articles/subject";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
+import { articleCountLabel } from "@/lib/articles/count-label";
 import { getPublishedArticles } from "@/lib/dal/articles";
 import { getSubjects } from "@/lib/dal/taxonomy";
 import { formatDateLong } from "@/lib/datetime";
@@ -84,7 +85,7 @@ async function SubjectContent({ params, searchParams }: PageProps<"/topics/[slug
       />
       <ArchiveHeader title={page.name} description={page.description} color={subject.color}>
         <p className="mt-1 text-sm text-text-muted">
-          {total === 1 ? "כתבה אחת" : `${total} כתבות`}
+          {articleCountLabel(total)}
           {latest?.publishedAt ? ` · עודכן ${formatDateLong(latest.publishedAt)}` : ""}
         </p>
       </ArchiveHeader>

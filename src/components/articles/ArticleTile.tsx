@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ArticleView } from "@/lib/dal/articles";
 import { formatDateShort } from "@/lib/datetime";
-import { AlsoIn, CoverImage, subjectStyle, SubjectKicker } from "./subject";
+import { AlsoIn, CoverImage, kickerLabel, subjectStyle, SubjectKicker } from "./subject";
 
 interface ArticleTileProps {
   readonly article: ArticleView;
@@ -41,7 +41,7 @@ export function ArticleTile({ article, phEvent, sizes, showKicker = true }: Arti
         </h3>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
           {/* On a phone the label sits here; from sm up it is on the image. */}
-          {showKicker && (article.subject || article.format !== "story") ? (
+          {showKicker && kickerLabel(article.subject, article.format) ? (
             <span className="sm:hidden">
               <SubjectKicker subject={article.subject} format={article.format} />
             </span>

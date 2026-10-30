@@ -66,10 +66,15 @@ interface KickerProps {
   readonly className?: string;
 }
 
-// The label above a headline: the primary subject in its color, or the format
-// for a roundup that spans several subjects.
+// The label above a headline: the primary subject, or the format for a roundup
+// or guide without one. A plain story without a subject has none.
+export function kickerLabel(subject: SubjectSummary | null, format: ArticleFormat): string | null {
+  return subject?.name ?? (format === "story" ? null : FORMAT_LABELS[format]);
+}
+
+// The label in the subject's color, or white for a format.
 export function SubjectKicker({ subject, format, className = "" }: KickerProps) {
-  const label = subject?.name ?? (format === "story" ? null : FORMAT_LABELS[format]);
+  const label = kickerLabel(subject, format);
   if (!label) return null;
   return (
     <span

@@ -5,6 +5,7 @@ import type { AdminTag } from "@/lib/dal/taxonomy-admin";
 import { ConfirmDelete } from "../ConfirmDelete";
 import { buttonClass, iconButtonClass, inputClass } from "../Field";
 import { CloseIcon } from "../icons";
+import { articleCountLabel } from "@/lib/articles/count-label";
 
 interface SelectedTagPanelProps {
   readonly tag: AdminTag;
@@ -30,7 +31,7 @@ export function SelectedTagPanel({ tag, others, busy, onRename, onMerge, onDelet
       <div className="flex items-center gap-2">
         <span className="font-bold">{tag.name}</span>
         <span className="text-sm text-text-muted">
-          {tag.articleCount === 1 ? "כתבה אחת" : `${tag.articleCount} כתבות`} · בחרו עמודה ולחצו &quot;העברה לכאן&quot;, או גררו
+          {articleCountLabel(tag.articleCount)} · בחרו עמודה ולחצו &quot;העברה לכאן&quot;, או גררו
         </span>
         <button type="button" onClick={onClose} aria-label="סגירה" className={`${iconButtonClass} ms-auto h-8 w-8`}>
           <CloseIcon />
