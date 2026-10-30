@@ -1,14 +1,14 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, eq, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { tagNameSchema } from "@/lib/articles/blocks";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/db";
 import { runAtomic } from "@/lib/db/atomic";
 import { isUniqueViolation } from "@/lib/db/errors";
-import { articleTags, subjects, tags } from "@/lib/db/schema";
+import { articles, articleTags, subjects, tags } from "@/lib/db/schema";
 import { subjectInputSchema, tagInputSchema } from "@/lib/taxonomy/admin-schema";
 
 export interface ActionResult {
@@ -28,6 +28,16 @@ const subjectRefSchema = z.uuid().nullable();
 function refresh(): void {
   updateTag("articles");
   revalidatePath("/", "layout");
+}
+
+// Keeps the legacy articles.tags mirror in step with a tag change, so rolling
+// the code back still shows current names. `next` may use `old.name`.
+function mirrorTagChange(db: ReturnType<typeof getDb>, tagId: string, next: SQL) {
+  return db.execute(sql`
+    update ${articles} set tags = ${next}
+    from ${tags} as old
+    where old.id = ${tagId}::uuid and old.name = any(${articles.tags})
+  `);
 }
 
 function invalid(): ActionResult {
@@ -139,8 +149,12 @@ export async function renameTag(tagId: string, name: string): Promise<ActionResu
   if (!idSchema.safeParse(tagId).success) return invalid();
   const parsed = tagNameSchema.safeParse(name);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const db = getDb();
   try {
-    await getDb().update(tags).set({ name: parsed.data }).where(eq(tags.id, tagId));
+    await runAtomic(db, [
+      mirrorTagChange(db, tagId, sql`array_replace(tags, old.name, ${parsed.data})`),
+      db.update(tags).set({ name: parsed.data }).where(eq(tags.id, tagId)),
+    ]);
   } catch (error) {
     if (isUniqueViolation(error)) return { error: "קיימת כבר תגית בשם הזה" };
     throw error;
@@ -163,6 +177,13 @@ export async function mergeTag(sourceId: string, targetId: string): Promise<Acti
       select article_id, ${targetId}::uuid, position from ${articleTags} where tag_id = ${sourceId}::uuid
       on conflict do nothing
     `),
+    mirrorTagChange(
+      db,
+      sourceId,
+      sql`case when (select name from ${tags} where id = ${targetId}::uuid) = any(tags)
+               then array_remove(tags, old.name)
+               else array_replace(tags, old.name, (select name from ${tags} where id = ${targetId}::uuid)) end`,
+    ),
     db.delete(tags).where(eq(tags.id, sourceId)),
   ]);
   refresh();
@@ -172,7 +193,11 @@ export async function mergeTag(sourceId: string, targetId: string): Promise<Acti
 export async function deleteTag(tagId: string): Promise<ActionResult> {
   await requireAdmin();
   if (!idSchema.safeParse(tagId).success) return invalid();
-  await getDb().delete(tags).where(eq(tags.id, tagId));
+  const db = getDb();
+  await runAtomic(db, [
+    mirrorTagChange(db, tagId, sql`array_remove(tags, old.name)`),
+    db.delete(tags).where(eq(tags.id, tagId)),
+  ]);
   refresh();
   return {};
 }

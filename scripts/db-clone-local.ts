@@ -38,13 +38,17 @@ async function copyTable(source: ScriptDb, target: ScriptDb, table: string): Pro
 
   const rows = rowsOf(await source.execute(sql`select ${columnList} from ${sql.identifier(table)}`));
   if (rows.length === 0) return 0;
-  const values = rows.map(
-    (row) => sql`(${sql.join(shared.map((column) => valueSql(row[column], to.get(column))), sql`, `)})`,
-  );
-  await target.execute(sql`
-    insert into ${sql.identifier(table)} (${columnList}) overriding system value
-    values ${sql.join(values, sql`, `)}
-  `);
+  // Chunks keep each statement under Postgres's 65535-parameter limit.
+  const chunkSize = Math.max(1, Math.floor(60000 / shared.length));
+  for (let start = 0; start < rows.length; start += chunkSize) {
+    const values = rows
+      .slice(start, start + chunkSize)
+      .map((row) => sql`(${sql.join(shared.map((column) => valueSql(row[column], to.get(column))), sql`, `)})`);
+    await target.execute(sql`
+      insert into ${sql.identifier(table)} (${columnList}) overriding system value
+      values ${sql.join(values, sql`, `)}
+    `);
+  }
   return rows.length;
 }
 

@@ -137,21 +137,17 @@ type Db = ReturnType<typeof getDb>;
 // Tag names in the picked order, or an error when a tag or the subject was
 // deleted while the form was open.
 async function resolveTaxonomy(db: Db, input: ArticleInput): Promise<string[] | { error: string }> {
-  const rows =
+  const [rows, subject] = await Promise.all([
     input.tagIds.length > 0
-      ? await db.select({ id: tagsTable.id, name: tagsTable.name }).from(tagsTable).where(inArray(tagsTable.id, input.tagIds))
-      : [];
+      ? db.select({ id: tagsTable.id, name: tagsTable.name }).from(tagsTable).where(inArray(tagsTable.id, input.tagIds))
+      : [],
+    input.primarySubjectId
+      ? db.select({ id: subjects.id }).from(subjects).where(eq(subjects.id, input.primarySubjectId)).limit(1)
+      : null,
+  ]);
   const names = new Map(rows.map((row) => [row.id, row.name]));
   if (names.size !== input.tagIds.length) return { error: "אחת התגיות נמחקה בינתיים. רעננו את הדף" };
-
-  if (input.primarySubjectId) {
-    const subject = await db
-      .select({ id: subjects.id })
-      .from(subjects)
-      .where(eq(subjects.id, input.primarySubjectId))
-      .limit(1);
-    if (!subject[0]) return { error: "הנושא נמחק בינתיים. רעננו את הדף" };
-  }
+  if (subject && !subject[0]) return { error: "הנושא נמחק בינתיים. רעננו את הדף" };
   return input.tagIds.map((id) => names.get(id) ?? "");
 }
 

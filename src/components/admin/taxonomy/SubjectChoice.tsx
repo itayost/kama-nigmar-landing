@@ -2,14 +2,8 @@
 
 import type { CSSProperties } from "react";
 import type { AdminSubject } from "@/lib/dal/taxonomy-admin";
-import { ARTICLE_FORMATS, type ArticleFormat } from "@/lib/taxonomy/format";
+import { ARTICLE_FORMATS, FORMAT_LABELS, type ArticleFormat } from "@/lib/taxonomy/format";
 import { otherSubjects } from "@/lib/taxonomy/suggest";
-
-export const FORMAT_LABELS: Record<ArticleFormat, string> = {
-  story: "כתבה",
-  roundup: "סיכום",
-  guide: "מדריך",
-};
 
 interface SubjectChoiceProps {
   readonly subjects: readonly AdminSubject[];

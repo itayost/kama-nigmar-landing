@@ -25,22 +25,30 @@ export interface AdminTaxonomy {
   readonly tags: readonly AdminTag[];
 }
 
+function selectSubjects() {
+  return getDb()
+    .select({
+      id: subjects.id,
+      name: subjects.name,
+      slug: subjects.slug,
+      color: subjects.color,
+      description: subjects.description,
+      onHomepage: subjects.onHomepage,
+    })
+    .from(subjects)
+    .orderBy(asc(subjects.position));
+}
+
+export async function getAdminSubjects(): Promise<AdminSubject[]> {
+  await requireAdmin();
+  return selectSubjects();
+}
+
 export async function getAdminTaxonomy(): Promise<AdminTaxonomy> {
   await requireAdmin();
-  const db = getDb();
   const [subjectRows, tagRows] = await Promise.all([
-    db
-      .select({
-        id: subjects.id,
-        name: subjects.name,
-        slug: subjects.slug,
-        color: subjects.color,
-        description: subjects.description,
-        onHomepage: subjects.onHomepage,
-      })
-      .from(subjects)
-      .orderBy(asc(subjects.position)),
-    db
+    selectSubjects(),
+    getDb()
       .select({
         id: tags.id,
         name: tags.name,

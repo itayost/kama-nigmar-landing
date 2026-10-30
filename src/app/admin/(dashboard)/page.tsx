@@ -1,16 +1,16 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { FORMAT_LABELS } from "@/components/admin/taxonomy/SubjectChoice";
 import { DeleteArticleButton } from "@/components/admin/DeleteArticleButton";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { toggleArticleStatus } from "@/lib/actions/articles";
 import { listAllArticles } from "@/lib/dal/admin-articles";
-import { getAdminTaxonomy } from "@/lib/dal/taxonomy-admin";
+import { getAdminSubjects } from "@/lib/dal/taxonomy-admin";
 import { formatDateShort } from "@/lib/datetime";
+import { FORMAT_LABELS } from "@/lib/taxonomy/format";
 
 export default async function AdminArticlesPage() {
-  const [articles, taxonomy] = await Promise.all([listAllArticles(), getAdminTaxonomy()]);
-  const subjectById = new Map(taxonomy.subjects.map((subject) => [subject.id, subject]));
+  const [articles, subjectList] = await Promise.all([listAllArticles(), getAdminSubjects()]);
+  const subjectById = new Map(subjectList.map((subject) => [subject.id, subject]));
 
   return (
     <div className="flex flex-col gap-6">
