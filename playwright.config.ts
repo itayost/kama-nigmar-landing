@@ -23,7 +23,8 @@ export default defineConfig({
   webServer: {
     // Against the local Docker database, like npm run dev:local; see above.
     command: `npx next dev --port ${E2E_PORT} --hostname localhost`,
-    env: local.env,
+    // The podcast feed is switched off so no run depends on the network.
+    env: { ...local.env, PODCAST_FEED_URL: "" },
     url: `http://localhost:${E2E_PORT}`,
     // Never reuse: a server already on this port may be talking to production.
     reuseExistingServer: false,

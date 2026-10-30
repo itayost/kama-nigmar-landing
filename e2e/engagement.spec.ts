@@ -91,10 +91,17 @@ test.describe("engagement surfaces", () => {
     await expect(page.locator('aside[aria-label="עוד באותו נושא"]')).toHaveCount(0);
 
     // Player bar on public pages, absent on admin login.
-    for (const path of ["/", "/articles", longUrl]) {
+    for (const path of ["/articles", longUrl]) {
       await page.goto(path);
       await expect(page.getByTestId("player-bar")).toBeVisible();
     }
+    // The homepage's episode row plays the show, so the bar waits below the
+    // screen until the row scrolls away.
+    await page.goto("/");
+    await expect(page.getByRole("region", { name: "הפרק האחרון" })).toBeVisible();
+    await expect(page.getByTestId("player-bar")).toBeHidden();
+    await page.locator("footer").scrollIntoViewIfNeeded();
+    await expect(page.getByTestId("player-bar")).toBeVisible();
 
     // Cleanup: articles, then the registry tag.
     await deleteArticle(page, long.title);

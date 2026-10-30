@@ -22,6 +22,12 @@
    header and anything inside it. */
 @custom-variant over-cover (&:where(body:has([data-cover-sheet]) [data-site-header]:not([data-solid]), body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) *));
 
+/* A control that plays the show in the page (the homepage's episode row) is a
+   player stand-in: while one is on screen the Player bar waits below it, and
+   comes up once PlayerDock marks it data-away. Set in the server HTML, so the
+   bar never flashes on load. */
+@custom-variant docked (&:where([data-dockable]):where(body:has([data-player-stand-in]:not([data-away])) *));
+
 :root {
   --color-text: #ffffff;
 }
@@ -30,7 +36,8 @@
    chips and sections set --subject), falling back to the brand green. */
 :focus-visible {
   outline: 2px solid var(--subject, var(--color-accent));
-  outline-offset: 3px;
+  /* A full-bleed link sets a negative offset so its ring stays on screen. */
+  outline-offset: var(--focus-offset, 3px);
 }
 
 ::selection {

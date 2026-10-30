@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import type { Navigation } from "@/lib/dal/navigation";
-import { PlatformButton } from "@/components/hero/PlatformButton";
+import { PlatformButton } from "./PlatformButton";
 import { isActivePath } from "./NavLinks";
 import { Wordmark } from "./Wordmark";
 

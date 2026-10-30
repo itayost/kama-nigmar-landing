@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { readingTimeMinutes } from "@/lib/articles/reading-time";
+import { bindClosingMarks } from "@/lib/articles/title";
 import {
   planRecirculation,
   type RecirculationPlan,
@@ -27,7 +28,13 @@ export type ArticleView = WithTaxonomy<
 // The article page's full article, body included.
 export type ArticleDetail = WithTaxonomy<SiteArticle>;
 
-function toListed({ content, ...article }: SiteArticle) {
+// A stored row as the site shows it: headline marks stay with their word.
+function forSite(row: SiteArticle): SiteArticle {
+  return { ...row, title: bindClosingMarks(row.title) };
+}
+
+function toListed(row: SiteArticle) {
+  const { content, ...article } = forSite(row);
   return { ...article, readingMinutes: readingTimeMinutes(content), blockCount: content.length };
 }
 
@@ -52,7 +59,8 @@ export async function getArticleByNumber(number: number): Promise<ArticleDetail 
     .select(siteColumns)
     .from(articles)
     .where(and(eq(articles.number, number), eq(articles.status, "published")))
-    .limit(1);
+    .limit(1)
+    .then((list) => list.map(forSite));
   const [article] = await decorate(rows);
   return article ?? null;
 }

@@ -29,6 +29,10 @@ interface CoverImageProps {
   readonly priority?: boolean;
 }
 
+// The wash behind the wordmark on a lead story with no cover photo.
+export const LEAD_PLACEHOLDER =
+  "bg-[radial-gradient(80%_100%_at_70%_20%,rgba(46,204,64,0.15),transparent_55%),linear-gradient(150deg,#14311f_0%,#0d1d33_60%,#101a3a_100%)]";
+
 // A card's cover, cropped around its focal point, or the wordmark on a wash.
 // Fills its positioned parent.
 export function CoverImage({
