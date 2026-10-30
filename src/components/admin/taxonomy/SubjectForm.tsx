@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { deleteSubject, saveSubject, type ActionResult } from "@/lib/actions/taxonomy";
 import type { AdminSubject } from "@/lib/dal/taxonomy-admin";
-import { inputClass } from "../Field";
+import { ConfirmDelete } from "../ConfirmDelete";
+import { buttonClass, Field, inputClass } from "../Field";
 
 const initialState: ActionResult = {};
 const DEFAULT_COLOR = "#4cb8ff";
@@ -20,8 +21,6 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
   const [slug, setSlug] = useState(subject?.slug ?? "");
   const [color, setColor] = useState(subject?.color ?? DEFAULT_COLOR);
   const [description, setDescription] = useState(subject?.description ?? "");
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [isDeleting, startDelete] = useTransition();
   const [state, formAction, isPending] = useActionState(async (prev: ActionResult, formData: FormData) => {
     const result = await saveSubject(prev, formData);
     if (!result.error) onDone();
@@ -36,8 +35,7 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
     >
       {subject ? <input type="hidden" name="id" value={subject.id} /> : null}
       <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">שם</span>
+        <Field label="שם">
           <input
             name="name"
             value={name}
@@ -46,9 +44,8 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
             className={inputClass}
             autoFocus
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">כתובת באנגלית</span>
+        </Field>
+        <Field label="כתובת באנגלית">
           <input
             name="slug"
             dir="ltr"
@@ -57,9 +54,8 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
             placeholder="israeli-football"
             className={`${inputClass} text-left`}
           />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium">צבע</span>
+        </Field>
+        <Field label="צבע">
           <input
             type="color"
             name="color"
@@ -67,10 +63,9 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
             onChange={(event) => setColor(event.target.value)}
             className="h-10 w-16 cursor-pointer rounded-lg border border-surface-border bg-surface p-1"
           />
-        </label>
+        </Field>
       </div>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="font-medium">משפט תיאור</span>
+      <Field label="משפט תיאור" error={state.error}>
         <input
           name="description"
           value={description}
@@ -78,8 +73,7 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
           placeholder="ליגת העל, הנבחרת והקבוצות שלנו באירופה"
           className={inputClass}
         />
-      </label>
-      {state.error ? <p className="text-sm text-red-400">{state.error}</p> : null}
+      </Field>
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="submit"
@@ -88,45 +82,20 @@ export function SubjectForm({ subject, onDone }: SubjectFormProps) {
         >
           {isPending ? "שומר..." : subject ? "שמירה" : "הוספת נושא"}
         </button>
-        <button
-          type="button"
-          onClick={onDone}
-          className="rounded-lg border border-surface-border px-4 py-2 text-sm text-text-muted hover:text-white"
-        >
+        <button type="button" onClick={onDone} className={`${buttonClass} text-text-muted`}>
           ביטול
         </button>
-        {subject && !confirmDelete ? (
-          <button
-            type="button"
-            onClick={() => setConfirmDelete(true)}
-            className="ms-auto rounded-lg px-3 py-2 text-sm text-text-muted hover:text-red-400"
-          >
-            מחיקת הנושא
-          </button>
-        ) : null}
-        {subject && confirmDelete ? (
-          <span className="ms-auto flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-red-400">התגיות יעברו לתיבת ההמתנה. למחוק?</span>
-            <button
-              type="button"
-              disabled={isDeleting}
-              onClick={() =>
-                startDelete(async () => {
-                  await deleteSubject(subject.id);
-                  onDone();
-                })
-              }
-              className="rounded-lg bg-red-500/90 px-3 py-1.5 font-medium text-white hover:bg-red-500 disabled:opacity-50"
-            >
-              מחיקה
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmDelete(false)}
-              className="rounded-lg border border-surface-border px-3 py-1.5 text-text-muted"
-            >
-              לא
-            </button>
+        {subject ? (
+          <span className="ms-auto">
+            <ConfirmDelete
+              question="התגיות יעברו לתיבת ההמתנה. למחוק?"
+              triggerLabel="מחיקת הנושא"
+              triggerClassName="text-sm text-text-muted transition-colors hover:text-red-400"
+              onConfirm={async () => {
+                await deleteSubject(subject.id);
+                onDone();
+              }}
+            />
           </span>
         ) : null}
       </div>

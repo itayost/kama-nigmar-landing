@@ -75,7 +75,6 @@ async function run(task: (context: ScriptContext) => Promise<void>): Promise<num
         options: { apply: values.apply, replace: values.replace },
         migrate: connection.migrate,
         confirmWrite() {
-          if (isLocalDatabase(url)) return new URL(url).hostname;
           const check = checkConfirmedHost(url, values["confirm-host"]);
           if (!check.ok) throw new ScriptStop(check.message);
           return check.host;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 import {
   createTag,
   deleteTag,
@@ -38,13 +38,16 @@ export function TaxonomyBoard({ subjects, tags }: AdminTaxonomy) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  function run(change: TagChange | null, action: () => Promise<ActionResult>) {
+  function run(change: TagChange | null, action: () => Promise<ActionResult>): Promise<ActionResult> {
     setError(null);
-    startTransition(async () => {
-      if (change) changeTags(change);
-      const result = await action();
-      if (result.error) setError(result.error);
-    });
+    return new Promise((resolve) =>
+      startTransition(async () => {
+        if (change) changeTags(change);
+        const result = await action();
+        if (result.error) setError(result.error);
+        resolve(result);
+      }),
+    );
   }
 
   function moveTo(tagId: string | null, subjectId: string | null) {
@@ -62,15 +65,17 @@ export function TaxonomyBoard({ subjects, tags }: AdminTaxonomy) {
     onDragEnd: () => setDraggingId(null),
     onMoveHere: (subjectId) => moveTo(draggingId ?? selectedId, subjectId),
     async onCreate(name, subjectId) {
-      setError(null);
-      const result = await createTag(name, subjectId);
-      if (result.error) setError(result.error);
-      return !result.error;
+      return !(await run(null, () => createTag(name, subjectId))).error;
     },
   };
 
   const selected = optimisticTags.find((tag) => tag.id === selectedId) ?? null;
-  const tagsOf = (subjectId: string | null) => optimisticTags.filter((tag) => tag.subjectId === subjectId);
+  const bySubject = useMemo(() => {
+    const groups = new Map<string | null, AdminTag[]>();
+    for (const tag of optimisticTags) groups.set(tag.subjectId, [...(groups.get(tag.subjectId) ?? []), tag]);
+    return groups;
+  }, [optimisticTags]);
+  const tagsOf = (subjectId: string | null) => bySubject.get(subjectId) ?? [];
 
   return (
     <div className="flex flex-col gap-4">

@@ -4,7 +4,8 @@
 // Usage: npm run dev:local   (then open http://localhost:3210)
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { parseEnv } from "node:util";
 import bcrypt from "bcryptjs";
 import { LOCAL_DATABASE_URL } from "@/lib/db/local";
 
@@ -27,24 +28,27 @@ if (!existsSync(ENV_FILE)) {
   console.log(`Created ${ENV_FILE}; the admin password is in it.`);
 }
 process.loadEnvFile(ENV_FILE);
-// Public settings (show links and the like) still come from .env.local, loaded
-// here because Next's own loader would run $-expansion over the bcrypt hash
-// below; __NEXT_PROCESSED_ENV tells it the environment is already complete.
-if (existsSync(".env.local")) process.loadEnvFile(".env.local");
+// Only public settings (show links and the like) come over from .env.local, so
+// no production secret reaches local dev. Next's own loader is switched off
+// (__NEXT_PROCESSED_ENV) because it would $-expand the bcrypt hash below.
+const publicSettings = existsSync(".env.local")
+  ? Object.fromEntries(
+      Object.entries(parseEnv(readFileSync(".env.local", "utf8"))).filter(
+        ([key]) => key.startsWith("NEXT_PUBLIC_") && !key.startsWith("NEXT_PUBLIC_POSTHOG"),
+      ),
+    )
+  : {};
 
 // Loopback only: the admin login above is meant for this machine.
 const child = spawn("npx", ["next", "dev", "--port", PORT, "--hostname", "localhost"], {
   stdio: "inherit",
   env: {
     ...process.env,
+    ...publicSettings,
     __NEXT_PROCESSED_ENV: "true",
     DATABASE_URL: LOCAL_DATABASE_URL,
     ADMIN_PASSWORD_HASH: process.env.LOCAL_ADMIN_PASSWORD_HASH,
     AUTH_SECRET: process.env.LOCAL_AUTH_SECRET,
-    // Keep local clicks out of production analytics and uploads out of the
-    // production image store.
-    NEXT_PUBLIC_POSTHOG_KEY: "",
-    BLOB_READ_WRITE_TOKEN: "",
   },
 });
 child.on("exit", (code) => process.exit(code ?? 0));

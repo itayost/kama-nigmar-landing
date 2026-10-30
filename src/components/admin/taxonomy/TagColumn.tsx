@@ -2,7 +2,10 @@
 
 import { useState, type CSSProperties, type DragEvent } from "react";
 import type { AdminSubject, AdminTag } from "@/lib/dal/taxonomy-admin";
-import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusIcon } from "../icons";
+import { INBOX_COLOR, INBOX_LABEL } from "@/lib/taxonomy/inbox";
+import { iconButtonClass } from "../Field";
+import { PencilIcon, PlusIcon } from "../icons";
+import { ColumnControls } from "./ColumnControls";
 
 export interface ColumnActions {
   readonly selectedId: string | null;
@@ -26,43 +29,23 @@ interface TagColumnProps {
   onToggleHomepage?(): void;
 }
 
-const iconButton =
-  "grid h-7 w-7 place-items-center rounded-md text-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent";
-
-export function TagColumn({
-  subject,
-  tags,
-  isFirst,
-  isLast,
-  actions,
-  onEdit,
-  onReorder,
-  onToggleHomepage,
-}: TagColumnProps) {
-  const [draft, setDraft] = useState("");
+export function TagColumn({ subject, tags, isFirst, isLast, actions, onEdit, onReorder, onToggleHomepage }: TagColumnProps) {
   const [isOver, setIsOver] = useState(false);
   const subjectId = subject?.id ?? null;
-  const selectedElsewhere =
-    actions.selectedId !== null && !tags.some((tag) => tag.id === actions.selectedId);
-  const accent = { "--subject": subject?.color ?? "#f2b53a" } as CSSProperties;
+  const ownIds = new Set(tags.map((tag) => tag.id));
+  const incoming = actions.draggingId ?? actions.selectedId;
+  const canReceive = incoming !== null && !ownIds.has(incoming);
 
   function handleDrop(event: DragEvent) {
     event.preventDefault();
     setIsOver(false);
-    if (actions.draggingId && !tags.some((tag) => tag.id === actions.draggingId)) {
-      actions.onMoveHere(subjectId);
-    }
-  }
-
-  async function submitDraft() {
-    const name = draft.trim();
-    if (name && (await actions.onCreate(name, subjectId))) setDraft("");
+    if (actions.draggingId && !ownIds.has(actions.draggingId)) actions.onMoveHere(subjectId);
   }
 
   return (
     <section
-      aria-label={subject ? subject.name : "ממתינות לשיבוץ"}
-      style={accent}
+      aria-label={subject ? subject.name : INBOX_LABEL}
+      style={{ "--subject": subject?.color ?? INBOX_COLOR } as CSSProperties}
       onDragOver={(event) => {
         if (!actions.draggingId) return;
         event.preventDefault();
@@ -76,45 +59,23 @@ export function TagColumn({
     >
       <header className="flex items-center gap-2">
         {subject ? <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-[3px] bg-[var(--subject)]" /> : null}
-        <h3 className="min-w-0 flex-1 text-sm font-extrabold leading-tight">{subject ? subject.name : "ממתינות לשיבוץ"}</h3>
+        <h3 className="min-w-0 flex-1 text-sm font-extrabold leading-tight">{subject ? subject.name : INBOX_LABEL}</h3>
         <span className="text-xs tabular-nums text-text-muted">{tags.length}</span>
         {onEdit ? (
-          <button type="button" onClick={onEdit} aria-label={`עריכת ${subject?.name}`} className={iconButton}>
+          <button type="button" onClick={onEdit} aria-label={`עריכת ${subject?.name}`} className={iconButtonClass}>
             <PencilIcon />
           </button>
         ) : null}
       </header>
 
-      {subject ? (
-        <div className="flex items-center gap-1 text-xs text-text-muted">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={subject.onHomepage}
-            onClick={onToggleHomepage}
-            className="flex items-center gap-1.5 whitespace-nowrap rounded-md py-1 pe-1.5 hover:text-white"
-          >
-            <span
-              aria-hidden="true"
-              className={`relative h-4 w-7 rounded-full transition-colors ${subject.onHomepage ? "bg-accent" : "bg-white/20"}`}
-            >
-              <span
-                className={`absolute top-0.5 h-3 w-3 rounded-full bg-bg-start transition-[inset-inline-start] ${
-                  subject.onHomepage ? "start-[0.85rem]" : "start-0.5"
-                }`}
-              />
-            </span>
-            בעמוד הבית
-          </button>
-          <span className="ms-auto flex">
-            <button type="button" disabled={isFirst} onClick={() => onReorder?.(-1)} aria-label="הקדמה" className={iconButton}>
-              <ChevronRightIcon />
-            </button>
-            <button type="button" disabled={isLast} onClick={() => onReorder?.(1)} aria-label="הזזה אחורה" className={iconButton}>
-              <ChevronLeftIcon />
-            </button>
-          </span>
-        </div>
+      {subject && onReorder && onToggleHomepage ? (
+        <ColumnControls
+          onHomepage={subject.onHomepage}
+          isFirst={Boolean(isFirst)}
+          isLast={Boolean(isLast)}
+          onToggleHomepage={onToggleHomepage}
+          onReorder={onReorder}
+        />
       ) : (
         <p className="text-xs text-text-muted">תגיות חדשות שעדיין לא שובצו בנושא</p>
       )}
@@ -122,22 +83,7 @@ export function TagColumn({
       <ul className="flex flex-col gap-1.5">
         {tags.map((tag) => (
           <li key={tag.id}>
-            <button
-              type="button"
-              draggable
-              aria-pressed={actions.selectedId === tag.id}
-              onClick={() => actions.onSelect(tag.id)}
-              onDragStart={() => actions.onDragStart(tag.id)}
-              onDragEnd={actions.onDragEnd}
-              className={`flex w-full cursor-grab items-center gap-2 rounded-lg border px-2.5 py-1.5 text-start text-sm transition-colors active:cursor-grabbing ${
-                actions.selectedId === tag.id
-                  ? "border-accent bg-accent/15"
-                  : "border-surface-border bg-surface hover:border-white/30"
-              } ${actions.draggingId === tag.id ? "opacity-40" : ""}`}
-            >
-              <span className="min-w-0 flex-1 truncate">{tag.name}</span>
-              <span className="text-xs tabular-nums text-text-muted">{tag.articleCount}</span>
-            </button>
+            <TagChip tag={tag} actions={actions} />
           </li>
         ))}
         {tags.length === 0 ? (
@@ -147,7 +93,7 @@ export function TagColumn({
         ) : null}
       </ul>
 
-      {selectedElsewhere ? (
+      {canReceive && actions.selectedId ? (
         <button
           type="button"
           onClick={() => actions.onMoveHere(subjectId)}
@@ -157,24 +103,52 @@ export function TagColumn({
         </button>
       ) : null}
 
-      <form
-        className="mt-auto flex items-center gap-1.5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void submitDraft();
-        }}
-      >
-        <input
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="תגית חדשה"
-          aria-label={`תגית חדשה ב${subject ? subject.name : "תיבת ההמתנה"}`}
-          className="min-w-0 flex-1 rounded-lg border border-surface-border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-text-muted focus:border-accent focus:outline-none"
-        />
-        <button type="submit" aria-label="הוספה" className={iconButton}>
-          <PlusIcon />
-        </button>
-      </form>
+      <NewTagInput label={`תגית חדשה ב${subject ? subject.name : "תיבת ההמתנה"}`} onCreate={(name) => actions.onCreate(name, subjectId)} />
     </section>
+  );
+}
+
+function TagChip({ tag, actions }: { readonly tag: AdminTag; readonly actions: ColumnActions }) {
+  const isSelected = actions.selectedId === tag.id;
+  return (
+    <button
+      type="button"
+      draggable
+      aria-pressed={isSelected}
+      onClick={() => actions.onSelect(tag.id)}
+      onDragStart={() => actions.onDragStart(tag.id)}
+      onDragEnd={actions.onDragEnd}
+      className={`flex w-full cursor-grab items-center gap-2 rounded-lg border px-2.5 py-1.5 text-start text-sm transition-colors active:cursor-grabbing ${
+        isSelected ? "border-accent bg-accent/15" : "border-surface-border bg-surface hover:border-white/30"
+      } ${actions.draggingId === tag.id ? "opacity-40" : ""}`}
+    >
+      <span className="min-w-0 flex-1 truncate">{tag.name}</span>
+      <span className="text-xs tabular-nums text-text-muted">{tag.articleCount}</span>
+    </button>
+  );
+}
+
+function NewTagInput({ label, onCreate }: { readonly label: string; onCreate(name: string): Promise<boolean> }) {
+  const [draft, setDraft] = useState("");
+  return (
+    <form
+      className="mt-auto flex items-center gap-1.5"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        const name = draft.trim();
+        if (name && (await onCreate(name))) setDraft("");
+      }}
+    >
+      <input
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        placeholder="תגית חדשה"
+        aria-label={label}
+        className="min-w-0 flex-1 rounded-lg border border-surface-border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-text-muted focus:border-accent focus:outline-none"
+      />
+      <button type="submit" aria-label="הוספה" className={iconButtonClass}>
+        <PlusIcon />
+      </button>
+    </form>
   );
 }

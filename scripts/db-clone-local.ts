@@ -6,14 +6,11 @@
 import { existsSync } from "node:fs";
 import { sql, type SQL } from "drizzle-orm";
 import { isLocalDatabase, LOCAL_DATABASE_URL } from "@/lib/db/local";
+import { rowsOf } from "@/lib/db/migrate";
 import { connectScriptDb, type ScriptDb } from "@/lib/db/script";
 
 // Parents before children, so foreign keys hold while inserting.
 const TABLES = ["polls", "subjects", "tags", "articles", "article_tags", "poll_votes", "article_views_daily"];
-
-function rowsOf(result: unknown): Record<string, unknown>[] {
-  return (result as { rows: Record<string, unknown>[] }).rows;
-}
 
 async function columnTypes(db: ScriptDb, table: string): Promise<Map<string, string>> {
   const result = await db.execute(sql`

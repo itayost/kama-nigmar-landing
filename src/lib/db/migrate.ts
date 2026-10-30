@@ -23,7 +23,7 @@ interface Snapshot {
 
 const history = sql`${sql.identifier(MIGRATIONS_CONFIG.migrationsSchema)}.${sql.identifier(MIGRATIONS_CONFIG.migrationsTable)}`;
 
-function rowsOf(result: unknown): Record<string, unknown>[] {
+export function rowsOf(result: unknown): Record<string, unknown>[] {
   const rows = Array.isArray(result) ? result : (result as { rows?: unknown } | null)?.rows;
   return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
 }

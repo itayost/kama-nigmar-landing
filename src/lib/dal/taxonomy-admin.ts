@@ -20,6 +20,9 @@ export interface AdminTag {
   readonly articleCount: number;
 }
 
+// A tag without its usage count: what the board and the article form pass around.
+export type TaxonomyTag = Omit<AdminTag, "articleCount">;
+
 export interface AdminTaxonomy {
   readonly subjects: readonly AdminSubject[];
   readonly tags: readonly AdminTag[];

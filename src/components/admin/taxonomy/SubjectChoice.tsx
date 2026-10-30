@@ -9,7 +9,7 @@ interface SubjectChoiceProps {
   readonly subjects: readonly AdminSubject[];
   readonly tagSubjects: readonly (string | null)[];
   readonly primarySubjectId: string | null;
-  readonly isSuggested: boolean;
+  readonly suggestedPrimaryId: string | null;
   readonly format: ArticleFormat;
   onPrimaryChange(subjectId: string | null): void;
   onUseSuggestion(): void;
@@ -22,13 +22,14 @@ export function SubjectChoice({
   subjects,
   tagSubjects,
   primarySubjectId,
-  isSuggested,
+  suggestedPrimaryId,
   format,
   onPrimaryChange,
   onUseSuggestion,
   onFormatChange,
 }: SubjectChoiceProps) {
   const primary = subjects.find((subject) => subject.id === primarySubjectId) ?? null;
+  const isSuggested = primarySubjectId === suggestedPrimaryId;
   const others = otherSubjects(tagSubjects, primarySubjectId)
     .map((id) => subjects.find((subject) => subject.id === id))
     .filter((subject): subject is AdminSubject => subject !== undefined);

@@ -5,7 +5,7 @@ import { readMigrationFiles } from "drizzle-orm/migrator";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { afterEach, describe, expect, it } from "vitest";
-import { adoptExistingDatabase, MIGRATIONS_CONFIG } from "./migrate";
+import { adoptExistingDatabase, MIGRATIONS_CONFIG, rowsOf } from "./migrate";
 
 const migrationsFolder = fileURLToPath(new URL("../../../drizzle", import.meta.url));
 
@@ -30,10 +30,6 @@ async function emptyDatabase() {
 }
 
 type Db = Awaited<ReturnType<typeof emptyDatabase>>;
-
-function rowsOf(result: unknown): Record<string, unknown>[] {
-  return (result as { rows: Record<string, unknown>[] }).rows;
-}
 
 const migrateAll = (db: Db) => migrate(db, { migrationsFolder, ...MIGRATIONS_CONFIG });
 

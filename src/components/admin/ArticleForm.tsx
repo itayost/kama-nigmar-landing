@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { saveArticle, type ArticleFormState } from "@/lib/actions/articles";
 import { normalizeBlocks, type ArticleBlock } from "@/lib/articles/blocks";
 import { toDatetimeLocalIsrael } from "@/lib/datetime";
 import type { PollChoice } from "@/lib/dal/polls";
-import type { AdminTaxonomy } from "@/lib/dal/taxonomy-admin";
+import type { AdminTaxonomy, TaxonomyTag } from "@/lib/dal/taxonomy-admin";
 import type { Article } from "@/lib/db/schema";
 import type { ArticleFormat } from "@/lib/taxonomy/format";
 import { suggestPrimarySubject } from "@/lib/taxonomy/suggest";
@@ -15,7 +15,7 @@ import { CoverFocusField, type CoverFocus } from "./CoverFocusField";
 import { Field, inputClass } from "./Field";
 import { ImageUploadField } from "./ImageUploadField";
 import { SubjectChoice } from "./taxonomy/SubjectChoice";
-import { TagPicker, type PickerTag } from "./taxonomy/TagPicker";
+import { TagPicker } from "./taxonomy/TagPicker";
 
 const initialState: ArticleFormState = { errors: {} };
 
@@ -45,7 +45,7 @@ export function ArticleForm({ article, tagIds: savedTagIds, taxonomy, pollChoice
     toDatetimeLocalIsrael(article?.publishedAt),
   );
   const [tagIds, setTagIds] = useState<string[]>(() => [...(savedTagIds ?? [])]);
-  const [catalog, setCatalog] = useState<PickerTag[]>(() => [...taxonomy.tags]);
+  const [catalog, setCatalog] = useState<TaxonomyTag[]>(() => [...taxonomy.tags]);
   const [format, setFormat] = useState<ArticleFormat>(article?.format ?? "story");
   // Null while the primary subject follows the tags; set once the admin picks one.
   const [chosenPrimary, setChosenPrimary] = useState<{ readonly id: string | null } | null>(() =>
@@ -63,7 +63,8 @@ export function ArticleForm({ article, tagIds: savedTagIds, taxonomy, pollChoice
   );
 
   const hasErrors = Object.keys(state.errors).length > 0;
-  const tagSubjects = tagIds.map((id) => catalog.find((tag) => tag.id === id)?.subjectId ?? null);
+  const subjectOfTag = useMemo(() => new Map(catalog.map((tag) => [tag.id, tag.subjectId])), [catalog]);
+  const tagSubjects = tagIds.map((id) => subjectOfTag.get(id) ?? null);
   const suggestedPrimary = suggestPrimarySubject(tagSubjects, format);
   const primarySubjectId = chosenPrimary ? chosenPrimary.id : suggestedPrimary;
 
@@ -201,7 +202,7 @@ export function ArticleForm({ article, tagIds: savedTagIds, taxonomy, pollChoice
         subjects={taxonomy.subjects}
         tagSubjects={tagSubjects}
         primarySubjectId={primarySubjectId}
-        isSuggested={!chosenPrimary || chosenPrimary.id === suggestedPrimary}
+        suggestedPrimaryId={suggestedPrimary}
         format={format}
         onPrimaryChange={(id) => setChosenPrimary({ id })}
         onUseSuggestion={() => setChosenPrimary(null)}

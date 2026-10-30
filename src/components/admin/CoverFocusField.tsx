@@ -8,7 +8,17 @@ export interface CoverFocus {
   readonly y: number;
 }
 
-export const CENTER: CoverFocus = { x: 50, y: 50 };
+const CENTER: CoverFocus = { x: 50, y: 50 };
+
+const PREVIEWS = [
+  { label: "בטלפון", className: "h-32 w-24", sizes: "96px" },
+  { label: "בכרטיס", className: "aspect-video w-36", sizes: "144px" },
+] as const;
+
+const SLIDERS = [
+  { label: "אופקי", axis: "x" },
+  { label: "אנכי", axis: "y" },
+] as const;
 
 interface CoverFocusFieldProps {
   readonly imageUrl: string;
@@ -51,43 +61,30 @@ export function CoverFocusField({ imageUrl, focus, onChange }: CoverFocusFieldPr
           />
         </button>
         <div className="flex items-end gap-3">
-          <figure className="flex flex-col items-center gap-1">
-            <div className="relative h-32 w-24 overflow-hidden rounded-lg border border-surface-border">
-              <Image src={imageUrl} alt="" fill sizes="96px" className="object-cover" style={{ objectPosition: position }} />
-            </div>
-            <figcaption className="text-xs text-text-muted">בטלפון</figcaption>
-          </figure>
-          <figure className="flex flex-col items-center gap-1">
-            <div className="relative aspect-video w-36 overflow-hidden rounded-lg border border-surface-border">
-              <Image src={imageUrl} alt="" fill sizes="144px" className="object-cover" style={{ objectPosition: position }} />
-            </div>
-            <figcaption className="text-xs text-text-muted">בכרטיס</figcaption>
-          </figure>
+          {PREVIEWS.map((preview) => (
+            <figure key={preview.label} className="flex flex-col items-center gap-1">
+              <div className={`relative overflow-hidden rounded-lg border border-surface-border ${preview.className}`}>
+                <Image src={imageUrl} alt="" fill sizes={preview.sizes} className="object-cover" style={{ objectPosition: position }} />
+              </div>
+              <figcaption className="text-xs text-text-muted">{preview.label}</figcaption>
+            </figure>
+          ))}
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-4 text-sm">
-        <label className="flex items-center gap-2">
-          אופקי
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={point.x}
-            onChange={(event) => onChange({ ...point, x: Number(event.target.value) })}
-            className="accent-accent"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          אנכי
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={point.y}
-            onChange={(event) => onChange({ ...point, y: Number(event.target.value) })}
-            className="accent-accent"
-          />
-        </label>
+        {SLIDERS.map((slider) => (
+          <label key={slider.axis} className="flex items-center gap-2">
+            {slider.label}
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={point[slider.axis]}
+              onChange={(event) => onChange({ ...point, [slider.axis]: Number(event.target.value) })}
+              className="accent-accent"
+            />
+          </label>
+        ))}
         {focus ? (
           <button type="button" onClick={() => onChange(null)} className="text-text-muted hover:text-white">
             חזרה למרכז

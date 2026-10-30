@@ -15,6 +15,7 @@ import { parseDatetimeLocalIsrael } from "@/lib/datetime";
 import { getDb } from "@/lib/db";
 import { runAtomic } from "@/lib/db/atomic";
 import { articles, articleTags, subjects, tags as tagsTable, type NewArticle } from "@/lib/db/schema";
+import { optionalInt, optionalString } from "@/lib/form-data";
 import { isUuid } from "@/lib/uuid";
 import { parseVideoUrl } from "@/lib/video/parseVideoUrl";
 
@@ -72,16 +73,6 @@ function normalizeVideoBlocks(blocks: ArticleBlock[]): ArticleBlock[] | null {
     normalized.push({ id: block.id, type: "video", url: block.url, ...parsed });
   }
   return normalized;
-}
-
-function optionalString(formData: FormData, key: string): string | undefined {
-  const value = formData.get(key);
-  return typeof value === "string" && value !== "" ? value : undefined;
-}
-
-function optionalInt(formData: FormData, key: string): number | undefined {
-  const value = optionalString(formData, key);
-  return value === undefined ? undefined : Number(value);
 }
 
 type ParsedArticle =
@@ -165,10 +156,11 @@ async function writeArticle(
   const clearLinks = db.delete(articleTags).where(eq(articleTags.articleId, id));
   const links = tagIds.map((tagId, position) => ({ articleId: id, tagId, position }));
 
-  const [saved] =
-    links.length > 0
-      ? await runAtomic(db, [save, clearLinks, db.insert(articleTags).values(links)])
-      : await runAtomic(db, [save, clearLinks]);
+  const [saved] = await runAtomic(db, [
+    save,
+    clearLinks,
+    ...(links.length > 0 ? [db.insert(articleTags).values(links)] : []),
+  ]);
   return saved[0]?.number ?? null;
 }
 
@@ -189,19 +181,15 @@ export async function saveArticle(
   const { data, content } = parsed;
 
   const db = getDb();
-  const tagNames = await resolveTaxonomy(db, data);
+  const [tagNames, existing] = await Promise.all([
+    resolveTaxonomy(db, data),
+    articleId
+      ? db.select({ publishedAt: articles.publishedAt }).from(articles).where(eq(articles.id, articleId)).limit(1)
+      : null,
+  ]);
   if ("error" in tagNames) return { errors: { tagIds: tagNames.error } };
-
-  let previousPublishedAt: Date | null = null;
-  if (articleId) {
-    const existing = await db
-      .select({ publishedAt: articles.publishedAt })
-      .from(articles)
-      .where(eq(articles.id, articleId))
-      .limit(1);
-    if (!existing[0]) return { errors: { form: "הכתבה לא נמצאה" } };
-    previousPublishedAt = existing[0].publishedAt;
-  }
+  if (existing && !existing[0]) return { errors: { form: "הכתבה לא נמצאה" } };
+  const previousPublishedAt = existing?.[0]?.publishedAt ?? null;
 
   const isPublished = data.status === "published";
   const savedNumber = await writeArticle(

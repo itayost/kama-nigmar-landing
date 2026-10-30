@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { AdminTag } from "@/lib/dal/taxonomy-admin";
-import { inputClass } from "../Field";
+import { ConfirmDelete } from "../ConfirmDelete";
+import { buttonClass, iconButtonClass, inputClass } from "../Field";
 import { CloseIcon } from "../icons";
 
 interface SelectedTagPanelProps {
@@ -15,14 +16,10 @@ interface SelectedTagPanelProps {
   onClose(): void;
 }
 
-const ghostButton =
-  "rounded-lg border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-white/30 disabled:opacity-50";
-
 // Actions for the tag picked on the board. Moving is done on the board itself.
 export function SelectedTagPanel({ tag, others, busy, onRename, onMerge, onDelete, onClose }: SelectedTagPanelProps) {
   const [name, setName] = useState(tag.name);
   const [mergeTarget, setMergeTarget] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div
@@ -35,12 +32,7 @@ export function SelectedTagPanel({ tag, others, busy, onRename, onMerge, onDelet
         <span className="text-sm text-text-muted">
           {tag.articleCount === 1 ? "כתבה אחת" : `${tag.articleCount} כתבות`} · בחרו עמודה ולחצו &quot;העברה לכאן&quot;, או גררו
         </span>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="סגירה"
-          className="ms-auto grid h-8 w-8 place-items-center rounded-md text-text-muted hover:bg-white/10 hover:text-white"
-        >
+        <button type="button" onClick={onClose} aria-label="סגירה" className={`${iconButtonClass} ms-auto h-8 w-8`}>
           <CloseIcon />
         </button>
       </div>
@@ -52,13 +44,8 @@ export function SelectedTagPanel({ tag, others, busy, onRename, onMerge, onDelet
             if (name.trim() && name.trim() !== tag.name) onRename(name);
           }}
         >
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            aria-label="שם התגית"
-            className={`${inputClass} w-44 py-1.5`}
-          />
-          <button type="submit" disabled={busy} className={ghostButton}>
+          <input value={name} onChange={(event) => setName(event.target.value)} aria-label="שם התגית" className={`${inputClass} w-44 py-1.5`} />
+          <button type="submit" disabled={busy} className={buttonClass}>
             שינוי שם
           </button>
         </form>
@@ -83,35 +70,17 @@ export function SelectedTagPanel({ tag, others, busy, onRename, onMerge, onDelet
                 </option>
               ))}
             </select>
-            <button type="submit" disabled={busy || !mergeTarget} className={ghostButton}>
+            <button type="submit" disabled={busy || !mergeTarget} className={buttonClass}>
               מיזוג
             </button>
           </form>
         ) : null}
-        {confirmDelete ? (
-          <span className="flex items-center gap-2 text-sm">
-            <span className="text-red-400">התגית תוסר מכל הכתבות. למחוק?</span>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={onDelete}
-              className="rounded-lg bg-red-500/90 px-3 py-1.5 font-medium text-white hover:bg-red-500 disabled:opacity-50"
-            >
-              מחיקה
-            </button>
-            <button type="button" onClick={() => setConfirmDelete(false)} className={ghostButton}>
-              לא
-            </button>
-          </span>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setConfirmDelete(true)}
-            className="text-sm text-text-muted transition-colors hover:text-red-400"
-          >
-            מחיקת התגית
-          </button>
-        )}
+        <ConfirmDelete
+          question="התגית תוסר מכל הכתבות. למחוק?"
+          triggerLabel="מחיקת התגית"
+          triggerClassName="text-sm text-text-muted transition-colors hover:text-red-400"
+          onConfirm={onDelete}
+        />
       </div>
     </div>
   );
