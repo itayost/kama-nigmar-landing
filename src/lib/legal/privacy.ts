@@ -5,13 +5,14 @@ import { CONTACT_EMAIL } from "@/lib/site";
 // what it is used for, who it is shared with, cookies, retention, security,
 // rights under חוק הגנת הפרטיות, תשמ"א-1981 — but the facts in it are the
 // site's real ones: no accounts, no forms, aggregate counters, cookieless
-// analytics, third-party players that load only on click, and the documented
+// analytics, the podcast player that loads Spotify with the page while other
+// third-party players load only on click, and the documented
 // 30-day pruning of the daily view rollups (ADR 0001).
 export const privacyDocument: LegalDocument = {
   title: "מדיניות פרטיות",
   description:
     "מדיניות הפרטיות של אתר כמה נגמר? — איזה מידע נאסף בגלישה, למה הוא משמש, מי הספקים ומהן זכויותיכם.",
-  updatedAt: "2026-08-05",
+  updatedAt: "2026-10-30",
   intro: [
     "אנחנו מכבדים את פרטיותכם. מדיניות זו מסבירה איזה מידע נאסף בעת השימוש באתר “כמה נגמר?”, למה הוא משמש, עם מי הוא נשמר ומהן זכויותיכם לגביו.",
   ],
@@ -65,7 +66,8 @@ export const privacyDocument: LegalDocument = {
             "שירות האנליטיקה מוגדר במצב ללא עוגיות (cookieless): הנתונים נשמרים בזיכרון הדפדפן למשך הביקור בלבד ואינם נשמרים במכשיר לאחר סגירת הלשונית. מסיבה זו אין באתר באנר עוגיות.",
             "אחסון מקומי (localStorage) משמש לזכירת סקרים שכבר הצבעתם בהם, כדי שלא תתבקשו להצביע בהם שוב. המידע נשאר במכשיר שלכם, אינו נשלח לשרת, וניתן למחוק אותו בכל עת דרך הגדרות הדפדפן.",
             "עוגייה אחת נוצרת באזור הניהול הסגור של האתר לצורך שמירת החיבור של מנהל האתר. היא אינה נוצרת אצל גולשים.",
-            "נגני שמע ווידאו של צדדים שלישיים עשויים לשמור עוגיות משלהם, אך הם נטענים רק לאחר לחיצה על כפתור ההפעלה. גולש שלא הפעיל נגן — לא נוצר עבורו קשר עם אותם שירותים.",
+            "נגן הפודקאסט שבתחתית האתר נטען מ-Spotify יחד עם העמוד, כדי שהפרק יתחיל להתנגן כבר בלחיצה הראשונה. לכן נוצר קשר עם Spotify בכל ביקור, ו-Spotify עשויה לשמור עוגיות משלה בהתאם למדיניות הפרטיות שלה.",
+            "נגני שמע ווידאו של צדדים שלישיים בתוך הכתבות נטענים רק לאחר לחיצה על כפתור ההפעלה. גולש שלא הפעיל נגן כזה — לא נוצר עבורו קשר עם אותם שירותים.",
           ],
         },
       ],
@@ -102,7 +104,8 @@ export const privacyDocument: LegalDocument = {
             "Neon — מסד הנתונים שבו נשמרים הכתבות, התגיות, מוני הצפיות ותוצאות הסקרים.",
             "PostHog (שרתי האיחוד האירופי) — סטטיסטיקת שימוש באתר.",
             "Google Search Console — אימות בעלות על האתר באמצעות תג אימות בלבד; אינו אוסף מידע על הגולשים.",
-            "Spotify, Apple Podcasts, YouTube, Instagram ו-TikTok — נגנים משובצים וקישורים לפרקים ולסרטונים. הם נטענים לפי בחירתכם וכפופים למדיניות הפרטיות שלהם.",
+            "Spotify — נגן הפודקאסט, שנטען יחד עם העמוד, ונגני פרקים בתוך הכתבות. כפופה למדיניות הפרטיות שלה.",
+            "Apple Podcasts, YouTube, Instagram ו-TikTok — נגנים משובצים וקישורים לפרקים ולסרטונים. הם נטענים לפי בחירתכם וכפופים למדיניות הפרטיות שלהם.",
           ],
         },
         {

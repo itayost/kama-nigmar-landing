@@ -1,16 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Episode } from "@/lib/podcast/episode";
+import { EpisodeDuration, episodePlayLabel, EpisodeTitle } from "./EpisodeTitle";
 import { PlayToggle } from "./icons";
 import { playerControl, type Playback } from "./player-control";
 
 const API_SCRIPT_SRC = "https://open.spotify.com/embed/iframe-api/v1";
 const READY_TIMEOUT_MS = 5000;
 
-// "idle" is the pre-interaction state: the bar renders fully, but nothing from
-// open.spotify.com is requested yet, so no third-party cookie is set on visitors
-// who never press play. First press moves us to "loading" and from there the
-// original flow is unchanged.
+// "idle" until Spotify's player is up. It loads once the page has finished
+// loading, so the first press plays at once: phones only allow sound during a
+// tap, and a player that loads after the tap asks too late. A press before it
+// is up moves to "loading" and plays when it is (the privacy policy says the
+// player loads with the page).
 type PlayerMode = "idle" | "loading" | "custom" | "fallback";
 
 interface PlaybackUpdate {
@@ -42,33 +45,44 @@ declare global {
 
 interface PlayerBarProps {
   readonly spotifyShowId: string;
+  // The latest episode, which the show's player starts from; null when the
+  // feed is unavailable.
+  readonly episode: Episode | null;
 }
 
 // Persistent site-wide Player bar (CONTEXT.md). Custom on-brand controls
 // drive a visually hidden Spotify embed via the iFrame API; if the API
 // fails to come up within the timeout, the stock compact embed renders
 // instead - the bar must never be a dead strip.
-export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
+export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<SpotifyController | null>(null);
   const [mode, setMode] = useState<PlayerMode>("idle");
   const [isPaused, setIsPaused] = useState(true);
   const [progress, setProgress] = useState(0);
-  // A one-way latch, deliberately not `mode`: the effect must run exactly once.
-  // Depending on `mode` re-runs it when the controller sets "custom", which
-  // re-arms the timeout below, and since onSpotifyIframeApiReady only ever
-  // fires once, that second timeout would drop a working player to "fallback".
-  const [hasActivated, setHasActivated] = useState(false);
+  // A one-way latch, deliberately not `mode`: the loading effect must run
+  // exactly once, since onSpotifyIframeApiReady only ever fires once.
+  const [shouldLoad, setShouldLoad] = useState(false);
   // Set when the user pressed play before the controller existed, so playback
   // starts as soon as it does rather than needing a second press.
   const shouldAutoPlayRef = useRef(false);
 
+  // Load the player after the page itself, so it never competes with the
+  // page's own images and scripts.
   useEffect(() => {
-    if (spotifyShowId === "" || !hasActivated) return;
+    if (spotifyShowId === "") return;
+    const load = () => setShouldLoad(true);
+    if (document.readyState === "complete") {
+      load();
+      return;
+    }
+    window.addEventListener("load", load, { once: true });
+    return () => window.removeEventListener("load", load);
+  }, [spotifyShowId]);
+
+  useEffect(() => {
+    if (spotifyShowId === "" || !shouldLoad) return;
     let isCancelled = false;
-    const timeout = setTimeout(() => {
-      if (!isCancelled && !controllerRef.current) setMode("fallback");
-    }, READY_TIMEOUT_MS);
 
     window.onSpotifyIframeApiReady = (api) => {
       if (isCancelled || !hostRef.current) return;
@@ -87,7 +101,6 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
                   : 0,
               );
             });
-            clearTimeout(timeout);
             setMode("custom");
             if (shouldAutoPlayRef.current) {
               shouldAutoPlayRef.current = false;
@@ -96,7 +109,6 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
           },
         );
       } catch {
-        clearTimeout(timeout);
         setMode("fallback");
       }
     };
@@ -106,7 +118,6 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
       script.src = API_SCRIPT_SRC;
       script.async = true;
       script.onerror = () => {
-        clearTimeout(timeout);
         if (!isCancelled) setMode("fallback");
       };
       document.body.appendChild(script);
@@ -114,9 +125,18 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
 
     return () => {
       isCancelled = true;
-      clearTimeout(timeout);
     };
-  }, [spotifyShowId, hasActivated]);
+  }, [spotifyShowId, shouldLoad]);
+
+  // A listener who pressed play waits at most READY_TIMEOUT_MS for the player;
+  // loading in the background alone never gives up on it.
+  useEffect(() => {
+    if (mode !== "loading") return;
+    const timeout = setTimeout(() => {
+      if (!controllerRef.current) setMode("fallback");
+    }, READY_TIMEOUT_MS);
+    return () => clearTimeout(timeout);
+  }, [mode]);
 
   // Stable, so other controls can hold it: toggles a ready player, otherwise
   // asks for playback to start as soon as the player is up.
@@ -127,7 +147,7 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
       return;
     }
     shouldAutoPlayRef.current = true;
-    setHasActivated(true);
+    setShouldLoad(true);
     setMode((current) => (current === "idle" ? "loading" : current));
   }, []);
 
@@ -184,17 +204,17 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
               style={{ transform: `scaleX(${progress})` }}
             />
           ) : null}
-          <PlayToggle playback={playback} onClick={handlePlayClick} playLabel="נגן את הפרק האחרון" />
-          <span className="min-w-0">
-            <span className="block text-[0.7rem] font-extrabold text-accent">
-              הפרק האחרון
+          <PlayToggle playback={playback} onClick={handlePlayClick} playLabel={episodePlayLabel(episode)} />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm leading-snug font-extrabold">
+              <EpisodeTitle episode={episode} />
             </span>
-            <span className="block truncate text-sm font-bold">
-              כמה נגמר? — התקציר היומי שלכם
-            </span>
+            {episode?.description ? (
+              <span className="block truncate text-xs leading-relaxed text-text-muted">{episode.description}</span>
+            ) : null}
           </span>
           {isPlaying ? (
-            <span aria-hidden="true" className="ms-auto flex items-end gap-[3px]">
+            <span aria-hidden="true" className="flex items-end gap-[3px]">
               {[0, 1, 2, 3].map((i) => (
                 <span
                   key={i}
@@ -203,6 +223,8 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
                 />
               ))}
             </span>
+          ) : episode?.durationSeconds ? (
+            <EpisodeDuration seconds={episode.durationSeconds} className="text-xs" />
           ) : null}
         </div>
       )}
