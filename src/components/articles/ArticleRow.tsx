@@ -29,7 +29,7 @@ export function ArticleRow({ article, note, showSubtitle, tagName, phEvent }: Ar
           article={article}
           sizes="(max-width: 640px) 96px, 136px"
           className="transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transform-none"
-          labelClassName="text-[0.65rem]"
+          labelClassName="text-[0.7rem]"
         />
       </div>
       <div className="flex min-w-0 flex-col gap-1">

@@ -41,7 +41,7 @@ export function CoverImage({
 }: CoverImageProps) {
   if (!article.coverImageUrl) {
     return (
-      <span className={`flex h-full w-full items-center justify-center ${placeholderClassName}`}>
+      <span aria-hidden="true" className={`flex h-full w-full items-center justify-center ${placeholderClassName}`}>
         <span className={`font-extrabold text-accent/40 ${labelClassName}`}>כמה נגמר?</span>
       </span>
     );

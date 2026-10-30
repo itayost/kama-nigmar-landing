@@ -27,7 +27,7 @@ export function ArticleTile({ article, phEvent, sizes, showKicker = true }: Arti
           article={article}
           sizes={sizes}
           className="transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transform-none"
-          labelClassName="text-[0.65rem] sm:text-xl"
+          labelClassName="text-[0.7rem] sm:text-xl"
         />
         {showKicker ? (
           <span className="absolute start-2.5 top-2.5 hidden sm:block">
