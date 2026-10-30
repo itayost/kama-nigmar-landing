@@ -1,5 +1,39 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { playerControl } from "./player-control";
+import { isAudible, playbackOf, playerControl } from "./player-control";
+
+describe("playbackOf", () => {
+  it("is loading while a press waits, with or without a player yet", () => {
+    expect(playbackOf({ hasPlayer: false, isWaiting: true, isPlaying: false })).toBe("loading");
+    expect(playbackOf({ hasPlayer: true, isWaiting: true, isPlaying: false })).toBe("loading");
+  });
+
+  it("is idle with no player and no press", () => {
+    expect(playbackOf({ hasPlayer: false, isWaiting: false, isPlaying: false })).toBe("idle");
+  });
+
+  it("follows the player once it is there", () => {
+    expect(playbackOf({ hasPlayer: true, isWaiting: false, isPlaying: true })).toBe("playing");
+    expect(playbackOf({ hasPlayer: true, isWaiting: false, isPlaying: false })).toBe("paused");
+  });
+});
+
+describe("isAudible", () => {
+  it("is true while an episode plays", () => {
+    expect(isAudible({ isPaused: false, position: 4443, duration: 849989 })).toBe(true);
+  });
+
+  it("is false when paused", () => {
+    expect(isAudible({ isPaused: true, position: 4443, duration: 849989 })).toBe(false);
+  });
+
+  it("is false when a start failed: Spotify says not paused but has no episode", () => {
+    expect(isAudible({ isPaused: false, position: 0, duration: 0 })).toBe(false);
+  });
+
+  it("is false once a preview has run to its end", () => {
+    expect(isAudible({ isPaused: false, position: 60000, duration: 60000 })).toBe(false);
+  });
+});
 
 let disconnect: (() => void) | null = null;
 

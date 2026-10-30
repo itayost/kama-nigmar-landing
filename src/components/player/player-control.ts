@@ -11,6 +11,32 @@ export interface PlayerSnapshot {
 
 const OFFLINE: PlayerSnapshot = { playback: "idle", available: false };
 
+// What Spotify's player reports as it plays.
+export interface SpotifyPlayback {
+  readonly isPaused: boolean;
+  readonly position: number;
+  readonly duration: number;
+}
+
+// Whether sound is actually coming out. Spotify also says "not paused" when a
+// start failed (no episode loaded, so no duration) and when a preview has run
+// to its end; neither is playing, and the button should offer play again.
+export function isAudible({ isPaused, position, duration }: SpotifyPlayback): boolean {
+  return !isPaused && duration > 0 && position < duration;
+}
+
+// What the play buttons show: loading while a press waits for the player,
+// then whatever the player is doing.
+export function playbackOf(state: {
+  readonly hasPlayer: boolean;
+  readonly isWaiting: boolean;
+  readonly isPlaying: boolean;
+}): Playback {
+  if (state.isWaiting) return "loading";
+  if (!state.hasPlayer) return "idle";
+  return state.isPlaying ? "playing" : "paused";
+}
+
 let snapshot = OFFLINE;
 let toggleRequest: (() => void) | null = null;
 const listeners = new Set<() => void>();

@@ -4,29 +4,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Episode } from "@/lib/podcast/episode";
 import { EpisodeDuration, episodePlayLabel, EpisodeTitle } from "./EpisodeTitle";
 import { PlayToggle } from "./icons";
-import { playerControl, type Playback } from "./player-control";
+import { isAudible, playbackOf, playerControl, type SpotifyPlayback } from "./player-control";
 
 const API_SCRIPT_SRC = "https://open.spotify.com/embed/iframe-api/v1";
-const READY_TIMEOUT_MS = 5000;
+// How long a listener who pressed play waits for the player before the bar
+// gives up on it: a slow phone network can take this long.
+const READY_TIMEOUT_MS = 10_000;
 
-// "idle" until Spotify's player is up. It loads once the page has finished
-// loading, so the first press plays at once: phones only allow sound during a
-// tap, and a player that loads after the tap asks too late. A press before it
-// is up moves to "loading" and plays when it is (the privacy policy says the
-// player loads with the page).
-type PlayerMode = "idle" | "loading" | "custom" | "fallback";
-
-interface PlaybackUpdate {
-  readonly data: {
-    readonly position: number;
-    readonly duration: number;
-    readonly isPaused: boolean;
-  };
-}
+// Spotify's player loads once the page has finished loading (not sooner: on a
+// slow network it would hold up the page's own cover photo), so that a press
+// reaches a ready player: phones only allow sound during a tap, and a player
+// that is still loading asks too late. "idle" until the player exists,
+// "custom" once it does, "fallback" when it failed. The privacy policy says
+// the player loads with the page.
+type PlayerMode = "idle" | "custom" | "fallback";
 
 interface SpotifyController {
   togglePlay(): void;
-  addListener(event: "playback_update", callback: (event: PlaybackUpdate) => void): void;
+  addListener(event: "ready", callback: () => void): void;
+  addListener(event: "playback_update", callback: (event: { readonly data: SpotifyPlayback }) => void): void;
 }
 
 interface SpotifyIframeApi {
@@ -58,13 +54,19 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<SpotifyController | null>(null);
   const [mode, setMode] = useState<PlayerMode>("idle");
-  const [isPaused, setIsPaused] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  // Spotify's player exists before it can play: a press only goes straight
+  // through once it has said it is ready.
+  const readyRef = useRef(false);
+  // A press arrived before the player was ready; the button shows loading.
+  const [isWaiting, setIsWaiting] = useState(false);
   // A one-way latch, deliberately not `mode`: the loading effect must run
   // exactly once, since onSpotifyIframeApiReady only ever fires once.
   const [shouldLoad, setShouldLoad] = useState(false);
-  // Set when the user pressed play before the controller existed, so playback
-  // starts as soon as it does rather than needing a second press.
+  // Set while a press waits for the player, so playback starts as soon as it
+  // is ready. A phone may refuse a start that late; the button then offers
+  // play again (see isAudible) and the next press plays.
   const shouldAutoPlayRef = useRef(false);
 
   // Load the player after the page itself, so it never competes with the
@@ -94,18 +96,23 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
             if (isCancelled) return;
             controllerRef.current = controller;
             controller.addListener("playback_update", (event) => {
-              setIsPaused(event.data.isPaused);
+              setIsPlaying(isAudible(event.data));
               setProgress(
                 event.data.duration > 0
                   ? event.data.position / event.data.duration
                   : 0,
               );
             });
+            controller.addListener("ready", () => {
+              if (isCancelled) return;
+              readyRef.current = true;
+              setIsWaiting(false);
+              if (shouldAutoPlayRef.current) {
+                shouldAutoPlayRef.current = false;
+                controller.togglePlay();
+              }
+            });
             setMode("custom");
-            if (shouldAutoPlayRef.current) {
-              shouldAutoPlayRef.current = false;
-              controller.togglePlay();
-            }
           },
         );
       } catch {
@@ -128,31 +135,38 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
     };
   }, [spotifyShowId, shouldLoad]);
 
-  // A listener who pressed play waits at most READY_TIMEOUT_MS for the player;
-  // loading in the background alone never gives up on it.
+  // A listener who pressed play waits at most READY_TIMEOUT_MS: then the bar
+  // stops waiting (a start much later would surprise them), and falls back to
+  // the stock player if Spotify's never came up. Loading in the background
+  // alone never gives up on it.
   useEffect(() => {
-    if (mode !== "loading") return;
+    if (!isWaiting) return;
     const timeout = setTimeout(() => {
+      shouldAutoPlayRef.current = false;
+      setIsWaiting(false);
       if (!controllerRef.current) setMode("fallback");
     }, READY_TIMEOUT_MS);
     return () => clearTimeout(timeout);
-  }, [mode]);
+  }, [isWaiting]);
 
   // Stable, so other controls can hold it: toggles a ready player, otherwise
-  // asks for playback to start as soon as the player is up.
+  // asks for playback to start as soon as the player is ready.
   const handlePlayClick = useCallback(() => {
     const controller = controllerRef.current;
-    if (controller) {
+    if (controller && readyRef.current) {
       controller.togglePlay();
       return;
     }
     shouldAutoPlayRef.current = true;
     setShouldLoad(true);
-    setMode((current) => (current === "idle" ? "loading" : current));
+    setIsWaiting(true);
   }, []);
 
-  const playback: Playback =
-    mode === "loading" ? "loading" : mode !== "custom" ? "idle" : isPaused ? "paused" : "playing";
+  const playback = playbackOf({
+    hasPlayer: mode === "custom",
+    isWaiting: isWaiting && mode !== "fallback",
+    isPlaying,
+  });
   useEffect(() => playerControl.report(playback), [playback]);
 
   // The stock embed that replaces a failed player cannot be driven from outside.
@@ -163,8 +177,6 @@ export function PlayerBar({ spotifyShowId, episode }: PlayerBarProps) {
   );
 
   if (spotifyShowId === "") return null;
-
-  const isPlaying = playback === "playing";
 
   return (
     <div
