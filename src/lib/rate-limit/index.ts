@@ -39,9 +39,9 @@ export function limitKey(scope: Scope, headers: Headers, subject = ""): string {
   return subject ? `${scope}:${subject}:${digest}` : `${scope}:${digest}`;
 }
 
-// Counts a hit and says whether to serve it. A database failure lets the
-// request through: these limits are a brake, and every caller has another one
-// (bcrypt for logins, plain counting for views and votes).
+// Counts a hit and says whether to serve it. If the count cannot be read,
+// logins are refused (a database outage must not open the door to guessing,
+// and the admin needs the database anyway) while views and votes pass.
 export async function allow(scope: Scope, key: string): Promise<boolean> {
   try {
     const db = getDb();
@@ -51,9 +51,9 @@ export async function allow(scope: Scope, key: string): Promise<boolean> {
   } catch (error) {
     // Once per instance: a missing table (migration 0002 not applied) would
     // otherwise log on every view.
-    if (!hasLoggedFailure) console.error("rate limit check failed; requests pass unlimited", error);
+    if (!hasLoggedFailure) console.error("rate limit check failed; logins refused, views and votes unlimited", error);
     hasLoggedFailure = true;
-    return true;
+    return scope !== "login";
   }
 }
 
