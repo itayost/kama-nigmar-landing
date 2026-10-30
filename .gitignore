@@ -48,7 +48,6 @@ next-env.d.ts
 # testing artifacts
 /test-results/
 /playwright-report/
-/drizzle/
 
 # graphify: local tool output, regenerable. Only the report is committed.
 graphify-out/*
