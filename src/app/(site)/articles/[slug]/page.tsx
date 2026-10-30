@@ -24,7 +24,7 @@ import {
   type ArticleDetail,
 } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
-import { stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
+import { PLACEHOLDER_PARAMS, stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
 import { FEED_ALTERNATE, breadcrumbSchema, newsArticleSchema } from "@/lib/seo/schema";
 import { subjectPath } from "@/lib/taxonomy/public";
 import { SITE_URL } from "@/lib/site";
@@ -41,7 +41,7 @@ const MID_MODULE_AFTER_BLOCKS = 2;
 // from the CDN with no function invocation.
 export async function generateStaticParams() {
   const articles = await getPublishedArticles();
-  return articles.map((article) => ({ slug: String(article.number) }));
+  return articles.length > 0 ? articles.map((article) => ({ slug: String(article.number) })) : PLACEHOLDER_PARAMS;
 }
 
 // Numeric params are canonical. Legacy transliterated slugs are turned into a real 308 by

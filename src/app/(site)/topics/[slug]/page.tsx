@@ -11,7 +11,7 @@ import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
 import { getPublishedArticles } from "@/lib/dal/articles";
 import { getSubjects } from "@/lib/dal/taxonomy";
 import { formatDateLong } from "@/lib/datetime";
-import { stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
+import { PLACEHOLDER_PARAMS, stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
 import { breadcrumbSchema, collectionPageSchema, FEED_ALTERNATE, pageOpenGraph } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 import { planSubjectPage, subjectPath, subjectSummary, viaTag, type SubjectSummary } from "@/lib/taxonomy/public";
@@ -20,7 +20,7 @@ const PAGE_SIZE = 12;
 
 export async function generateStaticParams() {
   const subjects = await getSubjects();
-  return subjects.map((subject) => ({ slug: subject.slug }));
+  return subjects.length > 0 ? subjects.map((subject) => ({ slug: subject.slug })) : PLACEHOLDER_PARAMS;
 }
 
 async function resolveSubject(slug: string): Promise<SubjectSummary | null> {
