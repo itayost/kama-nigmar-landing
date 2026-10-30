@@ -2,10 +2,11 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import type { RecirculationPlan } from "@/lib/articles/recirculation";
 import type { ArticleView } from "@/lib/dal/articles";
 import { subjectPath, type SubjectSummary } from "@/lib/taxonomy/public";
-import { ArticleCard } from "./ArticleCard";
+import { ArticleTile } from "./ArticleTile";
 
-// Three across inside the article column, about 240px each.
-const RECIRC_CARD_SIZES = "(max-width: 640px) 100vw, 240px";
+// A 96px row thumbnail on a phone; three across inside the article column,
+// about 240px each, from the small breakpoint up.
+const RECIRC_CARD_SIZES = "(max-width: 640px) 96px, 240px";
 
 interface RecirculationSectionsProps {
   readonly plan: RecirculationPlan<ArticleView>;
@@ -27,23 +28,25 @@ export function RecirculationSections({ plan, subject }: RecirculationSectionsPr
             linkHref={subject ? subjectPath(subject.slug) : undefined}
             linkLabel={subject ? "לכל הכתבות בנושא" : undefined}
           />
-          <div className="grid gap-4 sm:grid-cols-3">
-            {plan.related.map((article) => (
-              <ArticleCard key={article.id} article={article} phEvent="recirc_related_click" sizes={RECIRC_CARD_SIZES} />
-            ))}
-          </div>
+          <ArticleList articles={plan.related} phEvent="recirc_related_click" />
         </section>
       ) : null}
       {plan.trending.length > 0 ? (
         <section aria-labelledby="trending-articles-heading">
           <SectionHeading title="הנקראות ביותר" id="trending-articles-heading" />
-          <div className="grid gap-4 sm:grid-cols-3">
-            {plan.trending.map((article) => (
-              <ArticleCard key={article.id} article={article} phEvent="recirc_trending_click" sizes={RECIRC_CARD_SIZES} />
-            ))}
-          </div>
+          <ArticleList articles={plan.trending} phEvent="recirc_trending_click" />
         </section>
       ) : null}
+    </div>
+  );
+}
+
+function ArticleList({ articles, phEvent }: { readonly articles: readonly ArticleView[]; readonly phEvent: string }) {
+  return (
+    <div className="flex flex-col sm:grid sm:grid-cols-3 sm:gap-4">
+      {articles.map((article) => (
+        <ArticleTile key={article.id} article={article} phEvent={phEvent} sizes={RECIRC_CARD_SIZES} />
+      ))}
     </div>
   );
 }

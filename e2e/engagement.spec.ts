@@ -1,13 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
-
-async function login(page: Page) {
-  await page.goto("/admin/login");
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: "כניסה" }).click();
-  await expect(page).toHaveURL(/\/admin$/);
-}
+import { deleteArticle, deleteTag, login } from "./admin";
 
 async function findArticleUrl(page: Page, title: string): Promise<string> {
   await page.goto("/articles");
@@ -39,9 +31,14 @@ async function createArticle(
   if (options.pollLabel) {
     await page.locator('select[name="pollId"]').selectOption({ label: options.pollLabel });
   }
-  const tagsInput = page.getByPlaceholder(/הקלידו תגית/);
+  // The picker selects an existing tag on Enter and offers to create a new one,
+  // which lands in the inbox; shared tags are what link the test articles.
+  const tagsInput = page.getByRole("textbox", { name: "חיפוש תגית" });
   await tagsInput.fill(options.tag);
-  await tagsInput.press("Enter");
+  const create = page.getByRole("button", { name: "הוספה", exact: true });
+  if (await create.isVisible()) await create.click();
+  else await tagsInput.press("Enter");
+  await expect(page.getByRole("list", { name: "התגיות שנבחרו" })).toContainText(options.tag);
   await page.getByRole("radio", { name: "פורסם" }).check();
   for (let i = 0; i < options.paragraphs; i += 1) {
     await page.getByRole("button", { name: "+ פסקה" }).click();
@@ -55,16 +52,7 @@ async function createArticle(
   return findArticleUrl(page, options.title);
 }
 
-async function deleteArticle(page: Page, title: string) {
-  await page.goto("/admin");
-  const row = page.getByRole("listitem").filter({ hasText: title });
-  await row.getByRole("button", { name: "מחיקה" }).click();
-  await row.getByRole("button", { name: "מחיקה" }).last().click();
-  await expect(page.getByText(title)).toHaveCount(0);
-}
-
 test.describe("engagement surfaces", () => {
-  test.skip(!ADMIN_PASSWORD, "Set E2E_ADMIN_PASSWORD to run the engagement E2E flow");
   test.setTimeout(120_000);
 
   test("recirculation modules, player bar, and share button", async ({ page }) => {
@@ -112,11 +100,7 @@ test.describe("engagement surfaces", () => {
     await deleteArticle(page, long.title);
     await deleteArticle(page, shortA.title);
     await deleteArticle(page, shortB.title);
-    await page.goto("/admin/tags");
-    const tagRow = page.getByRole("listitem").filter({ hasText: tag });
-    await tagRow.getByRole("button", { name: "מחיקה" }).click();
-    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(tag, { exact: true })).toHaveCount(0);
+    await deleteTag(page, tag);
 
     // Logged-out login page has no player bar.
     const anon = await page.context().browser()!.newContext();
@@ -184,11 +168,7 @@ test.describe("engagement surfaces", () => {
       await row.getByRole("button", { name: "מחיקה" }).last().click();
       await expect(page.getByText(question)).toHaveCount(0);
     }
-    await page.goto("/admin/tags");
-    const tagRow = page.getByRole("listitem").filter({ hasText: article.tag });
-    await tagRow.getByRole("button", { name: "מחיקה" }).click();
-    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(article.tag, { exact: true })).toHaveCount(0);
+    await deleteTag(page, article.tag);
   });
 
   test("daily poll and episode callout", async ({ page }) => {
@@ -237,10 +217,6 @@ test.describe("engagement surfaces", () => {
     await cleanupRow.getByRole("button", { name: "מחיקה" }).last().click();
     await expect(page.getByText(question)).toHaveCount(0);
     await deleteArticle(page, article.title);
-    await page.goto("/admin/tags");
-    const tagRow = page.getByRole("listitem").filter({ hasText: article.tag });
-    await tagRow.getByRole("button", { name: "מחיקה" }).click();
-    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(article.tag, { exact: true })).toHaveCount(0);
+    await deleteTag(page, article.tag);
   });
 });

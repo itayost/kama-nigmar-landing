@@ -6,6 +6,7 @@ import { planHomepage, ROUNDUPS, subjectPath, type HomeSection } from "@/lib/tax
 import { ArticleCard } from "./ArticleCard";
 import { ArticleLeadCard } from "./ArticleLeadCard";
 import { ArticleRow } from "./ArticleRow";
+import { ArticleTile } from "./ArticleTile";
 import { RoundupCard } from "./RoundupCard";
 import { subjectStyle } from "./subject";
 
@@ -72,13 +73,43 @@ function SubjectSection({ section }: { readonly section: HomeSection<ArticleView
     );
   }
 
+  // Phones show one card and the rest as rows; wider screens two cards.
   const [main, second, ...rows] = articles;
+  const tagLinks =
+    section.tags.length > 0 ? (
+      <ul aria-label={`תגיות ב${subject.name}`} className="hidden flex-wrap gap-1.5 md:flex">
+        {section.tags.map((tag) => (
+          <li key={tag.name}>
+            <Link
+              href={`${href}?${new URLSearchParams({ tag: tag.name })}`}
+              className="rounded-full border border-surface-border px-2.5 py-0.5 text-xs text-text-muted transition-colors hover:border-[var(--subject)]/60 hover:text-white"
+            >
+              {tag.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    ) : null;
   return (
     <section aria-labelledby={headingId}>
-      <SectionHeading title={subject.name} id={headingId} color={subject.color} linkHref={href} linkLabel={`לכל ${total} הכתבות`} />
+      <SectionHeading
+        title={subject.name}
+        id={headingId}
+        color={subject.color}
+        extra={tagLinks}
+        linkHref={href}
+        linkLabel={`לכל ${total} הכתבות`}
+      />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
-        <ArticleCard article={main} phEvent="home_section_click" />
-        {second ? <ArticleCard article={second} phEvent="home_section_click" /> : null}
+        <ArticleCard article={main} phEvent="home_section_click" showKicker={false} />
+        {second ? (
+          <ArticleTile
+            article={second}
+            phEvent="home_section_click"
+            sizes="(max-width: 640px) 96px, (max-width: 1024px) 50vw, 300px"
+            showKicker={false}
+          />
+        ) : null}
         {rows.length > 0 ? (
           <div className="flex flex-col sm:col-span-2 lg:col-span-1">
             {rows.map((article) => (

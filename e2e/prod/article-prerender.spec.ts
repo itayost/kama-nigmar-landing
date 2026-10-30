@@ -1,19 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
-
-// Requires a build pointed at a Neon dev branch (never production) and the admin
-// password exported as an E2E env var.
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
+import { deleteArticle, login } from "../admin";
 
 const MISSING_NUMBER = 999_999;
 const NOT_FOUND_COPY = "הכתבה לא נמצאה";
 const NOINDEX_META = /<meta name="robots" content="[^"]*noindex/;
-
-async function login(page: Page): Promise<void> {
-  await page.goto("/admin/login");
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: "כניסה" }).click();
-  await expect(page).toHaveURL(/\/admin$/);
-}
 
 async function publishArticle(
   page: Page,
@@ -39,17 +29,7 @@ async function publishArticle(
   return href!;
 }
 
-async function deleteArticle(page: Page, title: string): Promise<void> {
-  await page.goto("/admin");
-  const row = page.getByRole("listitem").filter({ hasText: title });
-  await row.getByRole("button", { name: "מחיקה" }).click();
-  await row.getByRole("button", { name: "מחיקה" }).last().click();
-  await expect(page.getByText(title)).toHaveCount(0);
-}
-
 test.describe("article prerendering", () => {
-  test.skip(!ADMIN_PASSWORD, "Set E2E_ADMIN_PASSWORD to run the admin E2E flow");
-
   // Regression: generateStaticParams only covers articles that existed at build time.
   // Every other param used to share one prerendered entry keyed on /articles/[slug], so
   // whatever the first uncovered request rendered — normally a notFound(), since bots hit

@@ -11,7 +11,7 @@ import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
 import { getPublishedArticles } from "@/lib/dal/articles";
 import { getSubjects } from "@/lib/dal/taxonomy";
 import { formatDateLong } from "@/lib/datetime";
-import { stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
+import { PLACEHOLDER_PARAMS, stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
 import { breadcrumbSchema, collectionPageSchema, FEED_ALTERNATE, pageOpenGraph } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
 import { planSubjectPage, subjectPath, subjectSummary, viaTag, type SubjectSummary } from "@/lib/taxonomy/public";
@@ -20,7 +20,7 @@ const PAGE_SIZE = 12;
 
 export async function generateStaticParams() {
   const subjects = await getSubjects();
-  return subjects.map((subject) => ({ slug: subject.slug }));
+  return subjects.length > 0 ? subjects.map((subject) => ({ slug: subject.slug })) : PLACEHOLDER_PARAMS;
 }
 
 async function resolveSubject(slug: string): Promise<SubjectSummary | null> {
@@ -88,7 +88,7 @@ async function SubjectContent({ params, searchParams }: PageProps<"/topics/[slug
           {latest?.publishedAt ? ` · עודכן ${formatDateLong(latest.publishedAt)}` : ""}
         </p>
       </ArchiveHeader>
-      {lead ? <ArticleLeadCard article={lead} as="h2" priority /> : <p className="text-text-muted">עדיין אין כתבות בנושא הזה.</p>}
+      {lead ? <ArticleLeadCard article={lead} as="h2" priority showKicker={false} /> : <p className="text-text-muted">עדיין אין כתבות בנושא הזה.</p>}
       <Suspense fallback={<ListSkeleton />}>
         <SubjectList subject={subject} searchParams={searchParams} />
       </Suspense>
@@ -152,6 +152,7 @@ async function SubjectList({
               article={article}
               showSubtitle
               note={via && article.format === "roundup" ? `כולל את ${via.name}` : undefined}
+              tagName={article.tagList.find((tag) => tag.subjectId === subject.id)?.name}
               phEvent="topic_list_click"
             />
           );

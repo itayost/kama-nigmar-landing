@@ -21,7 +21,7 @@ export function ArticleMiniCard({ article, phEvent }: ArticleMiniCardProps) {
           article={article}
           sizes="96px"
           className="transition-transform duration-300 group-hover:scale-[1.05]"
-          labelClassName="text-[0.6rem]"
+          labelClassName="text-[0.7rem]"
         />
       </div>
       <h3 className="line-clamp-2 text-sm font-bold leading-snug transition-colors group-hover:text-[var(--subject)]">

@@ -1,8 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-
-// Requires a dev server pointed at a Neon dev branch (never production)
-// and the admin password exported as an E2E env var.
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
+import { deleteTag, login, tagChip } from "./admin";
 
 async function findArticleUrl(page: Page, title: string): Promise<string> {
   await page.goto("/articles");
@@ -16,7 +13,9 @@ async function findArticleUrl(page: Page, title: string): Promise<string> {
 }
 
 test.describe("admin flow", () => {
-  test.skip(!ADMIN_PASSWORD, "Set E2E_ADMIN_PASSWORD to run the admin E2E flow");
+  // Like the engagement suite: the first visit to an admin route compiles it in
+  // next dev, which can take most of a minute while other workers compile too.
+  test.setTimeout(120_000);
 
   test("rejects a wrong password with a Hebrew error", async ({ page }) => {
     await page.goto("/admin/login");
@@ -31,10 +30,7 @@ test.describe("admin flow", () => {
     const title = `בדיקת מערכת ${Date.now()}`;
     const paragraph = "פסקת בדיקה שנוצרה אוטומטית על ידי הבדיקה.";
 
-    await page.goto("/admin/login");
-    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-    await page.getByRole("button", { name: "כניסה" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await login(page);
 
     await page.getByRole("link", { name: "+ כתבה חדשה" }).click();
     await page.locator('input[name="title"]').fill(title);
@@ -74,10 +70,7 @@ test.describe("admin flow", () => {
     const title = `בדיקת פרסום מחדש ${Date.now()}`;
     const paragraph = "פסקה לבדיקת ניקוי המטמון לאחר פרסום מחדש.";
 
-    await page.goto("/admin/login");
-    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-    await page.getByRole("button", { name: "כניסה" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await login(page);
 
     await page.getByRole("link", { name: "+ כתבה חדשה" }).click();
     await page.locator('input[name="title"]').fill(title);
@@ -120,32 +113,27 @@ test.describe("admin flow", () => {
     const tagName = `תגית-בדיקה-${Date.now()}`;
     const renamed = `${tagName}-חדש`;
 
-    await page.goto("/admin/login");
-    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-    await page.getByRole("button", { name: "כניסה" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await login(page);
 
+    // A new tag waits in the inbox column of the board.
     await page.goto("/admin/tags");
-    await page.locator('input[name="name"]').fill(tagName);
-    await page.getByRole("button", { name: "+ הוספה" }).click();
-    await expect(page.getByText(tagName, { exact: true })).toBeVisible();
+    const newTag = page.getByRole("textbox", { name: "תגית חדשה בתיבת ההמתנה" });
+    await newTag.fill(tagName);
+    await newTag.press("Enter");
+    const chip = (name: string) => tagChip(page, name);
+    await expect(chip(tagName)).toBeVisible();
 
+    // The article form offers it, grouped under the inbox.
     await page.goto("/admin/articles/new");
-    await expect(page.getByRole("button", { name: `+ ${tagName}` })).toBeVisible();
+    await expect(page.getByRole("button", { name: tagName, exact: true })).toBeVisible();
 
+    // Renaming happens in the panel that opens when a tag is selected.
     await page.goto("/admin/tags");
-    const row = page.getByRole("listitem").filter({ hasText: tagName });
-    await row.getByRole("button", { name: "שינוי שם" }).click();
-    // In rename mode the tag name lives in the input value, which hasText
-    // does not match - target the row-scoped rename input directly.
-    const renameInput = page.getByRole("listitem").locator('input[name="name"]');
-    await renameInput.fill(renamed);
-    await page.getByRole("listitem").getByRole("button", { name: "שמירה" }).click();
-    await expect(page.getByText(renamed, { exact: true })).toBeVisible();
+    await chip(tagName).click();
+    await page.getByRole("textbox", { name: "שם התגית" }).fill(renamed);
+    await page.getByRole("button", { name: "שינוי שם" }).click();
+    await expect(chip(renamed)).toBeVisible();
 
-    const renamedRow = page.getByRole("listitem").filter({ hasText: renamed });
-    await renamedRow.getByRole("button", { name: "מחיקה" }).click();
-    await renamedRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(renamed, { exact: true })).toHaveCount(0);
+    await deleteTag(page, renamed);
   });
 });

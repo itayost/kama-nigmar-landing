@@ -14,6 +14,12 @@ import { connection } from "next/server";
 //
 // Under a real request connection() resolves immediately, so genuine 404s are
 // unaffected, and found pages keep rendering as fully static per-path entries.
+// Cache Components needs at least one param from generateStaticParams. Before
+// anything exists (a fresh database, or subjects before the backfill), routes
+// return this placeholder: it renders as not-found, which the guard above
+// keeps out of the build output.
+export const PLACEHOLDER_PARAMS = [{ slug: "_" }];
+
 export async function stallNotFoundOutsidePrerender(): Promise<void> {
   await connection();
 }

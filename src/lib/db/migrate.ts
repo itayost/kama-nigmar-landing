@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { sql, type SQL } from "drizzle-orm";
 import { readMigrationFiles } from "drizzle-orm/migrator";
+import { rowsOf, type Executor } from "./rows";
 
 // Production was built with `drizzle-kit push`, so it has the baseline schema
 // but no migration history. Recording the baseline as applied lets `migrate`
@@ -13,20 +14,11 @@ export const MIGRATIONS_CONFIG = {
   migrationsTable: "__drizzle_migrations",
 } as const;
 
-interface Executor {
-  execute(query: SQL): PromiseLike<unknown>;
-}
-
 interface Snapshot {
   readonly tables: Record<string, { readonly name: string; readonly columns: Record<string, { readonly name: string }> }>;
 }
 
 const history = sql`${sql.identifier(MIGRATIONS_CONFIG.migrationsSchema)}.${sql.identifier(MIGRATIONS_CONFIG.migrationsTable)}`;
-
-export function rowsOf(result: unknown): Record<string, unknown>[] {
-  const rows = Array.isArray(result) ? result : (result as { rows?: unknown } | null)?.rows;
-  return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
-}
 
 async function firstRow(db: Executor, query: SQL): Promise<Record<string, unknown>> {
   return rowsOf(await db.execute(query))[0] ?? {};

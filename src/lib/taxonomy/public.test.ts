@@ -58,6 +58,23 @@ describe("withTaxonomy", () => {
 describe("planHomepage", () => {
   const subjects = [IL, WF, BB, MS];
 
+  it("gives a section its subject's most used tags, at most three", () => {
+    const ucl = tag("ucl2", "wf");
+    const pl = tag("pl", "wf");
+    const seriea = tag("seriea", "wf");
+    const leicester = tag("leicester", "wf");
+    const lead = article("il", []);
+    const wf = [
+      article("wf", [ucl, pl, LIGA]),
+      article("wf", [ucl, pl]),
+      article("wf", [ucl, seriea]),
+      article("wf", [leicester]),
+    ];
+    const [section] = planHomepage([lead, ...wf], subjects).sections;
+    // Counts 3, 2, 1, 1: the tie goes to the name that sorts first.
+    expect(section.tags.map((entry) => entry.name)).toEqual([ucl.name, pl.name, leicester.name]);
+  });
+
   it("leads with the newest story and keeps it out of every section", () => {
     const lead = article("il", [LIGA]);
     const rest = [article("il", [LIGA]), article("il", []), article("il", []), article("il", [])];

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getNavigation } from "@/lib/dal/navigation";
+import { ROUNDUPS } from "@/lib/taxonomy/public";
 import { NavLinks, NavLinksFallback, type NavLink } from "./NavLinks";
 import { SiteMenu, SiteMenuFallback } from "./SiteMenu";
 import { Wordmark } from "./Wordmark";
@@ -14,7 +15,11 @@ interface SiteHeaderProps {
 // menu button and a full-page menu.
 export async function SiteHeader({ spotifyUrl, applePodcastUrl }: SiteHeaderProps) {
   const navigation = await getNavigation();
-  const links: NavLink[] = [{ href: "/", label: "בית" }, ...navigation.sections];
+  // Subjects carry their color dot; roundups, a format, stay plain.
+  const links: NavLink[] = [
+    { href: "/", label: "בית" },
+    ...navigation.sections.map((section) => (section.href === ROUNDUPS.href ? { href: section.href, label: section.label } : section)),
+  ];
 
   return (
     <header

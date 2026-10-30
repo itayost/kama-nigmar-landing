@@ -5,7 +5,8 @@ import { readMigrationFiles } from "drizzle-orm/migrator";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { afterEach, describe, expect, it } from "vitest";
-import { adoptExistingDatabase, MIGRATIONS_CONFIG, rowsOf } from "./migrate";
+import { adoptExistingDatabase, MIGRATIONS_CONFIG } from "./migrate";
+import { rowsOf } from "./rows";
 
 const migrationsFolder = fileURLToPath(new URL("../../../drizzle", import.meta.url));
 

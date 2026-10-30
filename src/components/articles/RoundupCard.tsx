@@ -20,7 +20,7 @@ export function RoundupCard({ article, as: Heading = "h3" }: RoundupCardProps) {
       className="group grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-3 rounded-xl border border-surface-border bg-white/[0.035] p-3.5 transition-colors hover:border-white/25"
     >
       <div className="relative aspect-square overflow-hidden rounded-lg bg-surface">
-        <CoverImage article={article} sizes="88px" labelClassName="text-[0.6rem]" />
+        <CoverImage article={article} sizes="88px" labelClassName="text-[0.7rem]" />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
         {article.publishedAt ? (

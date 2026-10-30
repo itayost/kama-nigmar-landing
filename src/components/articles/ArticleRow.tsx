@@ -9,11 +9,13 @@ interface ArticleRowProps {
   // roundup into a subject's list.
   readonly note?: string;
   readonly showSubtitle?: boolean;
+  // A tag to name after the date, e.g. the subject's own tag on its page.
+  readonly tagName?: string;
   readonly phEvent?: string;
 }
 
 // A thumbnail and a headline: the dense list item of sections and subject pages.
-export function ArticleRow({ article, note, showSubtitle, phEvent }: ArticleRowProps) {
+export function ArticleRow({ article, note, showSubtitle, tagName, phEvent }: ArticleRowProps) {
   return (
     <Link
       href={`/articles/${article.number}`}
@@ -27,7 +29,7 @@ export function ArticleRow({ article, note, showSubtitle, phEvent }: ArticleRowP
           article={article}
           sizes="(max-width: 640px) 96px, 136px"
           className="transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transform-none"
-          labelClassName="text-[0.65rem]"
+          labelClassName="text-[0.7rem]"
         />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
@@ -40,6 +42,7 @@ export function ArticleRow({ article, note, showSubtitle, phEvent }: ArticleRowP
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
           {article.subject ? null : <SubjectKicker subject={null} format={article.format} />}
           {note ?? (article.publishedAt ? formatDateShort(article.publishedAt) : null)}
+          {tagName && !note ? <span>· {tagName}</span> : null}
           <AlsoIn subject={article.subject} alsoIn={article.alsoIn} />
         </div>
       </div>

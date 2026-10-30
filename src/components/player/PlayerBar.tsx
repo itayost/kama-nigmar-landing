@@ -185,7 +185,7 @@ export function PlayerBar({ spotifyShowId }: PlayerBarProps) {
             )}
           </button>
           <span className="min-w-0">
-            <span className="block text-[0.65rem] font-extrabold text-accent">
+            <span className="block text-[0.7rem] font-extrabold text-accent">
               הפרק האחרון
             </span>
             <span className="block truncate text-sm font-bold">

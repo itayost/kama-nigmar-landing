@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { clearFailures, isLockedOut, recordFailure } from "@/lib/auth/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 import { createSession, destroySession } from "@/lib/auth/session";
 
 export interface LoginState {
@@ -14,11 +14,6 @@ export interface LoginState {
 const loginSchema = z.object({
   password: z.string().min(1, "חובה למלא סיסמה"),
 });
-
-async function clientIp(): Promise<string> {
-  const forwardedFor = (await headers()).get("x-forwarded-for");
-  return forwardedFor?.split(",")[0]?.trim() ?? "unknown";
-}
 
 export async function login(
   _prev: LoginState,
@@ -31,8 +26,10 @@ export async function login(
     return { error: parsed.error.issues[0].message };
   }
 
-  const ip = await clientIp();
-  if (isLockedOut(ip)) {
+  // Every attempt counts toward the limit, so the count is shared by all
+  // instances; a successful login clears it.
+  const limit = await rateLimit("login", await headers());
+  if (!limit.allowed) {
     return { error: "יותר מדי ניסיונות כניסה. נסו שוב בעוד 10 דקות" };
   }
 
@@ -43,11 +40,10 @@ export async function login(
 
   const passwordMatches = await bcrypt.compare(parsed.data.password, passwordHash);
   if (!passwordMatches) {
-    recordFailure(ip);
     return { error: "סיסמה שגויה" };
   }
 
-  clearFailures(ip);
+  await limit.clear();
   await createSession();
   redirect("/admin");
 }
