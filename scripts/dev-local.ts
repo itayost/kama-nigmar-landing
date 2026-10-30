@@ -27,16 +27,24 @@ if (!existsSync(ENV_FILE)) {
   console.log(`Created ${ENV_FILE}; the admin password is in it.`);
 }
 process.loadEnvFile(ENV_FILE);
+// Public settings (show links and the like) still come from .env.local, loaded
+// here because Next's own loader would run $-expansion over the bcrypt hash
+// below; __NEXT_PROCESSED_ENV tells it the environment is already complete.
+if (existsSync(".env.local")) process.loadEnvFile(".env.local");
 
-const child = spawn("npx", ["next", "dev", "--port", PORT], {
+// Loopback only: the admin login above is meant for this machine.
+const child = spawn("npx", ["next", "dev", "--port", PORT, "--hostname", "localhost"], {
   stdio: "inherit",
   env: {
     ...process.env,
+    __NEXT_PROCESSED_ENV: "true",
     DATABASE_URL: LOCAL_DATABASE_URL,
     ADMIN_PASSWORD_HASH: process.env.LOCAL_ADMIN_PASSWORD_HASH,
     AUTH_SECRET: process.env.LOCAL_AUTH_SECRET,
-    // Keep local clicks out of production analytics.
+    // Keep local clicks out of production analytics and uploads out of the
+    // production image store.
     NEXT_PUBLIC_POSTHOG_KEY: "",
+    BLOB_READ_WRITE_TOKEN: "",
   },
 });
 child.on("exit", (code) => process.exit(code ?? 0));

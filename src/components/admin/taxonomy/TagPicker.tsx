@@ -1,0 +1,174 @@
+"use client";
+
+import { useState, type CSSProperties } from "react";
+import { createTag } from "@/lib/actions/taxonomy";
+import type { AdminSubject } from "@/lib/dal/taxonomy-admin";
+import { inputClass } from "../Field";
+import { CloseIcon } from "../icons";
+
+export interface PickerTag {
+  readonly id: string;
+  readonly name: string;
+  readonly subjectId: string | null;
+}
+
+interface TagPickerProps {
+  readonly subjects: readonly AdminSubject[];
+  readonly catalog: readonly PickerTag[];
+  readonly value: readonly string[];
+  onChange(ids: string[]): void;
+  onCreated(tag: PickerTag): void;
+}
+
+const INBOX_COLOR = "#8899aa";
+
+// Picks tags grouped by subject. A name that does not exist yet can be
+// created on the spot, inside a subject or in the inbox.
+export function TagPicker({ subjects, catalog, value, onChange, onCreated }: TagPickerProps) {
+  const [query, setQuery] = useState("");
+  const [newSubjectId, setNewSubjectId] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const colorOf = (subjectId: string | null) =>
+    subjects.find((subject) => subject.id === subjectId)?.color ?? INBOX_COLOR;
+  const trimmed = query.trim();
+  const exact = catalog.find((tag) => tag.name === trimmed);
+  const groups = [...subjects.map((subject) => ({ id: subject.id, name: subject.name })), { id: null, name: "ממתינות לשיבוץ" }]
+    .map((group) => ({
+      ...group,
+      tags: catalog.filter((tag) => tag.subjectId === group.id && (!trimmed || tag.name.includes(trimmed))),
+    }))
+    .filter((group) => group.tags.length > 0);
+
+  function toggle(id: string) {
+    onChange(value.includes(id) ? value.filter((existing) => existing !== id) : [...value, id]);
+  }
+
+  async function create() {
+    if (!trimmed || exact) return;
+    setIsCreating(true);
+    setError(null);
+    const result = await createTag(trimmed, newSubjectId || null);
+    setIsCreating(false);
+    if (result.error || !result.tag) {
+      setError(result.error ?? "יצירת התגית נכשלה");
+      return;
+    }
+    onCreated(result.tag);
+    onChange([...value, result.tag.id]);
+    setQuery("");
+  }
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      {value.length > 0 ? (
+        <ul className="flex flex-wrap gap-2" aria-label="התגיות שנבחרו">
+          {value.map((id) => {
+            const tag = catalog.find((entry) => entry.id === id);
+            if (!tag) return null;
+            return (
+              <li
+                key={id}
+                style={{ "--subject": colorOf(tag.subjectId) } as CSSProperties}
+                className="flex items-center gap-1.5 rounded-full border border-[var(--subject)]/55 bg-[var(--subject)]/15 py-1 ps-3 pe-1 text-sm"
+              >
+                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-[var(--subject)]" />
+                {tag.name}
+                <button
+                  type="button"
+                  onClick={() => toggle(id)}
+                  aria-label={`הסרת ${tag.name}`}
+                  className="grid h-5 w-5 place-items-center rounded-full bg-white/10 hover:bg-red-400/30"
+                >
+                  <CloseIcon width={12} height={12} />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      <input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          if (exact) {
+            toggle(exact.id);
+            setQuery("");
+          } else {
+            void create();
+          }
+        }}
+        placeholder="חיפוש תגית או יצירת חדשה"
+        aria-label="חיפוש תגית"
+        className={inputClass}
+      />
+
+      {trimmed && !exact ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-3 py-2 text-sm">
+          <span>
+            יצירת התגית <b>״{trimmed}״</b> בנושא
+          </span>
+          <select
+            value={newSubjectId}
+            onChange={(event) => setNewSubjectId(event.target.value)}
+            aria-label="נושא לתגית החדשה"
+            className="rounded-md border border-surface-border bg-bg-start px-2 py-1"
+          >
+            <option value="">ללא נושא (לתיבת ההמתנה)</option>
+            {subjects.map((subject) => (
+              <option key={subject.id} value={subject.id}>
+                {subject.name}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            disabled={isCreating}
+            onClick={() => void create()}
+            className="rounded-md bg-accent px-3 py-1 font-bold text-bg-start disabled:opacity-50"
+          >
+            {isCreating ? "יוצר..." : "הוספה"}
+          </button>
+        </div>
+      ) : null}
+      {error ? <p className="text-sm text-red-400">{error}</p> : null}
+
+      <div className="flex max-h-72 flex-col gap-3 overflow-y-auto rounded-lg border border-surface-border bg-black/15 p-3">
+        {groups.map((group) => (
+          <div key={group.id ?? "inbox"} className="flex flex-col gap-1.5">
+            <span className="flex items-center gap-1.5 text-xs font-bold text-text-muted">
+              <span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: colorOf(group.id) }} />
+              {group.name}
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {group.tags.map((tag) => {
+                const isOn = value.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    aria-pressed={isOn}
+                    onClick={() => toggle(tag.id)}
+                    style={{ "--subject": colorOf(tag.subjectId) } as CSSProperties}
+                    className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${
+                      isOn
+                        ? "border-[var(--subject)] bg-[var(--subject)]/25 font-bold text-white"
+                        : "border-surface-border text-text-muted hover:border-[var(--subject)]/60 hover:text-white"
+                    }`}
+                  >
+                    {tag.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        {groups.length === 0 ? <p className="text-xs text-text-muted">אין תגיות שמתאימות לחיפוש</p> : null}
+      </div>
+    </div>
+  );
+}
