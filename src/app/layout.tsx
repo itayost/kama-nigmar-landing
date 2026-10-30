@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Heebo } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -61,11 +60,6 @@ export default function RootLayout({
     <html lang="he" dir="rtl" className={heebo.variable}>
       <body className="font-heebo antialiased">
         {children}
-        <Script
-          src="https://cdn.userway.org/widget.js"
-          data-account="7ek953Xjr7"
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   );

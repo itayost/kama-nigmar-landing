@@ -151,6 +151,19 @@ export const pollVotes = pgTable(
   (table) => [primaryKey({ columns: [table.pollId, table.optionId] })],
 );
 
+// Fixed-window counters for login attempts, view beacons and votes, shared by
+// every serverless instance (src/lib/rate-limit). Keys carry a hashed client
+// address, never the address itself; rows past their window are pruned.
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text("key").primaryKey(),
+    hits: integer("hits").notNull(),
+    windowEndsAt: timestamp("window_ends_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("rate_limits_window_ends_at_idx").on(table.windowEndsAt)],
+);
+
 export type Article = typeof articles.$inferSelect;
 export type NewArticle = typeof articles.$inferInsert;
 export type Tag = typeof tags.$inferSelect;

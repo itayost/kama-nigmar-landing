@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { pollVotes, polls } from "@/lib/db/schema";
+import { allow, limitKey } from "@/lib/rate-limit";
 import { voteInputSchema, type PollResults } from "@/lib/polls/schema";
 
 // Public vote endpoint. Like the view beacon (ADR 0001) it never invalidates
@@ -19,6 +20,10 @@ export async function POST(request: Request): Promise<Response> {
     ({ pollId, optionId } = parsed.data);
   } catch {
     return new Response(null, { status: 400 });
+  }
+
+  if (!(await allow("vote", limitKey("vote", request.headers, pollId)))) {
+    return new Response(null, { status: 429 });
   }
 
   const db = getDb();

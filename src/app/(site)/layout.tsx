@@ -1,3 +1,4 @@
+import Script from "next/script";
 import { Suspense } from "react";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { SiteFooter } from "@/components/layout/SiteFooter";
@@ -23,6 +24,9 @@ export default function SiteLayout({
       <Suspense fallback={null}>
         <AnalyticsProvider />
       </Suspense>
+      {/* The accessibility widget is for readers; the admin, which handles
+          the session cookie, runs no third-party script. */}
+      <Script src="https://cdn.userway.org/widget.js" data-account="7ek953Xjr7" strategy="lazyOnload" />
     </>
   );
 }

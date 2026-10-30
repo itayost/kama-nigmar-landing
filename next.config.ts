@@ -25,6 +25,27 @@ const nextConfig: NextConfig = {
       new URL("https://i.ytimg.com/**"),
     ],
   },
+  // Baseline hardening on every response. No script-src policy: the site runs
+  // PostHog, UserWay and Spotify/YouTube embeds, and a nonce policy would make
+  // every page dynamic. Framing, plugins, base and form targets are locked down;
+  // Vercel already sends HSTS for the custom domain.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+          },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+        ],
+      },
+    ];
+  },
   // The old production alias still served the whole site at 200 after the move to
   // kama-nigmar.co.il, which is duplicate content. Scoped by host so the per-deployment
   // preview URLs, which have different hostnames, are left alone.

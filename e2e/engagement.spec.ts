@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { deleteTag } from "./tags";
 
 const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
 
@@ -39,9 +40,14 @@ async function createArticle(
   if (options.pollLabel) {
     await page.locator('select[name="pollId"]').selectOption({ label: options.pollLabel });
   }
-  const tagsInput = page.getByPlaceholder(/הקלידו תגית/);
+  // The picker selects an existing tag on Enter and offers to create a new one,
+  // which lands in the inbox; shared tags are what link the test articles.
+  const tagsInput = page.getByRole("textbox", { name: "חיפוש תגית" });
   await tagsInput.fill(options.tag);
-  await tagsInput.press("Enter");
+  const create = page.getByRole("button", { name: "הוספה", exact: true });
+  if (await create.isVisible()) await create.click();
+  else await tagsInput.press("Enter");
+  await expect(page.getByRole("list", { name: "התגיות שנבחרו" })).toContainText(options.tag);
   await page.getByRole("radio", { name: "פורסם" }).check();
   for (let i = 0; i < options.paragraphs; i += 1) {
     await page.getByRole("button", { name: "+ פסקה" }).click();
@@ -112,11 +118,7 @@ test.describe("engagement surfaces", () => {
     await deleteArticle(page, long.title);
     await deleteArticle(page, shortA.title);
     await deleteArticle(page, shortB.title);
-    await page.goto("/admin/tags");
-    const tagRow = page.getByRole("listitem").filter({ hasText: tag });
-    await tagRow.getByRole("button", { name: "מחיקה" }).click();
-    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(tag, { exact: true })).toHaveCount(0);
+    await deleteTag(page, tag);
 
     // Logged-out login page has no player bar.
     const anon = await page.context().browser()!.newContext();
@@ -184,11 +186,7 @@ test.describe("engagement surfaces", () => {
       await row.getByRole("button", { name: "מחיקה" }).last().click();
       await expect(page.getByText(question)).toHaveCount(0);
     }
-    await page.goto("/admin/tags");
-    const tagRow = page.getByRole("listitem").filter({ hasText: article.tag });
-    await tagRow.getByRole("button", { name: "מחיקה" }).click();
-    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(article.tag, { exact: true })).toHaveCount(0);
+    await deleteTag(page, article.tag);
   });
 
   test("daily poll and episode callout", async ({ page }) => {
@@ -237,10 +235,6 @@ test.describe("engagement surfaces", () => {
     await cleanupRow.getByRole("button", { name: "מחיקה" }).last().click();
     await expect(page.getByText(question)).toHaveCount(0);
     await deleteArticle(page, article.title);
-    await page.goto("/admin/tags");
-    const tagRow = page.getByRole("listitem").filter({ hasText: article.tag });
-    await tagRow.getByRole("button", { name: "מחיקה" }).click();
-    await tagRow.getByRole("button", { name: "מחיקה" }).last().click();
-    await expect(page.getByText(article.tag, { exact: true })).toHaveCount(0);
+    await deleteTag(page, article.tag);
   });
 });

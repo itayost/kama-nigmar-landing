@@ -15,6 +15,13 @@
       "when": 1793359690515,
       "tag": "0001_subject_taxonomy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793363812571,
+      "tag": "0002_rate_limits",
+      "breakpoints": true
     }
   ]
 }

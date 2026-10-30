@@ -2,6 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import { articleViewsDaily, articles } from "@/lib/db/schema";
+import { allow, limitKey } from "@/lib/rate-limit";
 
 const RETENTION_DAYS = 30;
 
@@ -21,6 +22,11 @@ export async function POST(request: Request): Promise<Response> {
     number = parsed.data.number;
   } catch {
     return new Response(null, { status: 400 });
+  }
+
+  // A flood from one address stops counting; the reader sees no difference.
+  if (!(await allow("view", limitKey("view", request.headers)))) {
+    return new Response(null, { status: 204 });
   }
 
   const db = getDb();

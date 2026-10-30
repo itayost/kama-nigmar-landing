@@ -6,7 +6,7 @@
 import { existsSync } from "node:fs";
 import { sql, type SQL } from "drizzle-orm";
 import { isLocalDatabase, LOCAL_DATABASE_URL } from "@/lib/db/local";
-import { rowsOf } from "@/lib/db/migrate";
+import { rowsOf } from "@/lib/db/rows";
 import { connectScriptDb, type ScriptDb } from "@/lib/db/script";
 
 // Parents before children, so foreign keys hold while inserting.
