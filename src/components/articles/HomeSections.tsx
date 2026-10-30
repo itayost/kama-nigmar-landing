@@ -6,6 +6,7 @@ import { planHomepage, ROUNDUPS, subjectPath, type HomeSection } from "@/lib/tax
 import { ArticleCard } from "./ArticleCard";
 import { ArticleLeadCard } from "./ArticleLeadCard";
 import { ArticleRow } from "./ArticleRow";
+import { ArticleTile } from "./ArticleTile";
 import { RoundupCard } from "./RoundupCard";
 import { subjectStyle } from "./subject";
 
@@ -102,13 +103,15 @@ function SubjectSection({ section }: { readonly section: HomeSection<ArticleView
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-[1.25fr_1fr_1fr]">
         <ArticleCard article={main} phEvent="home_section_click" showKicker={false} />
         {second ? (
-          <div className="hidden sm:grid">
-            <ArticleCard article={second} phEvent="home_section_click" showKicker={false} />
-          </div>
+          <ArticleTile
+            article={second}
+            phEvent="home_section_click"
+            sizes="(max-width: 640px) 96px, (max-width: 1024px) 50vw, 300px"
+            showKicker={false}
+          />
         ) : null}
-        {second || rows.length > 0 ? (
+        {rows.length > 0 ? (
           <div className="flex flex-col sm:col-span-2 lg:col-span-1">
-            {second ? <ArticleRow article={second} phEvent="home_section_click" className="sm:hidden" /> : null}
             {rows.map((article) => (
               <ArticleRow key={article.id} article={article} phEvent="home_section_click" />
             ))}

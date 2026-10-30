@@ -13,6 +13,10 @@ async function findArticleUrl(page: Page, title: string): Promise<string> {
 }
 
 test.describe("admin flow", () => {
+  // Like the engagement suite: the first visit to an admin route compiles it in
+  // next dev, which can take most of a minute while other workers compile too.
+  test.setTimeout(120_000);
+
   test("rejects a wrong password with a Hebrew error", async ({ page }) => {
     await page.goto("/admin/login");
     await page.locator('input[name="password"]').fill("definitely-wrong");

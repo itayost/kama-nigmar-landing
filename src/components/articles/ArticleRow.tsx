@@ -11,19 +11,18 @@ interface ArticleRowProps {
   readonly showSubtitle?: boolean;
   // A tag to name after the date, e.g. the subject's own tag on its page.
   readonly tagName?: string;
-  readonly className?: string;
   readonly phEvent?: string;
 }
 
 // A thumbnail and a headline: the dense list item of sections and subject pages.
-export function ArticleRow({ article, note, showSubtitle, tagName, phEvent, className = "" }: ArticleRowProps) {
+export function ArticleRow({ article, note, showSubtitle, tagName, phEvent }: ArticleRowProps) {
   return (
     <Link
       href={`/articles/${article.number}`}
       data-ph-event={phEvent}
       data-ph-slug={article.number}
       style={subjectStyle(article.subject?.color)}
-      className={`group grid grid-cols-[6rem_minmax(0,1fr)] items-start gap-3 border-b border-surface-border py-3 last:border-b-0 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-4 ${className}`}
+      className="group grid grid-cols-[6rem_minmax(0,1fr)] items-start gap-3 border-b border-surface-border py-3 last:border-b-0 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-4"
     >
       <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-surface">
         <CoverImage
