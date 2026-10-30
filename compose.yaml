@@ -8,7 +8,8 @@ services:
       POSTGRES_PASSWORD: kama
       POSTGRES_DB: kama
     ports:
-      - "54329:5432"
+      # Loopback only: the data is a copy of the site and the password is public.
+      - "127.0.0.1:54329:5432"
     volumes:
       - kama-db:/var/lib/postgresql/data
     healthcheck:
