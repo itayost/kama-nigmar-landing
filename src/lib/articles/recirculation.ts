@@ -99,16 +99,3 @@ export function planRecirculation<T extends RecircInput>(
 
   return { midArticle, related, trending };
 }
-
-// Trending in isolation (articles index strip): 7-day views only.
-export function rankTrending<T extends RecircInput>(
-  candidates: readonly T[],
-  weeklyViews: Readonly<Record<string, number>>,
-  limit: number,
-): T[] {
-  const weekly = (candidate: T) => weeklyViews[candidate.id] ?? 0;
-  return candidates
-    .filter((candidate) => weekly(candidate) > 0)
-    .sort((a, b) => weekly(b) - weekly(a) || publishedTime(b) - publishedTime(a))
-    .slice(0, limit);
-}

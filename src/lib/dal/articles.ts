@@ -3,7 +3,6 @@ import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { readingTimeMinutes } from "@/lib/articles/reading-time";
 import {
   planRecirculation,
-  rankTrending,
   type RecirculationPlan,
 } from "@/lib/articles/recirculation";
 import { getDb } from "@/lib/db";
@@ -110,12 +109,4 @@ export async function getRecirculation(number: number): Promise<RecirculationPla
     weeklyViews,
   );
   return { midArticle: back(plan.midArticle), related: back(plan.related), trending: back(plan.trending) };
-}
-
-export async function getTrendingArticles(limit: number): Promise<ArticleView[]> {
-  "use cache";
-  cacheLife("hours");
-  cacheTag("articles");
-  const [published, weeklyViews] = await Promise.all([getPublishedArticles(), fetchWeeklyViews()]);
-  return resolveIds(published)(rankTrending(published.map(forRanking), weeklyViews, limit));
 }

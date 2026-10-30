@@ -6,7 +6,7 @@ import { ArticleTile } from "./ArticleTile";
 
 // A 96px row thumbnail on a phone; three across inside the article column,
 // about 240px each, from the small breakpoint up.
-const RECIRC_CARD_SIZES = "(max-width: 640px) 96px, 240px";
+const RECIRC_CARD_SIZES = "(max-width: 639px) 96px, 240px";
 
 interface RecirculationSectionsProps {
   readonly plan: RecirculationPlan<ArticleView>;

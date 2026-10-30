@@ -63,10 +63,15 @@ function SubjectSection({ section }: { readonly section: HomeSection<ArticleView
           <span aria-hidden="true" className="h-2.5 w-2.5 rounded-[3px] bg-[var(--subject)]" />
           {subject.name}
         </h2>
-        <Link href={`/articles/${article.number}`} className="min-w-0 flex-1 truncate text-sm text-white/75 hover:text-white">
+        {/* On a phone the title takes its own line under the heading; from sm
+            up the row is one line, as in the mockup. */}
+        <Link
+          href={`/articles/${article.number}`}
+          className="order-last line-clamp-2 basis-full text-sm text-white/75 hover:text-white sm:order-none sm:line-clamp-1 sm:min-w-0 sm:flex-1 sm:basis-0"
+        >
           {article.title}
         </Link>
-        <Link href={href} className="text-sm font-semibold text-[var(--subject)] hover:opacity-80">
+        <Link href={href} className="ms-auto text-sm font-semibold text-[var(--subject)] hover:opacity-80 sm:ms-0">
           {total === 1 ? "לנושא" : `לכל ${total} הכתבות`}
         </Link>
       </section>
@@ -106,7 +111,7 @@ function SubjectSection({ section }: { readonly section: HomeSection<ArticleView
           <ArticleTile
             article={second}
             phEvent="home_section_click"
-            sizes="(max-width: 640px) 96px, (max-width: 1024px) 50vw, 300px"
+            sizes="(max-width: 639px) 96px, (max-width: 1023px) 340px, 300px"
             showKicker={false}
           />
         ) : null}

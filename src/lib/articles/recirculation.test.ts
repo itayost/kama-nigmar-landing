@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
   planRecirculation,
-  rankTrending,
   type RecircInput,
 } from "./recirculation";
 
@@ -144,23 +143,6 @@ describe("planRecirculation", () => {
     const noDate = make("no-date", ["כדורגל"], null);
     const plan = planRecirculation(longCurrent, [noDate], {});
     expect(slugs(plan.midArticle)).toEqual(["id-no-date"]);
-  });
-});
-
-describe("rankTrending", () => {
-  test("ranks by weekly views then recency, dropping zero-view articles", () => {
-    const a = make("a", [], new Date("2026-07-01"));
-    const b = make("b", [], new Date("2026-07-30"));
-    const c = make("c", [], new Date("2026-07-15"));
-    const zero = make("zero", []);
-    const result = rankTrending([a, b, c, zero], views({ a: 5, b: 5, c: 9 }), 3);
-    expect(slugs(result)).toEqual(["id-c", "id-b", "id-a"]);
-  });
-
-  test("respects the limit and empty input", () => {
-    expect(rankTrending([], {}, 3)).toEqual([]);
-    const many = Array.from({ length: 5 }, (_, i) => make(`a${i}`, []));
-    expect(rankTrending(many, views({ a0: 1, a1: 2, a2: 3, a3: 4, a4: 5 }), 2)).toHaveLength(2);
   });
 });
 
