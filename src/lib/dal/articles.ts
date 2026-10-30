@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
-import { and, arrayContains, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { readingTimeMinutes } from "@/lib/articles/reading-time";
 import {
   planRecirculation,
   rankTrending,
@@ -7,47 +8,61 @@ import {
 } from "@/lib/articles/recirculation";
 import { getDb } from "@/lib/db";
 import { articleViewsDaily, articles, type Article } from "@/lib/db/schema";
+import { type WithTaxonomy } from "@/lib/taxonomy/public";
+import { decorate } from "./taxonomy";
 
-export async function getPublishedArticles(tag?: string): Promise<Article[]> {
-  "use cache";
-  cacheLife("article");
-  cacheTag("articles");
-  const where = tag
-    ? and(eq(articles.status, "published"), arrayContains(articles.tags, [tag]))
-    : eq(articles.status, "published");
-  return getDb()
-    .select()
-    .from(articles)
-    .where(where)
-    .orderBy(desc(articles.publishedAt));
+// Every column but the legacy `tags` mirror, which the site never reads.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- dropped on purpose
+const { tags: legacyTags, ...siteColumns } = getTableColumns(articles);
+
+// An article row as the site reads it.
+export type SiteArticle = Omit<Article, "tags">;
+
+// An article as lists show it: with its subject and tags, and without its
+// body, which only the article page needs. Every list reads one cached copy
+// of the archive, so it stays small.
+export type ArticleView = WithTaxonomy<
+  Omit<SiteArticle, "content"> & { readonly readingMinutes: number; readonly blockCount: number }
+>;
+
+// The article page's full article, body included.
+export type ArticleDetail = WithTaxonomy<SiteArticle>;
+
+function toListed({ content, ...article }: SiteArticle) {
+  return { ...article, readingMinutes: readingTimeMinutes(content), blockCount: content.length };
 }
 
-export async function getLatestArticles(count: number): Promise<Article[]> {
+export async function getPublishedArticles(): Promise<ArticleView[]> {
   "use cache";
   cacheLife("article");
   cacheTag("articles");
-  return getDb()
-    .select()
+  const rows = getDb()
+    .select(siteColumns)
     .from(articles)
     .where(eq(articles.status, "published"))
     .orderBy(desc(articles.publishedAt))
-    .limit(count);
+    .then((list) => list.map(toListed));
+  return decorate(rows);
 }
 
-export async function getArticleByNumber(number: number): Promise<Article | null> {
+export async function getArticleByNumber(number: number): Promise<ArticleDetail | null> {
   "use cache";
   cacheLife("article");
   cacheTag("articles", `article-${number}`);
-  const rows = await getDb()
-    .select()
+  const rows = getDb()
+    .select(siteColumns)
     .from(articles)
     .where(and(eq(articles.number, number), eq(articles.status, "published")))
     .limit(1);
-  return rows[0] ?? null;
+  const [article] = await decorate(rows);
+  return article ?? null;
 }
 
 // Views received in the trailing 7 days, keyed by article id (ADR 0001).
+// Cached on its own so every recirculation entry shares one aggregate.
 async function fetchWeeklyViews(): Promise<Record<string, number>> {
+  "use cache";
+  cacheLife("hours");
   const rows = await getDb()
     .select({
       articleId: articleViewsDaily.articleId,
@@ -59,50 +74,48 @@ async function fetchWeeklyViews(): Promise<Record<string, number>> {
   return Object.fromEntries(rows.map((row) => [row.articleId, row.total]));
 }
 
-// cacheLife("hours") instead of "max": rankings blend in view counts, which
-// accumulate without cache invalidation, so results refresh periodically
-// in addition to instantly on publish (the "articles" tag).
-export async function getRecirculation(
-  number: number,
-): Promise<RecirculationPlan<Article>> {
+// Recirculation ranks by shared tag and subject ids; only what it reads.
+function forRanking(article: ArticleView) {
+  return {
+    id: article.id,
+    publishedAt: article.publishedAt,
+    tags: article.tagList.map((tag) => tag.id),
+    subjects: article.subjects.map((subject) => subject.id),
+  };
+}
+
+// Maps ranked ids back to the listed articles.
+function resolveIds(published: readonly ArticleView[]) {
+  const byId = new Map(published.map((article) => [article.id, article]));
+  return (list: readonly { readonly id: string }[]) => list.flatMap((item) => byId.get(item.id) ?? []);
+}
+
+// cacheLife("hours") instead of the article profile: rankings blend in view
+// counts, which accumulate without cache invalidation, so results refresh
+// periodically in addition to instantly on publish (the "articles" tag).
+export async function getRecirculation(number: number): Promise<RecirculationPlan<ArticleView>> {
   "use cache";
   cacheLife("hours");
   cacheTag("articles");
-  const db = getDb();
   const [published, weeklyViews] = await Promise.all([
-    db.select().from(articles).where(eq(articles.status, "published")),
+    getPublishedArticles(),
     fetchWeeklyViews(),
   ]);
   const current = published.find((article) => article.number === number);
   if (!current) return { midArticle: [], related: [], trending: [] };
-  return planRecirculation(
-    { id: current.id, tags: current.tags, blockCount: current.content.length },
-    published,
+  const back = resolveIds(published);
+  const plan = planRecirculation(
+    { ...forRanking(current), blockCount: current.blockCount },
+    published.map(forRanking),
     weeklyViews,
   );
+  return { midArticle: back(plan.midArticle), related: back(plan.related), trending: back(plan.trending) };
 }
 
-export async function getTrendingArticles(limit: number): Promise<Article[]> {
+export async function getTrendingArticles(limit: number): Promise<ArticleView[]> {
   "use cache";
   cacheLife("hours");
   cacheTag("articles");
-  const db = getDb();
-  const [published, weeklyViews] = await Promise.all([
-    db.select().from(articles).where(eq(articles.status, "published")),
-    fetchWeeklyViews(),
-  ]);
-  return rankTrending(published, weeklyViews, limit);
-}
-
-export async function getAllTags(): Promise<string[]> {
-  "use cache";
-  cacheLife("article");
-  cacheTag("articles");
-  const rows = await getDb()
-    .select({ tags: articles.tags })
-    .from(articles)
-    .where(eq(articles.status, "published"));
-  return [...new Set(rows.flatMap((row) => row.tags))].sort((a, b) =>
-    a.localeCompare(b, "he"),
-  );
+  const [published, weeklyViews] = await Promise.all([getPublishedArticles(), fetchWeeklyViews()]);
+  return resolveIds(published)(rankTrending(published.map(forRanking), weeklyViews, limit));
 }

@@ -3,7 +3,9 @@ import type { Article } from "@/lib/db/schema";
 import { SITE_URL } from "@/lib/site";
 import {
   breadcrumbSchema,
+  collectionPageSchema,
   newsArticleSchema,
+  pageOpenGraph,
   podcastSeriesSchema,
   webSiteSchema,
 } from "./schema";
@@ -63,7 +65,7 @@ describe("podcastSeriesSchema", () => {
 
 describe("newsArticleSchema", () => {
   test("maps article fields with ISO dates", () => {
-    const schema = newsArticleSchema(baseArticle);
+    const schema = newsArticleSchema(baseArticle, { section: "כדורגל ישראלי", keywords: ["ליגת העל", "הפועל באר שבע"] });
     expect(schema["@type"]).toBe("NewsArticle");
     expect(schema.headline).toBe("כותרת בדיקה");
     expect(schema.image).toEqual([baseArticle.coverImageUrl]);
@@ -71,8 +73,8 @@ describe("newsArticleSchema", () => {
     expect(schema.dateModified).toBe("2026-07-30T12:00:00.000Z");
     expect(schema.author).toEqual({ "@type": "Person", name: "יוסי" });
     expect(schema.mainEntityOfPage).toBe(`${SITE_URL}/articles/1`);
-    expect(schema.articleSection).toBe("כדורגל");
-    expect(schema.keywords).toBe("כדורגל, ליגת העל");
+    expect(schema.articleSection).toBe("כדורגל ישראלי");
+    expect(schema.keywords).toBe("ליגת העל, הפועל באר שבע");
   });
 
   test("falls back to the brand OG image without a cover", () => {
@@ -80,8 +82,8 @@ describe("newsArticleSchema", () => {
     expect(schema.image).toEqual([`${SITE_URL}/og-image.jpg`]);
   });
 
-  test("omits keywords when there are no tags", () => {
-    const schema = newsArticleSchema({ ...baseArticle, tags: [] });
+  test("omits the section and keywords when the article has no subject or tags", () => {
+    const schema = newsArticleSchema(baseArticle, { keywords: [] });
     expect(schema.keywords).toBeUndefined();
     expect(schema.articleSection).toBeUndefined();
   });
@@ -97,5 +99,27 @@ describe("breadcrumbSchema", () => {
       { "@type": "ListItem", position: 1, name: "בית", item: SITE_URL },
       { "@type": "ListItem", position: 2, name: "כתבות", item: `${SITE_URL}/articles` },
     ]);
+  });
+});
+
+describe("collectionPageSchema", () => {
+  test("describes a listing page as part of the site", () => {
+    const schema = collectionPageSchema({ name: "כדורסל", description: "הכל על כדורסל", url: `${SITE_URL}/topics/basketball` });
+    expect(schema).toMatchObject({
+      "@type": "CollectionPage",
+      name: "כדורסל",
+      url: `${SITE_URL}/topics/basketball`,
+      inLanguage: "he",
+      isPartOf: { "@type": "WebSite", url: SITE_URL },
+    });
+  });
+});
+
+describe("pageOpenGraph", () => {
+  test("suffixes the title with the site name and points at the page", () => {
+    const og = pageOpenGraph({ name: "סיכומים", description: "תיאור", url: `${SITE_URL}/roundups` });
+    expect(og.title).toBe("סיכומים | כמה נגמר?");
+    expect(og.url).toBe(`${SITE_URL}/roundups`);
+    expect(og.locale).toBe("he_IL");
   });
 });

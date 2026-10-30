@@ -1,5 +1,14 @@
 import type { ReactNode } from "react";
 
+export const buttonClass =
+  "whitespace-nowrap rounded-md border border-surface-border px-3 py-1.5 text-sm transition-colors hover:border-accent/50 disabled:opacity-50";
+
+export const dangerButtonClass =
+  "whitespace-nowrap rounded-md bg-red-500/90 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-500 disabled:opacity-50";
+
+export const iconButtonClass =
+  "grid h-7 w-7 place-items-center rounded-md text-text-muted transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent";
+
 export const inputClass =
   "w-full rounded-lg border border-surface-border bg-surface px-3 py-2 text-white placeholder:text-text-muted focus:border-accent focus:outline-none";
 

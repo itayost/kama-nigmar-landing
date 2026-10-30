@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PlatformButton } from "@/components/hero/PlatformButton";
+import { Wordmark } from "./Wordmark";
 import { SOCIAL_LINKS, getCurrentYear } from "@/lib/site";
 
 const SOCIAL_ICONS: ReadonlyArray<{
@@ -49,7 +50,7 @@ export async function SiteFooter({ spotifyUrl, applePodcastUrl }: SiteFooterProp
         <div className="grid gap-10 py-12 sm:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <p className="text-xl font-black tracking-tight">
-              כמה נגמר<span className="text-accent">?</span>
+              <Wordmark />
             </p>
             <p className="mt-3 mb-5 max-w-[34ch] text-sm text-text-muted">
               פודקאסט ספורט יומי ומהיר. כל בוקר — התקציר של מה שקרה אתמול,

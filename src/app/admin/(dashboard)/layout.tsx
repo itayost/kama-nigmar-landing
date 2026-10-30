@@ -15,7 +15,7 @@ export default function AdminDashboardLayout({
   return (
     <div className="min-h-dvh">
       <header className="border-b border-surface-border">
-        <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
           <h1 className="text-lg font-bold">ניהול כתבות</h1>
           <nav className="flex items-center gap-4 text-sm">
             <Link
@@ -28,7 +28,7 @@ export default function AdminDashboardLayout({
               href="/admin/tags"
               className="text-text-muted transition-colors hover:text-white"
             >
-              תגיות
+              נושאים ותגיות
             </Link>
             <Link
               href="/admin/polls"
@@ -53,7 +53,7 @@ export default function AdminDashboardLayout({
           </nav>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-4xl px-6 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-5xl px-6 py-8">{children}</main>
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import type { Article } from "@/lib/db/schema";
+import type { ArticleView } from "@/lib/dal/articles";
 import { ArticleCard } from "./ArticleCard";
 
 interface ArticlesGridProps {
-  readonly articles: readonly Article[];
+  readonly articles: readonly ArticleView[];
 }
 
 export function ArticlesGrid({ articles }: ArticlesGridProps) {

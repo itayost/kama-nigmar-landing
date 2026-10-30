@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ARTICLE_FORMATS } from "@/lib/taxonomy/format";
 import { richTextSchema, type RichText } from "./rich-text";
 
 export const LIST_STYLES = ["bullet", "ordered"] as const;
@@ -162,7 +163,16 @@ export const articleInputSchema = z.object({
   title: z.string().min(1, "חובה למלא כותרת").max(200, "הכותרת ארוכה מדי"),
   subtitle: z.string().max(300, "כותרת המשנה ארוכה מדי").optional(),
   authorName: z.string().min(1, "חובה למלא שם כותב").max(100, "שם הכותב ארוך מדי"),
-  tags: z.array(tagNameSchema).max(10, "אפשר להוסיף עד 10 תגיות"),
+  // Ordered: the article shows its tags in this order.
+  tagIds: z
+    .array(z.uuid("תגית לא תקינה"))
+    .max(10, "אפשר להוסיף עד 10 תגיות")
+    .refine((ids) => new Set(ids).size === ids.length, "אותה תגית נבחרה פעמיים"),
+  primarySubjectId: z.uuid("נושא לא תקין").optional(),
+  format: z.enum(ARTICLE_FORMATS).default("story"),
+  coverCredit: z.string().trim().max(120, "הקרדיט ארוך מדי").optional(),
+  coverFocusX: z.number().int().min(0).max(100).optional(),
+  coverFocusY: z.number().int().min(0).max(100).optional(),
   status: z.enum(["draft", "published"]),
   // Spotify-episode validation happens in the save action via parseVideoUrl
   // (importing it here would be circular).

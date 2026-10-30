@@ -3,16 +3,19 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { del } from "@vercel/blob";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import {
   articleInputSchema,
   blocksSchema,
   type ArticleBlock,
+  type ArticleInput,
 } from "@/lib/articles/blocks";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { parseDatetimeLocalIsrael } from "@/lib/datetime";
 import { getDb } from "@/lib/db";
-import { articles, tags as tagsTable } from "@/lib/db/schema";
+import { runAtomic } from "@/lib/db/atomic";
+import { articles, articleTags, subjects, tags as tagsTable, type NewArticle } from "@/lib/db/schema";
+import { optionalInt, optionalString } from "@/lib/form-data";
 import { isUuid } from "@/lib/uuid";
 import { parseVideoUrl } from "@/lib/video/parseVideoUrl";
 
@@ -72,6 +75,95 @@ function normalizeVideoBlocks(blocks: ArticleBlock[]): ArticleBlock[] | null {
   return normalized;
 }
 
+type ParsedArticle =
+  | { readonly errors: Record<string, string> }
+  | { readonly data: ArticleInput; readonly content: ArticleBlock[] };
+
+function parseArticleForm(formData: FormData): ParsedArticle {
+  const contentResult = parseContentField(formData.get("content"));
+  const publishedAtRaw = optionalString(formData, "publishedAt");
+
+  const parsed = articleInputSchema.safeParse({
+    title: formData.get("title"),
+    subtitle: optionalString(formData, "subtitle"),
+    authorName: formData.get("authorName"),
+    tagIds: formData.getAll("tagIds").filter((value) => typeof value === "string"),
+    primarySubjectId: optionalString(formData, "primarySubjectId"),
+    format: optionalString(formData, "format"),
+    status: formData.get("status"),
+    episodeUrl: optionalString(formData, "episodeUrl"),
+    pollId: optionalString(formData, "pollId"),
+    // The datetime-local value is a naive wall-clock string; interpret it
+    // in Israel time (matching how the form displays it) instead of letting
+    // the server's own time zone shift it on every save.
+    publishedAt: publishedAtRaw ? (parseDatetimeLocalIsrael(publishedAtRaw) ?? publishedAtRaw) : undefined,
+    coverImageUrl: formData.get("coverImageUrl") ?? "",
+    coverCredit: optionalString(formData, "coverCredit"),
+    coverFocusX: optionalInt(formData, "coverFocusX"),
+    coverFocusY: optionalInt(formData, "coverFocusY"),
+    content: "blocks" in contentResult ? contentResult.blocks : [],
+  });
+
+  if (!parsed.success || "error" in contentResult) {
+    const errors: Record<string, string> = {};
+    if ("error" in contentResult) errors.content = contentResult.error;
+    for (const issue of parsed.success ? [] : parsed.error.issues) {
+      const field = String(issue.path[0] ?? "form");
+      if (field !== "content" || !errors.content) errors[field] ??= issue.message;
+    }
+    return { errors };
+  }
+
+  const content = normalizeVideoBlocks(parsed.data.content);
+  if (!content) return { errors: { content: "אחד מקישורי הסרטונים אינו תקין" } };
+  const episodeUrl = parsed.data.episodeUrl || null;
+  if (episodeUrl !== null && parseVideoUrl(episodeUrl)?.provider !== "spotify") {
+    return { errors: { episodeUrl: "קישור הפרק חייב להיות קישור לפרק בספוטיפיי" } };
+  }
+  return { data: parsed.data, content };
+}
+
+type Db = ReturnType<typeof getDb>;
+
+// Tag names in the picked order, or an error when a tag or the subject was
+// deleted while the form was open.
+async function resolveTaxonomy(db: Db, input: ArticleInput): Promise<string[] | { error: string }> {
+  const [rows, subject] = await Promise.all([
+    input.tagIds.length > 0
+      ? db.select({ id: tagsTable.id, name: tagsTable.name }).from(tagsTable).where(inArray(tagsTable.id, input.tagIds))
+      : [],
+    input.primarySubjectId
+      ? db.select({ id: subjects.id }).from(subjects).where(eq(subjects.id, input.primarySubjectId)).limit(1)
+      : null,
+  ]);
+  const names = new Map(rows.map((row) => [row.id, row.name]));
+  if (names.size !== input.tagIds.length) return { error: "אחת התגיות נמחקה בינתיים. רעננו את הדף" };
+  if (subject && !subject[0]) return { error: "הנושא נמחק בינתיים. רעננו את הדף" };
+  return input.tagIds.map((id) => names.get(id) ?? "");
+}
+
+// Saves the article and its ordered tag links in one atomic batch.
+async function writeArticle(
+  db: Db,
+  articleId: string | null,
+  values: Omit<NewArticle, "id">,
+  tagIds: readonly string[],
+): Promise<number | null> {
+  const id = articleId ?? crypto.randomUUID();
+  const save = articleId
+    ? db.update(articles).set(values).where(eq(articles.id, id)).returning({ number: articles.number })
+    : db.insert(articles).values({ ...values, id }).returning({ number: articles.number });
+  const clearLinks = db.delete(articleTags).where(eq(articleTags.articleId, id));
+  const links = tagIds.map((tagId, position) => ({ articleId: id, tagId, position }));
+
+  const [saved] = await runAtomic(db, [
+    save,
+    clearLinks,
+    ...(links.length > 0 ? [db.insert(articleTags).values(links)] : []),
+  ]);
+  return saved[0]?.number ?? null;
+}
+
 export async function saveArticle(
   _prev: ArticleFormState,
   formData: FormData,
@@ -84,120 +176,46 @@ export async function saveArticle(
     return { errors: { form: "הכתבה לא נמצאה" } };
   }
 
-  const contentResult = parseContentField(formData.get("content"));
-  const tagsRaw = formData.get("tags");
-  const tags =
-    typeof tagsRaw === "string"
-      ? tagsRaw.split(",").map((tag) => tag.trim()).filter(Boolean)
-      : [];
-  const publishedAtRaw = formData.get("publishedAt");
-  const subtitleRaw = formData.get("subtitle");
-  const episodeUrlRaw = formData.get("episodeUrl");
-  const pollIdRaw = formData.get("pollId");
-
-  const parsed = articleInputSchema.safeParse({
-    title: formData.get("title"),
-    subtitle: typeof subtitleRaw === "string" ? subtitleRaw : undefined,
-    authorName: formData.get("authorName"),
-    tags,
-    status: formData.get("status"),
-    episodeUrl: typeof episodeUrlRaw === "string" ? episodeUrlRaw : undefined,
-    pollId: typeof pollIdRaw === "string" && pollIdRaw !== "" ? pollIdRaw : undefined,
-    // The datetime-local value is a naive wall-clock string; interpret it
-    // in Israel time (matching how the form displays it) instead of letting
-    // the server's own time zone shift it on every save.
-    publishedAt:
-      typeof publishedAtRaw === "string" && publishedAtRaw !== ""
-        ? (parseDatetimeLocalIsrael(publishedAtRaw) ?? publishedAtRaw)
-        : undefined,
-    coverImageUrl: formData.get("coverImageUrl") ?? "",
-    content: "blocks" in contentResult ? contentResult.blocks : [],
-  });
-
-  if (!parsed.success || "error" in contentResult) {
-    const errors: Record<string, string> = {};
-    if ("error" in contentResult) {
-      errors.content = contentResult.error;
-    }
-    if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        const field = String(issue.path[0] ?? "form");
-        if (field !== "content" || !errors.content) {
-          errors[field] ??= issue.message;
-        }
-      }
-    }
-    return { errors };
-  }
-
-  const content = normalizeVideoBlocks(parsed.data.content);
-  if (!content) {
-    return { errors: { content: "אחד מקישורי הסרטונים אינו תקין" } };
-  }
-
-  const episodeUrl = parsed.data.episodeUrl || null;
-  if (episodeUrl !== null && parseVideoUrl(episodeUrl)?.provider !== "spotify") {
-    return {
-      errors: { episodeUrl: "קישור הפרק חייב להיות קישור לפרק בספוטיפיי" },
-    };
-  }
+  const parsed = parseArticleForm(formData);
+  if ("errors" in parsed) return { errors: parsed.errors };
+  const { data, content } = parsed;
 
   const db = getDb();
+  const [tagNames, existing] = await Promise.all([
+    resolveTaxonomy(db, data),
+    articleId
+      ? db.select({ publishedAt: articles.publishedAt }).from(articles).where(eq(articles.id, articleId)).limit(1)
+      : null,
+  ]);
+  if ("error" in tagNames) return { errors: { tagIds: tagNames.error } };
+  if (existing && !existing[0]) return { errors: { form: "הכתבה לא נמצאה" } };
+  const previousPublishedAt = existing?.[0]?.publishedAt ?? null;
 
-  let previousNumber: number | null = null;
-  let previousPublishedAt: Date | null = null;
-  if (articleId) {
-    const existing = await db
-      .select({ number: articles.number, publishedAt: articles.publishedAt })
-      .from(articles)
-      .where(eq(articles.id, articleId))
-      .limit(1);
-    if (!existing[0]) {
-      return { errors: { form: "הכתבה לא נמצאה" } };
-    }
-    previousNumber = existing[0].number;
-    previousPublishedAt = existing[0].publishedAt;
-  }
-
-  const isPublished = parsed.data.status === "published";
-  const publishedAt =
-    parsed.data.publishedAt ??
-    previousPublishedAt ??
-    (isPublished ? new Date() : null);
-
-  const values = {
-    title: parsed.data.title,
-    subtitle: parsed.data.subtitle || null,
-    coverImageUrl: parsed.data.coverImageUrl || null,
-    content,
-    authorName: parsed.data.authorName,
-    episodeUrl,
-    pollId: parsed.data.pollId ?? null,
-    tags: parsed.data.tags,
-    status: parsed.data.status,
-    publishedAt,
-    updatedAt: new Date(),
-  };
-
-  // Form-created tags land in the central registry.
-  if (parsed.data.tags.length > 0) {
-    await db
-      .insert(tagsTable)
-      .values(parsed.data.tags.map((name) => ({ name })))
-      .onConflictDoNothing();
-  }
-
-  // Set by the lookup above when editing, by the insert when creating.
-  let savedNumber = previousNumber;
-  if (articleId) {
-    await db.update(articles).set(values).where(eq(articles.id, articleId));
-  } else {
-    const inserted = await db
-      .insert(articles)
-      .values(values)
-      .returning({ number: articles.number });
-    savedNumber = inserted[0].number;
-  }
+  const isPublished = data.status === "published";
+  const savedNumber = await writeArticle(
+    db,
+    articleId,
+    {
+      title: data.title,
+      subtitle: data.subtitle || null,
+      coverImageUrl: data.coverImageUrl || null,
+      coverCredit: data.coverCredit || null,
+      coverFocusX: data.coverFocusX ?? null,
+      coverFocusY: data.coverFocusY ?? null,
+      content,
+      authorName: data.authorName,
+      episodeUrl: data.episodeUrl || null,
+      pollId: data.pollId ?? null,
+      primarySubjectId: data.primarySubjectId ?? null,
+      format: data.format,
+      // Mirrors the links for a rollback to the code before article_tags.
+      tags: tagNames,
+      status: data.status,
+      publishedAt: data.publishedAt ?? previousPublishedAt ?? (isPublished ? new Date() : null),
+      updatedAt: new Date(),
+    },
+    data.tagIds,
+  );
 
   if (savedNumber !== null) {
     revalidateArticle(savedNumber);

@@ -2,15 +2,16 @@ import { notFound } from "next/navigation";
 import { ArticleForm } from "@/components/admin/ArticleForm";
 import { getArticleById } from "@/lib/dal/admin-articles";
 import { getPollById, listPollChoices } from "@/lib/dal/polls";
-import { listTagNames } from "@/lib/dal/tags";
+import { getAdminTaxonomy, getArticleTagIds } from "@/lib/dal/taxonomy-admin";
 
 export default async function EditArticlePage({
   params,
 }: PageProps<"/admin/articles/[id]/edit">) {
   const { id } = await params;
-  const [article, tagSuggestions, choices] = await Promise.all([
+  const [article, tagIds, taxonomy, choices] = await Promise.all([
     getArticleById(id),
-    listTagNames(),
+    getArticleTagIds(id),
+    getAdminTaxonomy(),
     listPollChoices(),
   ]);
   if (!article) {
@@ -30,7 +31,7 @@ export default async function EditArticlePage({
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-2xl font-bold">עריכת כתבה</h2>
-      <ArticleForm article={article} tagSuggestions={tagSuggestions} pollChoices={pollChoices} />
+      <ArticleForm article={article} tagIds={tagIds} taxonomy={taxonomy} pollChoices={pollChoices} />
     </div>
   );
 }

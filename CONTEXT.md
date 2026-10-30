@@ -15,7 +15,9 @@ Language of the site: Hebrew. Canonical Hebrew labels appear beside each term.
 | **Format** (סוג) | What kind of piece an article is, independent of its subject: story (כתבה), roundup (סיכום), guide (מדריך). |
 | **View** (צפייה) | One reader opening an article page. Counted best-effort from the reader's browser; a ranking signal, not analytics. |
 | **Trending** (הנקראות ביותר) | Articles ranked by views received in the trailing 7 days — not all-time totals. |
-| **Related** (עוד באותו נושא) | Articles sharing tags with the current one, ranked by tag overlap, then trending views, then recency. |
+| **Related** (עוד ב<נושא>) | Articles sharing tags or a subject with the current one, ranked by relevance (each shared tag counts twice, a shared subject once), then trending views, then recency. |
+| **Subject page** (עמוד נושא) | `/topics/<slug>`: the subject's newest story as the lead, then every article in the subject, filterable by the subject's own tags. |
+| **Roundups** (סיכומים) | `/roundups`: every roundup, newest first, each listing the subjects it covers. |
 | **Mid-article recirculation** | The small Related module inserted inside an article's body near the first screen; only appears in articles long enough to carry it. |
 | **End-of-article recirculation** | The two labeled rows after an article: Related and Trending. An article never appears twice on the same page. |
 | **Player bar** (נגן) | The persistent site-wide audio player carrying the latest episode. There is exactly one player; it survives navigation between pages. |

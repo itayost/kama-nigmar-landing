@@ -19,8 +19,9 @@ export async function GET(): Promise<Response> {
       if (article.subtitle) {
         parts.push(`      <description>${escapeXml(article.subtitle)}</description>`);
       }
-      for (const tag of article.tags) {
-        parts.push(`      <category>${escapeXml(tag)}</category>`);
+      const categories = [...article.subjects, ...article.tagList].map((entry) => entry.name);
+      for (const category of new Set(categories)) {
+        parts.push(`      <category>${escapeXml(category)}</category>`);
       }
       return `    <item>\n${parts.join("\n")}\n    </item>`;
     })

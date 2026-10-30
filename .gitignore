@@ -43,6 +43,7 @@ next-env.d.ts
 
 # project artifacts
 .env.local
+.env.localdev
 .superpowers/
 
 # testing artifacts

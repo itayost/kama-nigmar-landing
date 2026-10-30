@@ -2,6 +2,8 @@ import type { TaxonomyMapping } from "./backfill-plan";
 
 // The tag-to-subject mapping agreed on 2026-10-30, keyed by today's tag names.
 // Tags created after that date are not listed and land in the admin's inbox.
+// It outlives the backfill: the proxy reads it to redirect old
+// /articles?tag=<name> links (legacy-tag.ts), so keep its tag entries as they are.
 export const TAXONOMY_MAPPING: TaxonomyMapping = {
   subjects: [
     { slug: "israeli-football", name: "כדורגל ישראלי", position: 1, onHomepage: true, color: "#4cb8ff" },

@@ -28,8 +28,14 @@ over where each tag belongs.
 4. The rollout is additive. Migration `0001` only adds tables, columns and indexes, so
    it is safe to apply while the current code is live. The backfill
    (`npm run db:backfill-taxonomy`) reads `articles.tags`, never changes it, and runs at
-   cutover, right before the code that reads the new structures ships. `articles.tags`
-   is dropped only after that.
+   cutover, right before the code that reads the new structures ships.
+6. After cutover the site reads only `article_tags`. `articles.tags` stays as a
+   rollback mirror: every admin save rewrites it in tag order, and nothing public
+   selects it. It is not dropped.
+7. Old archive filter links (`/articles?tag=<name>`) answer with a 308 from the proxy:
+   a tag that became a subject goes to `/topics/<slug>`, the weekend tag to
+   `/roundups`, a kept tag (renamed per the backfill mapping) to its subject page
+   filtered by it, and a retired or unfiled tag to `/articles`.
 5. Every command that writes requires `--confirm-host=<host>`, because `.env.local`
    points at production.
 
@@ -42,5 +48,7 @@ over where each tag belongs.
   be re-run, since it would overwrite tag edits made in the new admin.
 - `db:push` is removed from the scripts: mixing push with migrations creates tables
   outside the migration history and breaks the next `db:migrate`.
+- Rolling back means deploying the previous code: it reads `articles.tags`, which the
+  mirror keeps current.
 - Open: one subject per tag. "ליגיונרים" is the only current tag that would want two;
   it starts in the inbox.

@@ -1,7 +1,7 @@
-import type { Article } from "@/lib/db/schema";
+import type { SiteArticle } from "@/lib/dal/articles";
 import { SITE_URL } from "@/lib/site";
 
-const SITE_NAME = "כמה נגמר?";
+export const SITE_NAME = "כמה נגמר?";
 const FALLBACK_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 // `alternates` is replaced wholesale when a page defines it, so every page
@@ -37,7 +37,14 @@ export function podcastSeriesSchema({ spotifyUrl, applePodcastUrl }: PodcastPlat
   };
 }
 
-export function newsArticleSchema(article: Article) {
+export interface ArticleTaxonomyMeta {
+  // The primary subject's name.
+  readonly section?: string;
+  readonly keywords?: readonly string[];
+}
+
+export function newsArticleSchema(article: SiteArticle, taxonomy: ArticleTaxonomyMeta = {}) {
+  const keywords = taxonomy.keywords ?? [];
   return {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -54,8 +61,8 @@ export function newsArticleSchema(article: Article) {
     },
     mainEntityOfPage: `${SITE_URL}/articles/${article.number}`,
     inLanguage: "he",
-    articleSection: article.tags[0],
-    keywords: article.tags.length > 0 ? article.tags.join(", ") : undefined,
+    articleSection: taxonomy.section,
+    keywords: keywords.length > 0 ? keywords.join(", ") : undefined,
   };
 }
 
@@ -74,5 +81,37 @@ export function breadcrumbSchema(items: readonly BreadcrumbItem[]) {
       name: item.name,
       item: item.url,
     })),
+  };
+}
+
+export interface CollectionPageMeta {
+  readonly name: string;
+  readonly description: string;
+  readonly url: string;
+}
+
+// A subject page or the roundups: a listing of articles.
+export function collectionPageSchema({ name, description, url }: CollectionPageMeta) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url,
+    inLanguage: "he",
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+  };
+}
+
+// Open Graph for a listing page; the shared site image and locale.
+export function pageOpenGraph({ name, description, url }: CollectionPageMeta) {
+  return {
+    title: `${name} | ${SITE_NAME}`,
+    description,
+    url,
+    siteName: SITE_NAME,
+    type: "website" as const,
+    locale: "he_IL",
+    images: [{ url: "/og-wide.jpg", width: 1200, height: 630, alt: `${SITE_NAME} פודקאסט` }],
   };
 }

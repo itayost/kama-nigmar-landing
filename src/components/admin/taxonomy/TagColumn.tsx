@@ -1,0 +1,154 @@
+"use client";
+
+import { useState, type CSSProperties, type DragEvent } from "react";
+import type { AdminSubject, AdminTag } from "@/lib/dal/taxonomy-admin";
+import { INBOX_COLOR, INBOX_LABEL } from "@/lib/taxonomy/inbox";
+import { iconButtonClass } from "../Field";
+import { PencilIcon, PlusIcon } from "../icons";
+import { ColumnControls } from "./ColumnControls";
+
+export interface ColumnActions {
+  readonly selectedId: string | null;
+  readonly draggingId: string | null;
+  onSelect(tagId: string): void;
+  onDragStart(tagId: string): void;
+  onDragEnd(): void;
+  onMoveHere(subjectId: string | null): void;
+  onCreate(name: string, subjectId: string | null): Promise<boolean>;
+}
+
+interface TagColumnProps {
+  // Null for the inbox of tags without a subject.
+  readonly subject: AdminSubject | null;
+  readonly tags: readonly AdminTag[];
+  readonly isFirst?: boolean;
+  readonly isLast?: boolean;
+  readonly actions: ColumnActions;
+  onEdit?(): void;
+  onReorder?(direction: -1 | 1): void;
+  onToggleHomepage?(): void;
+}
+
+export function TagColumn({ subject, tags, isFirst, isLast, actions, onEdit, onReorder, onToggleHomepage }: TagColumnProps) {
+  const [isOver, setIsOver] = useState(false);
+  const subjectId = subject?.id ?? null;
+  const ownIds = new Set(tags.map((tag) => tag.id));
+  const incoming = actions.draggingId ?? actions.selectedId;
+  const canReceive = incoming !== null && !ownIds.has(incoming);
+
+  function handleDrop(event: DragEvent) {
+    event.preventDefault();
+    setIsOver(false);
+    if (actions.draggingId && !ownIds.has(actions.draggingId)) actions.onMoveHere(subjectId);
+  }
+
+  return (
+    <section
+      aria-label={subject ? subject.name : INBOX_LABEL}
+      style={{ "--subject": subject?.color ?? INBOX_COLOR } as CSSProperties}
+      onDragOver={(event) => {
+        if (!actions.draggingId) return;
+        event.preventDefault();
+        setIsOver(true);
+      }}
+      onDragLeave={() => setIsOver(false)}
+      onDrop={handleDrop}
+      className={`flex min-h-56 flex-col gap-2.5 rounded-xl border p-3 transition-colors ${
+        subject ? "border-surface-border bg-white/[0.03]" : "border-dashed border-[var(--subject)]/50 bg-[var(--subject)]/[0.06]"
+      } ${isOver ? "border-[var(--subject)] bg-[var(--subject)]/10" : ""}`}
+    >
+      <header className="flex items-center gap-2">
+        {subject ? <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-[3px] bg-[var(--subject)]" /> : null}
+        <h3 className="min-w-0 flex-1 text-sm font-extrabold leading-tight">{subject ? subject.name : INBOX_LABEL}</h3>
+        <span className="text-xs tabular-nums text-text-muted">{tags.length}</span>
+        {onEdit ? (
+          <button type="button" onClick={onEdit} aria-label={`עריכת ${subject?.name}`} className={iconButtonClass}>
+            <PencilIcon />
+          </button>
+        ) : null}
+      </header>
+
+      {subject && onReorder && onToggleHomepage ? (
+        <ColumnControls
+          onHomepage={subject.onHomepage}
+          isFirst={Boolean(isFirst)}
+          isLast={Boolean(isLast)}
+          onToggleHomepage={onToggleHomepage}
+          onReorder={onReorder}
+        />
+      ) : (
+        <p className="text-xs text-text-muted">תגיות חדשות שעדיין לא שובצו בנושא</p>
+      )}
+
+      <ul className="flex flex-col gap-1.5">
+        {tags.map((tag) => (
+          <li key={tag.id}>
+            <TagChip tag={tag} actions={actions} />
+          </li>
+        ))}
+        {tags.length === 0 ? (
+          <li className="rounded-lg border border-dashed border-surface-border p-3 text-center text-xs text-text-muted">
+            {subject ? "אין עדיין תגיות" : "אין תגיות שממתינות"}
+          </li>
+        ) : null}
+      </ul>
+
+      {canReceive && actions.selectedId ? (
+        <button
+          type="button"
+          onClick={() => actions.onMoveHere(subjectId)}
+          className="rounded-lg bg-[var(--subject)] px-2 py-1.5 text-xs font-bold text-bg-start"
+        >
+          העברה לכאן
+        </button>
+      ) : null}
+
+      <NewTagInput label={`תגית חדשה ב${subject ? subject.name : "תיבת ההמתנה"}`} onCreate={(name) => actions.onCreate(name, subjectId)} />
+    </section>
+  );
+}
+
+function TagChip({ tag, actions }: { readonly tag: AdminTag; readonly actions: ColumnActions }) {
+  const isSelected = actions.selectedId === tag.id;
+  return (
+    <button
+      type="button"
+      draggable
+      aria-pressed={isSelected}
+      onClick={() => actions.onSelect(tag.id)}
+      onDragStart={() => actions.onDragStart(tag.id)}
+      onDragEnd={actions.onDragEnd}
+      className={`flex w-full cursor-grab items-center gap-2 rounded-lg border px-2.5 py-1.5 text-start text-sm transition-colors active:cursor-grabbing ${
+        isSelected ? "border-accent bg-accent/15" : "border-surface-border bg-surface hover:border-white/30"
+      } ${actions.draggingId === tag.id ? "opacity-40" : ""}`}
+    >
+      <span className="min-w-0 flex-1 truncate">{tag.name}</span>
+      <span className="text-xs tabular-nums text-text-muted">{tag.articleCount}</span>
+    </button>
+  );
+}
+
+function NewTagInput({ label, onCreate }: { readonly label: string; onCreate(name: string): Promise<boolean> }) {
+  const [draft, setDraft] = useState("");
+  return (
+    <form
+      className="mt-auto flex items-center gap-1.5"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        const name = draft.trim();
+        if (name && (await onCreate(name))) setDraft("");
+      }}
+    >
+      <input
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        placeholder="תגית חדשה"
+        aria-label={label}
+        className="min-w-0 flex-1 rounded-lg border border-surface-border bg-transparent px-2.5 py-1.5 text-sm placeholder:text-text-muted focus:border-accent focus:outline-none"
+      />
+      <button type="submit" aria-label="הוספה" className={iconButtonClass}>
+        <PlusIcon />
+      </button>
+    </form>
+  );
+}

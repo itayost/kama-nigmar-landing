@@ -11,10 +11,31 @@
   --color-surface-border: rgba(255, 255, 255, 0.08);
 
   --font-heebo: var(--font-heebo), sans-serif;
+
+  /* The site header's height: the cover tucks under it, sticky rails sit
+     below it, and the phone menu grows from its middle. */
+  --spacing-header: 3.75rem;
 }
+
+/* Over an article's cover the header floats on a soft shade until the
+   article's sheet reaches it (HeaderSolidity sets data-solid). Matches the
+   header and anything inside it. */
+@custom-variant over-cover (&:where(body:has([data-cover-sheet]) [data-site-header]:not([data-solid]), body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) *));
 
 :root {
   --color-text: #ffffff;
+}
+
+/* Keyboard focus and selection follow the nearest subject color (cards,
+   chips and sections set --subject), falling back to the brand green. */
+:focus-visible {
+  outline: 2px solid var(--subject, var(--color-accent));
+  outline-offset: 3px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--subject, var(--color-accent)) 40%, transparent);
+  color: #fff;
 }
 
 body {
@@ -37,6 +58,74 @@ body {
   .eq-bar {
     animation: none;
     transform: scaleY(0.6);
+  }
+}
+
+/* Phone menu: grows out of the menu button (top right in RTL): the header's
+   1.5rem padding plus half the 2.5rem button, at half the header's height. */
+.site-menu {
+  clip-path: circle(0 at calc(100% - 2.75rem) calc(var(--spacing-header) / 2));
+  visibility: hidden;
+  transition: clip-path 0.45s cubic-bezier(0.7, 0, 0.84, 0), visibility 0s linear 0.45s;
+}
+
+.site-menu[data-open] {
+  clip-path: circle(150% at calc(100% - 2.75rem) calc(var(--spacing-header) / 2));
+  visibility: visible;
+  transition: clip-path 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+}
+
+.site-menu-item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
+}
+
+.site-menu[data-open] .site-menu-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(140ms + var(--i, 0) * 40ms), calc(140ms + var(--i, 0) * 40ms), 0s;
+}
+
+/* The cover dims and the headline fades as the sheet slides over them.
+   Browsers without scroll timelines keep the cover as it is. */
+@supports (animation-timeline: scroll()) {
+  .cover-photo {
+    animation: cover-dim linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 60svh;
+  }
+
+  .cover-headline {
+    animation: cover-fade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 34svh;
+  }
+}
+
+@keyframes cover-dim {
+  to {
+    transform: scale(1.08);
+    filter: brightness(0.5);
+  }
+}
+
+@keyframes cover-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-menu,
+  .site-menu[data-open],
+  .site-menu-item {
+    transition: none;
+  }
+
+  .cover-photo,
+  .cover-headline {
+    animation: none;
   }
 }
 

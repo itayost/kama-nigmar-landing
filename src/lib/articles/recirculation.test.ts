@@ -163,3 +163,21 @@ describe("rankTrending", () => {
     expect(rankTrending(many, views({ a0: 1, a1: 2, a2: 3, a3: 4, a4: 5 }), 2)).toHaveLength(2);
   });
 });
+
+describe("planRecirculation with subjects", () => {
+  const current = { id: "id-current", tags: ["beer-sheva"], subjects: ["il", "wf"], blockCount: 6 };
+
+  test("treats an article in a shared subject as related even without a shared tag", () => {
+    const sameSubject = { ...make("same", []), subjects: ["il"] };
+    const unrelated = { ...make("other", []), subjects: ["bb"] };
+    const plan = planRecirculation(current, [sameSubject, unrelated], {});
+    expect(slugs(plan.midArticle)).toEqual(["id-same"]);
+  });
+
+  test("ranks a shared tag above a shared subject", () => {
+    const sameTag = { ...make("tag", ["beer-sheva"], new Date("2026-06-01")), subjects: ["bb"] };
+    const sameSubject = { ...make("subject", [], new Date("2026-07-01")), subjects: ["il"] };
+    const plan = planRecirculation(current, [sameSubject, sameTag], {});
+    expect(slugs(plan.midArticle)).toEqual(["id-tag", "id-subject"]);
+  });
+});

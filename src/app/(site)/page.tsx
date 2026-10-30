@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Hero } from "@/components/hero/Hero";
 import { PollSection } from "@/components/polls/PollSection";
 import { getMainPoll } from "@/lib/dal/polls";
-import { LatestArticlesSection } from "@/components/articles/LatestArticlesSection";
+import { HomeSections } from "@/components/articles/HomeSections";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FEED_ALTERNATE, podcastSeriesSchema, webSiteSchema } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
@@ -22,7 +22,7 @@ async function HomePollSlot() {
   if (!poll) return null;
 
   return (
-    <div className="mx-auto w-full max-w-2xl pt-9">
+    <div className="mx-auto w-full max-w-2xl pb-10">
       <PollSection placement="homepage" poll={poll} />
     </div>
   );
@@ -36,12 +36,12 @@ export default function Home() {
         data={podcastSeriesSchema({ spotifyUrl: spotifyShowUrl, applePodcastUrl })}
       />
       <Hero spotifyUrl={spotifyShowUrl} applePodcastUrl={applePodcastUrl} />
+      <div className="pb-10 pt-9">
+        <HomeSections />
+      </div>
       <Suspense fallback={null}>
         <HomePollSlot />
       </Suspense>
-      <div className="pb-10 pt-9">
-        <LatestArticlesSection />
-      </div>
     </main>
   );
 }

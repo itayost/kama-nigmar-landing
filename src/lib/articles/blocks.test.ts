@@ -149,12 +149,15 @@ describe("tagNameSchema", () => {
   });
 });
 
+const TAG_A = "11111111-1111-4111-8111-111111111111";
+const TAG_B = "22222222-2222-4222-8222-222222222222";
+
 describe("articleInputSchema", () => {
   const validInput = {
     title: "מכבי ניצחה בדרבי",
     subtitle: "סיכום המשחק",
     authorName: "יוסי",
-    tags: ["כדורגל"],
+    tagIds: [TAG_A],
     status: "draft",
     content: [paragraph],
   };
@@ -186,8 +189,34 @@ describe("articleInputSchema", () => {
   });
 
   test("limits tags to 10", () => {
-    const tags = Array.from({ length: 11 }, (_, i) => `tag${i}`);
-    expect(articleInputSchema.safeParse({ ...validInput, tags }).success).toBe(false);
+    const tagIds = Array.from({ length: 11 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, "0")}`);
+    expect(articleInputSchema.safeParse({ ...validInput, tagIds }).success).toBe(false);
+  });
+
+  test("rejects a tag picked twice and a malformed tag id", () => {
+    expect(articleInputSchema.safeParse({ ...validInput, tagIds: [TAG_A, TAG_A] }).success).toBe(false);
+    expect(articleInputSchema.safeParse({ ...validInput, tagIds: ["כדורגל"] }).success).toBe(false);
+  });
+
+  test("defaults the format to a story and accepts a primary subject", () => {
+    const result = articleInputSchema.parse({ ...validInput, tagIds: [TAG_A, TAG_B], primarySubjectId: TAG_B });
+    expect(result.format).toBe("story");
+    expect(result.primarySubjectId).toBe(TAG_B);
+    expect(articleInputSchema.safeParse({ ...validInput, format: "column" }).success).toBe(false);
+  });
+
+  test("keeps the cover focus inside the photo", () => {
+    expect(articleInputSchema.parse({ ...validInput, coverFocusX: 30, coverFocusY: 70 })).toMatchObject({
+      coverFocusX: 30,
+      coverFocusY: 70,
+    });
+    expect(articleInputSchema.safeParse({ ...validInput, coverFocusX: 140 }).success).toBe(false);
+    expect(articleInputSchema.safeParse({ ...validInput, coverFocusY: 12.5 }).success).toBe(false);
+  });
+
+  test("limits the cover credit to a short caption", () => {
+    expect(articleInputSchema.safeParse({ ...validInput, coverCredit: "צילום: בן בודה" }).success).toBe(true);
+    expect(articleInputSchema.safeParse({ ...validInput, coverCredit: "א".repeat(121) }).success).toBe(false);
   });
 
   test("allows empty coverImageUrl but rejects foreign hosts", () => {

@@ -70,7 +70,9 @@ export const articles = pgTable(
     authorName: text("author_name").notNull(),
     episodeUrl: text("episode_url"),
     pollId: uuid("poll_id").references(() => polls.id, { onDelete: "set null" }),
-    // Legacy flat tag list; still what the site reads until article_tags goes live.
+    // Legacy flat tag list, kept as a rollback mirror of article_tags: every
+    // admin save rewrites it in tag order, and only the backfill reads it.
+    // The site reads article_tags (ADR 0002).
     tags: text("tags").array().notNull().default([]),
     // Drives the label above the headline, the breadcrumb and the SEO section.
     // Null for a roundup that spans several subjects.

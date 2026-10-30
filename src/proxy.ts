@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { parseArticleNumber } from "@/lib/articles/article-param";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth/token";
 import { getDb } from "@/lib/db";
-import { articles } from "@/lib/db/schema";
+import { articles, subjects, tags } from "@/lib/db/schema";
+import { legacyTagRedirect, legacyTagTarget, type LegacyTagTarget } from "@/lib/taxonomy/legacy-tag";
+import { TAXONOMY_MAPPING } from "@/lib/taxonomy/mapping";
 
 // Malformed percent-encoding (e.g. "%" or a truncated escape) makes
 // decodeURIComponent throw. Treat that as "not a slug we can resolve" and
@@ -54,6 +56,39 @@ async function redirectLegacyArticle(request: NextRequest) {
   return NextResponse.redirect(new URL(`/articles/${number}`, request.url), 308);
 }
 
+// The archive's old tag filter (/articles?tag=<name>) now lives on subject
+// pages. A real redirect here, for the same streaming reason as legacy slugs.
+// The backfill mapping knows what each original tag became; the database says
+// whether that subject still exists, or where the admin has filed the tag.
+async function liveSubjectSlug(target: LegacyTagTarget): Promise<string | null> {
+  if (target.kind === "subject") {
+    const rows = await getDb().select({ slug: subjects.slug }).from(subjects).where(eq(subjects.slug, target.slug)).limit(1);
+    return rows[0]?.slug ?? null;
+  }
+  if (target.kind === "tag") {
+    const rows = await getDb()
+      .select({ slug: subjects.slug })
+      .from(tags)
+      .innerJoin(subjects, eq(subjects.id, tags.subjectId))
+      .where(eq(tags.name, target.name))
+      .limit(1);
+    return rows[0]?.slug ?? null;
+  }
+  return null;
+}
+
+async function redirectLegacyTag(request: NextRequest, name: string) {
+  const target = legacyTagTarget(name, TAXONOMY_MAPPING);
+  // A database hiccup should not turn an old link into a 500: with no answer
+  // the redirect falls back to the archive, temporarily.
+  const liveSlug = await liveSubjectSlug(target).catch((error: unknown) => {
+    console.error("legacy tag redirect lookup failed", error);
+    return null;
+  });
+  const { path, permanent } = legacyTagRedirect(target, liveSlug);
+  return NextResponse.redirect(new URL(path, request.url), permanent ? 308 : 307);
+}
+
 // Signature check only: full authorization still happens in requireAdmin()
 // inside every admin page and Server Action. Verifying (rather than just
 // checking cookie presence) prevents a redirect loop between /admin and
@@ -62,6 +97,10 @@ async function redirectLegacyArticle(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/articles/")) {
     return redirectLegacyArticle(request);
+  }
+  if (request.nextUrl.pathname === "/articles") {
+    // The matcher only sends /articles here when it carries ?tag=.
+    return redirectLegacyTag(request, request.nextUrl.searchParams.get("tag") ?? "");
   }
 
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -82,5 +121,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/articles/:slug"],
+  matcher: [
+    "/admin/:path*",
+    "/articles/:slug",
+    // Only legacy tag links; the plain archive never runs the proxy.
+    { source: "/articles", has: [{ type: "query", key: "tag" }] },
+  ],
 };

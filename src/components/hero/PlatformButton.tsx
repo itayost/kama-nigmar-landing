@@ -3,6 +3,8 @@ interface PlatformButtonProps {
   readonly label: string;
   readonly ariaLabel: string;
   readonly variant: "spotify" | "apple";
+  // Layout from the caller, e.g. to share a row evenly.
+  readonly className?: string;
 }
 
 // Text colour lives per-variant: white on Spotify green is only 2.59:1, below the
@@ -16,7 +18,7 @@ const variantStyles = {
     "bg-apple text-white hover:shadow-[0_0_20px_rgba(135,46,196,0.4)] focus-visible:shadow-[0_0_20px_rgba(135,46,196,0.4)]",
 } as const;
 
-export function PlatformButton({ href, label, ariaLabel, variant }: PlatformButtonProps) {
+export function PlatformButton({ href, label, ariaLabel, variant, className = "" }: PlatformButtonProps) {
   return (
     <a
       href={href}
@@ -30,6 +32,7 @@ export function PlatformButton({ href, label, ariaLabel, variant }: PlatformButt
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30
         motion-reduce:transition-none motion-reduce:hover:scale-100
         ${variantStyles[variant]}
+        ${className}
       `}
     >
       {label}
