@@ -20,9 +20,11 @@ export function HomeSections({ plan }: { readonly plan: HomepagePlan<ArticleView
       {plan.roundups.length > 0 ? (
         <section aria-labelledby="roundups-heading">
           <SectionHeading title={ROUNDUPS.label} id="roundups-heading" color={ROUNDUPS.color} linkHref={ROUNDUPS.href} linkLabel="לכל הסיכומים" />
-          <div className="-mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-6 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0">
+          {/* A swiped card snaps to the page margin (scroll-px), and every
+              card fills the row's height. */}
+          <div className="-mx-6 flex snap-x snap-mandatory scroll-px-6 gap-3 overflow-x-auto px-6 [scrollbar-width:none] md:mx-0 md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:px-0">
             {plan.roundups.map((article) => (
-              <div key={article.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
+              <div key={article.id} className="w-[78%] max-w-80 shrink-0 snap-start md:w-auto md:max-w-none">
                 <RoundupCard article={article} />
               </div>
             ))}

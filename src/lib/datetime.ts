@@ -34,6 +34,17 @@ export function formatDateShort(date: Date): string {
   return shortDateFormatter.format(date);
 }
 
+const weekdayFormatter = new Intl.DateTimeFormat("he-IL", {
+  timeZone: ISRAEL_TIME_ZONE,
+  weekday: "long",
+});
+
+// The day's name as said in Israel: "שישי" rather than the formatter's
+// "יום שישי".
+export function formatWeekday(date: Date): string {
+  return weekdayFormatter.format(date).replace(/^יום /, "");
+}
+
 interface WallClockParts {
   readonly year: number;
   readonly month: number;

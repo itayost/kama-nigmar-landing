@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseDatetimeLocalIsrael, toDatetimeLocalIsrael } from "./datetime";
+import { formatWeekday, parseDatetimeLocalIsrael, toDatetimeLocalIsrael } from "./datetime";
 
 describe("toDatetimeLocalIsrael", () => {
   test("formats winter instants at IST (+2)", () => {
@@ -44,5 +44,17 @@ describe("parseDatetimeLocalIsrael", () => {
     expect(parseDatetimeLocalIsrael("not a date")).toBeNull();
     expect(parseDatetimeLocalIsrael("2026-07-30")).toBeNull();
     expect(parseDatetimeLocalIsrael("2026-07-30T15:34:00Z")).toBeNull();
+  });
+});
+
+describe("formatWeekday", () => {
+  test("names the day in Hebrew", () => {
+    expect(formatWeekday(new Date("2026-09-11T06:00:00Z"))).toBe("שישי");
+    expect(formatWeekday(new Date("2026-08-23T09:00:00Z"))).toBe("ראשון");
+  });
+
+  test("uses the day in Israel, not in UTC", () => {
+    // 22:30 UTC on Friday is already 01:30 on Saturday in Israel.
+    expect(formatWeekday(new Date("2026-09-11T22:30:00Z"))).toBe("שבת");
   });
 });

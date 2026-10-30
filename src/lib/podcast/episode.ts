@@ -17,15 +17,3 @@ export function formatDuration(totalSeconds: number): string {
   const pad = (value: number) => String(value).padStart(2, "0");
   return hours > 0 ? `${hours}:${pad(minutes)}:${pad(seconds)}` : `${minutes}:${pad(seconds)}`;
 }
-
-// Episode titles open with the show's question: "כמה נגמר ? 23.10.2011".
-// Returns what follows it, so the page can draw the question as the wordmark;
-// null when the title does not open with it or has nothing after it.
-const SHOW_QUESTION = /^כמה נגמר\s*\?\s*/;
-
-export function splitEpisodeTitle(title: string): string | null {
-  const match = SHOW_QUESTION.exec(title);
-  if (!match) return null;
-  const rest = title.slice(match[0].length).trim();
-  return rest.length > 0 ? rest : null;
-}
