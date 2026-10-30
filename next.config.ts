@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // On Vercel the edge network compresses responses and Next's own gzip does
+  // not run. Locally (dev:local, the production-build E2E) `next start` would
+  // gzip, and its gzip stream holds back the end of a streamed Server Action
+  // response: the admin list then never applied a delete or publish toggle.
+  // Matching Vercel keeps local runs honest.
+  compress: process.env.LOCAL_ONLY !== "1",
   cacheComponents: true,
   // Article reads are invalidated instantly by updateTag() on admin save, so the
   // TTL is only a safety net. It exists because "max" (revalidate 30 days) let a

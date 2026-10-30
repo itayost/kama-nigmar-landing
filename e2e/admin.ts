@@ -16,15 +16,8 @@ export async function deleteArticle(page: Page, title: string): Promise<void> {
   await page.goto("/admin");
   const row = page.getByRole("listitem").filter({ hasText: title });
   await row.getByRole("button", { name: "מחיקה" }).click();
-  const confirm = row.getByRole("button", { name: "מחיקה" }).last();
-  await confirm.click();
-  // Known issue in production builds only: after a list action (delete,
-  // publish toggle) the admin list keeps its old rows until a reload, although
-  // the change is saved. Cleanup checks the saved state, not the in-place update.
-  await expect(async () => {
-    await page.reload();
-    await expect(page.getByText(title)).toHaveCount(0);
-  }).toPass({ timeout: 15_000 });
+  await row.getByRole("button", { name: "מחיקה" }).last().click();
+  await expect(page.getByText(title)).toHaveCount(0);
 }
 
 // A tag on the /admin/tags board. A chip reads "<name><article count>", so
