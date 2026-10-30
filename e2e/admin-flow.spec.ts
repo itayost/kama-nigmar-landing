@@ -1,9 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { deleteTag, tagChip } from "./tags";
-
-// The config runs the dev server against the local Docker database and
-// supplies the local admin password (e2e/local-env.ts); production is never touched.
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
+import { deleteTag, login, tagChip } from "./admin";
 
 async function findArticleUrl(page: Page, title: string): Promise<string> {
   await page.goto("/articles");
@@ -17,8 +13,6 @@ async function findArticleUrl(page: Page, title: string): Promise<string> {
 }
 
 test.describe("admin flow", () => {
-  test.skip(!ADMIN_PASSWORD, "Set E2E_ADMIN_PASSWORD to run the admin E2E flow");
-
   test("rejects a wrong password with a Hebrew error", async ({ page }) => {
     await page.goto("/admin/login");
     await page.locator('input[name="password"]').fill("definitely-wrong");
@@ -32,10 +26,7 @@ test.describe("admin flow", () => {
     const title = `בדיקת מערכת ${Date.now()}`;
     const paragraph = "פסקת בדיקה שנוצרה אוטומטית על ידי הבדיקה.";
 
-    await page.goto("/admin/login");
-    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-    await page.getByRole("button", { name: "כניסה" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await login(page);
 
     await page.getByRole("link", { name: "+ כתבה חדשה" }).click();
     await page.locator('input[name="title"]').fill(title);
@@ -75,10 +66,7 @@ test.describe("admin flow", () => {
     const title = `בדיקת פרסום מחדש ${Date.now()}`;
     const paragraph = "פסקה לבדיקת ניקוי המטמון לאחר פרסום מחדש.";
 
-    await page.goto("/admin/login");
-    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-    await page.getByRole("button", { name: "כניסה" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await login(page);
 
     await page.getByRole("link", { name: "+ כתבה חדשה" }).click();
     await page.locator('input[name="title"]').fill(title);
@@ -121,10 +109,7 @@ test.describe("admin flow", () => {
     const tagName = `תגית-בדיקה-${Date.now()}`;
     const renamed = `${tagName}-חדש`;
 
-    await page.goto("/admin/login");
-    await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-    await page.getByRole("button", { name: "כניסה" }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await login(page);
 
     // A new tag waits in the inbox column of the board.
     await page.goto("/admin/tags");

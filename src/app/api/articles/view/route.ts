@@ -2,9 +2,11 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import { articleViewsDaily, articles } from "@/lib/db/schema";
-import { allow, limitKey } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 
 const RETENTION_DAYS = 30;
+// Old rollups only need clearing now and then, not on every view.
+const RETENTION_PRUNE_SHARE = 0.01;
 
 const viewPayloadSchema = z.object({ number: z.number().int().min(1).max(2147483647) });
 
@@ -25,7 +27,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   // A flood from one address stops counting; the reader sees no difference.
-  if (!(await allow("view", limitKey("view", request.headers)))) {
+  if (!(await rateLimit("view", request.headers)).allowed) {
     return new Response(null, { status: 204 });
   }
 
@@ -46,13 +48,15 @@ export async function POST(request: Request): Promise<Response> {
         set: { count: sql`${articleViewsDaily.count} + 1` },
       });
     // Documented retention bound: rollups older than 30 days are pruned
-    // opportunistically on write (the trending window only needs 7).
+    // opportunistically on a sample of writes (the trending window only needs 7).
     // sql.raw: a bound parameter here makes `date - $1` ambiguous in Postgres.
-    await db
-      .delete(articleViewsDaily)
-      .where(
-        sql`${articleViewsDaily.day} < CURRENT_DATE - ${sql.raw(String(RETENTION_DAYS))}`,
-      );
+    if (Math.random() < RETENTION_PRUNE_SHARE) {
+      await db
+        .delete(articleViewsDaily)
+        .where(
+          sql`${articleViewsDaily.day} < CURRENT_DATE - ${sql.raw(String(RETENTION_DAYS))}`,
+        );
+    }
   }
 
   return new Response(null, { status: 204 });

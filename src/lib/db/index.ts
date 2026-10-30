@@ -13,6 +13,11 @@ type Db = ReturnType<typeof createNeonDb>;
 
 function createDb(): Db {
   const url = process.env.DATABASE_URL!;
+  // dev:local and E2E set LOCAL_ONLY; whatever else changes around them, a
+  // process started for local use never reaches another database.
+  if (process.env.LOCAL_ONLY === "1" && !isLocalDatabase(url)) {
+    throw new Error("LOCAL_ONLY is set but DATABASE_URL is not a local database; refusing to connect.");
+  }
   if (isLocalDatabase(url)) {
     // The Docker database for development and e2e. Same query API; it only
     // lacks Neon's HTTP batch, which runAtomic() covers.

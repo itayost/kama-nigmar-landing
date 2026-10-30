@@ -1,7 +1,15 @@
 import { defineConfig } from "@playwright/test";
-import { localServerEnv } from "./e2e/local-env";
+import { localNextEnv } from "./scripts/local-env";
 
 const E2E_PORT = 3117;
+
+// The specs log in, then create, publish and delete articles, and .env.local
+// points at production. So the server runs against the local Docker database
+// (npm run db:local:up, then npm run db:migrate -- --confirm-host=localhost
+// with DATABASE_URL set to it), with the local admin login handed to the
+// specs, whose worker processes inherit this environment.
+const local = localNextEnv();
+process.env.E2E_ADMIN_PASSWORD = local.adminPassword;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -13,9 +21,9 @@ export default defineConfig({
     baseURL: `http://localhost:${E2E_PORT}`,
   },
   webServer: {
-    // Against the local Docker database, like npm run dev:local; see e2e/local-env.ts.
+    // Against the local Docker database, like npm run dev:local; see above.
     command: `npx next dev --port ${E2E_PORT} --hostname localhost`,
-    env: localServerEnv(),
+    env: local.env,
     url: `http://localhost:${E2E_PORT}`,
     // Never reuse: a server already on this port may be talking to production.
     reuseExistingServer: false,

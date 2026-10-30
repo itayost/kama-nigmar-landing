@@ -1,7 +1,12 @@
 import { defineConfig } from "@playwright/test";
-import { localServerEnv } from "./e2e/local-env";
+import { localNextEnv } from "./scripts/local-env";
 
 const E2E_PROD_PORT = 3118;
+
+// The specs write articles, so the build runs against the local Docker database
+// with the local admin login, exactly as in playwright.config.ts.
+const local = localNextEnv();
+process.env.E2E_ADMIN_PASSWORD = local.adminPassword;
 
 // `next dev` has no prerendered artifacts: no PPR fallback shell, no ISR entries, no
 // generateStaticParams snapshot. Every bug in that layer is invisible to the main e2e
@@ -15,8 +20,8 @@ export default defineConfig({
   },
   webServer: {
     command: `npm run build && npm run start -- --port ${E2E_PROD_PORT}`,
-    // Built and served against the local Docker database; see e2e/local-env.ts.
-    env: localServerEnv(),
+    // Built and served against the local Docker database; see above.
+    env: local.env,
     url: `http://localhost:${E2E_PROD_PORT}`,
     // Never reuse: the point of these specs is what the build produced from current source.
     reuseExistingServer: false,

@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { pollVotes, polls } from "@/lib/db/schema";
-import { allow, limitKey } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 import { voteInputSchema, type PollResults } from "@/lib/polls/schema";
 
 // Public vote endpoint. Like the view beacon (ADR 0001) it never invalidates
@@ -22,12 +22,14 @@ export async function POST(request: Request): Promise<Response> {
     return new Response(null, { status: 400 });
   }
 
-  if (!(await allow("vote", limitKey("vote", request.headers, pollId)))) {
+  const db = getDb();
+  const [limit, pollRows] = await Promise.all([
+    rateLimit("vote", request.headers, pollId),
+    db.select().from(polls).where(eq(polls.id, pollId)).limit(1),
+  ]);
+  if (!limit.allowed) {
     return new Response(null, { status: 429 });
   }
-
-  const db = getDb();
-  const pollRows = await db.select().from(polls).where(eq(polls.id, pollId)).limit(1);
   const poll = pollRows[0];
   if (
     !poll ||

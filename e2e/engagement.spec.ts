@@ -1,14 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { deleteTag } from "./tags";
-
-const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? "";
-
-async function login(page: Page) {
-  await page.goto("/admin/login");
-  await page.locator('input[name="password"]').fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: "כניסה" }).click();
-  await expect(page).toHaveURL(/\/admin$/);
-}
+import { deleteArticle, deleteTag, login } from "./admin";
 
 async function findArticleUrl(page: Page, title: string): Promise<string> {
   await page.goto("/articles");
@@ -61,16 +52,7 @@ async function createArticle(
   return findArticleUrl(page, options.title);
 }
 
-async function deleteArticle(page: Page, title: string) {
-  await page.goto("/admin");
-  const row = page.getByRole("listitem").filter({ hasText: title });
-  await row.getByRole("button", { name: "מחיקה" }).click();
-  await row.getByRole("button", { name: "מחיקה" }).last().click();
-  await expect(page.getByText(title)).toHaveCount(0);
-}
-
 test.describe("engagement surfaces", () => {
-  test.skip(!ADMIN_PASSWORD, "Set E2E_ADMIN_PASSWORD to run the engagement E2E flow");
   test.setTimeout(120_000);
 
   test("recirculation modules, player bar, and share button", async ({ page }) => {

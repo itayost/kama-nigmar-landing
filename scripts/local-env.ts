@@ -34,6 +34,10 @@ export function localNextEnv(): LocalEnv {
     console.log(`Created ${ENV_FILE}; the admin password is in it.`);
   }
   const local = parseEnv(readFileSync(ENV_FILE, "utf8"));
+  const { LOCAL_ADMIN_PASSWORD, LOCAL_ADMIN_PASSWORD_HASH, LOCAL_AUTH_SECRET } = local;
+  if (!LOCAL_ADMIN_PASSWORD || !LOCAL_ADMIN_PASSWORD_HASH || !LOCAL_AUTH_SECRET) {
+    throw new Error(`${ENV_FILE} is incomplete; delete it and run npm run dev:local again.`);
+  }
   // Only public settings (show links and the like) come over from .env.local, so
   // no production secret reaches local runs. Next's own loader is switched off
   // (__NEXT_PROCESSED_ENV) because it would $-expand the bcrypt hash below.
@@ -49,9 +53,11 @@ export function localNextEnv(): LocalEnv {
       ...publicSettings,
       __NEXT_PROCESSED_ENV: "true",
       DATABASE_URL: LOCAL_DATABASE_URL,
-      ADMIN_PASSWORD_HASH: local.LOCAL_ADMIN_PASSWORD_HASH ?? "",
-      AUTH_SECRET: local.LOCAL_AUTH_SECRET ?? "",
+      // Makes getDb() refuse any database that is not local (src/lib/db).
+      LOCAL_ONLY: "1",
+      ADMIN_PASSWORD_HASH: LOCAL_ADMIN_PASSWORD_HASH,
+      AUTH_SECRET: LOCAL_AUTH_SECRET,
     },
-    adminPassword: local.LOCAL_ADMIN_PASSWORD ?? "",
+    adminPassword: LOCAL_ADMIN_PASSWORD,
   };
 }

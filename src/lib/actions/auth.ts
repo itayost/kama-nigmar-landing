@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { allow, clearLimit, limitKey } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 import { createSession, destroySession } from "@/lib/auth/session";
 
 export interface LoginState {
@@ -28,8 +28,8 @@ export async function login(
 
   // Every attempt counts toward the limit, so the count is shared by all
   // instances; a successful login clears it.
-  const key = limitKey("login", await headers());
-  if (!(await allow("login", key))) {
+  const limit = await rateLimit("login", await headers());
+  if (!limit.allowed) {
     return { error: "יותר מדי ניסיונות כניסה. נסו שוב בעוד 10 דקות" };
   }
 
@@ -43,7 +43,7 @@ export async function login(
     return { error: "סיסמה שגויה" };
   }
 
-  await clearLimit(key);
+  await limit.clear();
   await createSession();
   redirect("/admin");
 }
