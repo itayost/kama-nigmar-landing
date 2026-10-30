@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bindClosingMarks } from "./title";
+import { bindClosingMarks, splitShowQuestion } from "./title";
 
 const NBSP = " ";
 
@@ -26,5 +26,21 @@ describe("bindClosingMarks", () => {
 
   it("leaves a mark that opens the title", () => {
     expect(bindClosingMarks("? פתיחה")).toBe("? פתיחה");
+  });
+});
+
+describe("splitShowQuestion", () => {
+  it("separates the show's question from the rest of the title", () => {
+    expect(splitShowQuestion(`כמה נגמר${NBSP}? 23.10.2011`)).toBe("23.10.2011");
+    expect(splitShowQuestion("כמה נגמר? נבחרת ארגנטינה ומסי")).toBe("נבחרת ארגנטינה ומסי");
+    expect(splitShowQuestion(`כמה נגמר${NBSP}? מחזור ראשון באלופות`)).toBe("מחזור ראשון באלופות");
+  });
+
+  it("returns null for a title that does not open with the question", () => {
+    expect(splitShowQuestion("סיכום השבוע! 23-27.8")).toBeNull();
+  });
+
+  it("returns null when the question is the whole title", () => {
+    expect(splitShowQuestion("כמה נגמר ?")).toBeNull();
   });
 });

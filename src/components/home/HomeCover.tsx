@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { CoverImage, LEAD_PLACEHOLDER, SubjectKicker, subjectStyle } from "@/components/articles/subject";
+import { ForwardArrow } from "@/components/ui/ForwardArrow";
 import { minutesLabel } from "@/lib/articles/reading-time";
 import type { ArticleView } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
@@ -50,18 +51,7 @@ export function HomeCover({ article }: { readonly article: ArticleView }) {
               className="inline-flex h-11 items-center gap-2 rounded-full bg-white ps-5 pe-[1.125rem] text-[0.95rem] font-extrabold text-bg-start shadow-[0_10px_24px_-10px_rgba(0,0,0,0.6)] transition-[scale,background-color] duration-200 group-active:scale-[0.97] group-active:bg-[#e3e8ef] motion-reduce:transition-none md:h-[2.875rem]"
             >
               לקריאת הכתבה
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.4}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                className="h-[1.125rem] w-[1.125rem] transition-transform duration-300 ease-out group-hover:-translate-x-1 motion-reduce:transform-none"
-              >
-                <path d="M19 12H5M11 6l-6 6 6 6" />
-              </svg>
+              <ForwardArrow className="h-[1.125rem] w-[1.125rem]" />
             </span>
             {/* Each part keeps to one line; the narrowest phones drop the date. */}
             <span className="flex items-center gap-2 text-xs whitespace-nowrap text-white/75 md:text-[0.8rem]">

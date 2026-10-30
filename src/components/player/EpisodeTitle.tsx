@@ -1,5 +1,6 @@
 import { Wordmark } from "@/components/layout/Wordmark";
-import { formatDuration, splitEpisodeTitle, type Episode } from "@/lib/podcast/episode";
+import { splitShowQuestion } from "@/lib/articles/title";
+import { formatDuration, type Episode } from "@/lib/podcast/episode";
 
 // The latest episode's title, shared by the homepage's episode row and the
 // Player bar. Titles open with the show's question, drawn as the wordmark;
@@ -12,7 +13,7 @@ export function EpisodeTitle({ episode }: { readonly episode: Episode | null }) 
       </>
     );
   }
-  const rest = splitEpisodeTitle(episode.title);
+  const rest = splitShowQuestion(episode.title);
   if (rest === null) return <>{episode.title}</>;
   return (
     <>
