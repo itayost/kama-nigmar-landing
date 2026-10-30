@@ -1,0 +1,21 @@
+# Local Postgres for development and e2e. Test credentials only; it holds a
+# copy of the site made with `npm run db:local:clone`.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: kama
+      POSTGRES_PASSWORD: kama
+      POSTGRES_DB: kama
+    ports:
+      - "54329:5432"
+    volumes:
+      - kama-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kama -d kama"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  kama-db:
