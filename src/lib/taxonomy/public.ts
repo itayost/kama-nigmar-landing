@@ -23,15 +23,28 @@ export interface TaxonomyFields {
   readonly subject: SubjectSummary | null;
   // In the order the article shows them.
   readonly tagList: readonly TagSummary[];
-  // The primary subject first, then the rest by position.
-  readonly subjectIds: readonly string[];
+  // Every subject the article appears in: the primary one first, then the
+  // rest by position.
+  readonly subjects: readonly SubjectSummary[];
   // Subjects the article also appears in, besides its primary one.
   readonly alsoIn: readonly SubjectSummary[];
 }
 
 export type WithTaxonomy<T> = T & TaxonomyFields;
 
-interface Taxable {
+export const subjectPath = (slug: string) => `/topics/${slug}`;
+
+// Roundups are a format, not a subject, but the site lists them alongside the
+// subjects: one definition for the nav, the chips and the homepage strip.
+export const ROUNDUPS = { href: "/roundups", label: "סיכומים", color: "#ffffff" } as const;
+
+export const isRoundup = (article: { readonly format: ArticleFormat }) => article.format === "roundup";
+
+export function inSubject(article: TaxonomyFields, subjectId: string): boolean {
+  return article.subjects.some((subject) => subject.id === subjectId);
+}
+
+export interface Taxable {
   readonly id: string;
   readonly primarySubjectId: string | null;
 }
@@ -51,7 +64,7 @@ export function withTaxonomy<T extends Taxable>(
     ...article,
     subject,
     tagList,
-    subjectIds: [...(subject ? [subject.id] : []), ...alsoIn.map((other) => other.id)],
+    subjects: [...(subject ? [subject] : []), ...alsoIn],
     alsoIn,
   };
 }
@@ -81,13 +94,13 @@ const ROUNDUPS_SHOWN = 3;
 // appears only in its primary subject's section, and roundups have their
 // own strip.
 export function planHomepage<T extends Listed>(articles: readonly T[], subjects: readonly SubjectSummary[]): HomepagePlan<T> {
-  const lead = articles.find((article) => article.format !== "roundup") ?? null;
+  const lead = articles.find((article) => !isRoundup(article)) ?? null;
   const rest = articles.filter((article) => article !== lead);
   const sections = [...subjects]
     .filter((subject) => subject.onHomepage)
     .sort((a, b) => a.position - b.position)
     .flatMap((subject): HomeSection<T>[] => {
-      const stories = rest.filter((article) => article.format !== "roundup" && article.subject?.id === subject.id);
+      const stories = rest.filter((article) => !isRoundup(article) && article.subject?.id === subject.id);
       if (stories.length === 0) return [];
       const full = stories.length >= FULL_SECTION_MIN;
       return [
@@ -95,11 +108,11 @@ export function planHomepage<T extends Listed>(articles: readonly T[], subjects:
           subject,
           variant: full ? "full" : "compact",
           articles: stories.slice(0, full ? FULL_SECTION_MAX : 1),
-          total: articles.filter((article) => article.subjectIds.includes(subject.id)).length,
+          total: articles.filter((article) => inSubject(article, subject.id)).length,
         },
       ];
     });
-  return { lead, sections, roundups: rest.filter((article) => article.format === "roundup").slice(0, ROUNDUPS_SHOWN) };
+  return { lead, sections, roundups: rest.filter(isRoundup).slice(0, ROUNDUPS_SHOWN) };
 }
 
 export interface RailTag {
@@ -107,13 +120,18 @@ export interface RailTag {
   readonly count: number;
 }
 
-export interface SubjectPagePlan<T> {
+export interface SubjectSummaryPlan<T> {
   readonly lead: T | null;
+  // The subject's newest article, which may be a roundup newer than the lead.
+  readonly latest: T | null;
+  readonly total: number;
+}
+
+export interface SubjectPagePlan<T> extends SubjectSummaryPlan<T> {
   readonly rail: readonly RailTag[];
   readonly activeTag: string | null;
   readonly items: readonly T[];
   readonly hasMore: boolean;
-  readonly total: number;
 }
 
 function railFor(members: readonly Listed[], subjectId: string): RailTag[] {
@@ -128,6 +146,27 @@ function railFor(members: readonly Listed[], subjectId: string): RailTag[] {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "he"));
 }
 
+function membersOf<T extends Listed>(articles: readonly T[], subject: SubjectSummary): T[] {
+  return articles.filter((article) => inSubject(article, subject.id));
+}
+
+function summarize<T extends Listed>(members: readonly T[], subject: SubjectSummary): SubjectSummaryPlan<T> {
+  const lead = members.find((article) => article.subject?.id === subject.id && !isRoundup(article)) ?? members[0] ?? null;
+  return { lead, latest: members[0] ?? null, total: members.length };
+}
+
+// The subject page's masthead: its lead story, newest date and size.
+export function subjectSummary<T extends Listed>(articles: readonly T[], subject: SubjectSummary): SubjectSummaryPlan<T> {
+  return summarize(membersOf(articles, subject), subject);
+}
+
+// The tag that brought an article into a subject it isn't primarily about,
+// e.g. the basketball item inside a weekly roundup.
+export function viaTag(article: TaxonomyFields, subject: SubjectSummary): TagSummary | null {
+  if (article.subject?.id === subject.id) return null;
+  return article.tagList.find((tag) => tag.subjectId === subject.id) ?? null;
+}
+
 // The subject's newest story leads; the rest list below it, filterable by the
 // subject's own tags. A filter that matches the lead brings it into the list.
 export function planSubjectPage<T extends Listed>(
@@ -135,20 +174,19 @@ export function planSubjectPage<T extends Listed>(
   subject: SubjectSummary,
   options: { readonly tag?: string; readonly limit: number },
 ): SubjectPagePlan<T> {
-  const members = articles.filter((article) => article.subjectIds.includes(subject.id));
-  const lead =
-    members.find((article) => article.subject?.id === subject.id && article.format !== "roundup") ?? members[0] ?? null;
+  const members = membersOf(articles, subject);
+  const summary = summarize(members, subject);
+  const { lead } = summary;
   const rail = railFor(members, subject.id);
   const activeTag = options.tag && rail.some((entry) => entry.name === options.tag) ? options.tag : null;
   const listed = activeTag
     ? members.filter((article) => article.tagList.some((tag) => tag.name === activeTag))
     : members.filter((article) => article !== lead);
   return {
-    lead,
+    ...summary,
     rail,
     activeTag,
     items: listed.slice(0, options.limit),
     hasMore: listed.length > options.limit,
-    total: members.length,
   };
 }

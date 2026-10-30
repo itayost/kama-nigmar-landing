@@ -11,7 +11,16 @@
   --color-surface-border: rgba(255, 255, 255, 0.08);
 
   --font-heebo: var(--font-heebo), sans-serif;
+
+  /* The site header's height: the cover tucks under it, sticky rails sit
+     below it, and the phone menu grows from its middle. */
+  --spacing-header: 3.75rem;
 }
+
+/* Over an article's cover the header floats on a soft shade until the
+   article's sheet reaches it (HeaderSolidity sets data-solid). Matches the
+   header and anything inside it. */
+@custom-variant over-cover (&:where(body:has([data-cover-sheet]) [data-site-header]:not([data-solid]), body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) *));
 
 :root {
   --color-text: #ffffff;
@@ -40,15 +49,16 @@ body {
   }
 }
 
-/* Phone menu: grows out of the menu button's corner (top right in RTL). */
+/* Phone menu: grows out of the menu button (top right in RTL): the header's
+   1.5rem padding plus half the 2.5rem button, at half the header's height. */
 .site-menu {
-  clip-path: circle(0 at calc(100% - 2.75rem) 1.875rem);
+  clip-path: circle(0 at calc(100% - 2.75rem) calc(var(--spacing-header) / 2));
   visibility: hidden;
   transition: clip-path 0.45s cubic-bezier(0.7, 0, 0.84, 0), visibility 0s linear 0.45s;
 }
 
 .site-menu[data-open] {
-  clip-path: circle(150% at calc(100% - 2.75rem) 1.875rem);
+  clip-path: circle(150% at calc(100% - 2.75rem) calc(var(--spacing-header) / 2));
   visibility: visible;
   transition: clip-path 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
 }
@@ -63,23 +73,6 @@ body {
   opacity: 1;
   transform: none;
   transition-delay: calc(140ms + var(--i, 0) * 40ms), calc(140ms + var(--i, 0) * 40ms), 0s;
-}
-
-/* Over an article's cover the header floats on a soft shade until the
-   article's sheet reaches it (HeaderSolidity sets data-solid). */
-body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) {
-  border-color: transparent;
-  background: linear-gradient(to bottom, rgb(6 13 24 / 0.72), rgb(6 13 24 / 0));
-  backdrop-filter: none;
-}
-
-body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) .menu-button {
-  background: rgb(6 13 24 / 0.45);
-  backdrop-filter: blur(6px);
-}
-
-body:has([data-cover-sheet]) [data-site-header]:not([data-solid]) .site-logo {
-  text-shadow: 0 1px 10px rgb(0 0 0 / 0.55);
 }
 
 /* The cover dims and the headline fades as the sheet slides over them.

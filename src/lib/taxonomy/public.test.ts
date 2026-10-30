@@ -3,6 +3,8 @@ import type { ArticleFormat } from "./format";
 import {
   planHomepage,
   planSubjectPage,
+  subjectSummary,
+  viaTag,
   withTaxonomy,
   type SubjectSummary,
   type TagSummary,
@@ -37,19 +39,19 @@ describe("withTaxonomy", () => {
     const a = article("il", [UCL, LIGA, NBA, INBOX]);
     expect(a.subject).toBe(IL);
     expect(a.tagList).toEqual([UCL, LIGA, NBA, INBOX]);
-    expect(a.subjectIds).toEqual(["il", "wf", "bb"]);
+    expect(a.subjects.map((s) => s.id)).toEqual(["il", "wf", "bb"]);
     expect(a.alsoIn).toEqual([WF, BB]);
   });
 
   it("puts a roundup without a primary subject on every subject its tags reach", () => {
     const a = article(null, [F1, LIGA], "roundup");
     expect(a.subject).toBeNull();
-    expect(a.subjectIds).toEqual(["il", "ms"]);
+    expect(a.subjects.map((s) => s.id)).toEqual(["il", "ms"]);
     expect(a.alsoIn).toEqual([IL, MS]);
   });
 
   it("copes with an article that has no tags", () => {
-    expect(article("wf", []).subjectIds).toEqual(["wf"]);
+    expect(article("wf", []).subjects.map((s) => s.id)).toEqual(["wf"]);
   });
 });
 
@@ -98,6 +100,14 @@ describe("planHomepage", () => {
 });
 
 describe("planSubjectPage", () => {
+  it("dates the page by its newest article, even a roundup newer than the lead", () => {
+    const roundup = article(null, [LIGA], "roundup");
+    const story = article("il", [LIGA]);
+    const plan = planSubjectPage([roundup, story], IL, { limit: 12 });
+    expect(plan.lead).toBe(story);
+    expect(plan.latest).toBe(roundup);
+  });
+
   const lead = article("il", [LIGA]);
   const cross = article("wf", [UCL, LIGA]);
   const roundup = article(null, [LIGA, NBA], "roundup");
@@ -133,5 +143,23 @@ describe("planSubjectPage", () => {
     const page = planSubjectPage(all, IL, { limit: 2 });
     expect(page.items).toEqual([roundup, cross]);
     expect(page.hasMore).toBe(true);
+  });
+});
+
+describe("viaTag", () => {
+  it("names the subject's tag that brought another subject's article in", () => {
+    expect(viaTag(article(null, [UCL, NBA], "roundup"), BB)).toEqual(NBA);
+  });
+
+  it("is empty for an article primarily about the subject", () => {
+    expect(viaTag(article("bb", [NBA]), BB)).toBeNull();
+  });
+});
+
+describe("subjectSummary", () => {
+  it("matches the subject page's lead, latest and total", () => {
+    const all = [article(null, [LIGA], "roundup"), article("il", []), article("wf", [LIGA]), article("bb", [])];
+    const page = planSubjectPage(all, IL, { limit: 12 });
+    expect(subjectSummary(all, IL)).toEqual({ lead: page.lead, latest: page.latest, total: page.total });
   });
 });

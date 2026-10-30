@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getPublishedArticles, type ArticleView } from "@/lib/dal/articles";
 import { getSubjects } from "@/lib/dal/taxonomy";
-import { planHomepage, type HomeSection } from "@/lib/taxonomy/public";
+import { planHomepage, ROUNDUPS, subjectPath, type HomeSection } from "@/lib/taxonomy/public";
 import { ArticleCard } from "./ArticleCard";
 import { ArticleLeadCard } from "./ArticleLeadCard";
 import { ArticleRow } from "./ArticleRow";
@@ -14,19 +14,21 @@ import { subjectStyle } from "./subject";
 export async function HomeSections() {
   const [articles, subjects] = await Promise.all([getPublishedArticles(), getSubjects()]);
   const plan = planHomepage(articles, subjects);
-  if (!plan.lead) return null;
+  if (!plan.lead && plan.sections.length === 0 && plan.roundups.length === 0) return null;
   const [first, ...others] = plan.sections;
 
   return (
     <div className="flex w-full flex-col gap-12">
-      <section aria-labelledby="lead-heading">
-        <SectionHeading title="הסיפור הגדול" id="lead-heading" linkHref="/articles" linkLabel="לכל הכתבות" />
-        <ArticleLeadCard article={plan.lead} />
-      </section>
+      {plan.lead ? (
+        <section aria-labelledby="lead-heading">
+          <SectionHeading title="הסיפור הגדול" id="lead-heading" linkHref="/articles" linkLabel="לכל הכתבות" />
+          <ArticleLeadCard article={plan.lead} />
+        </section>
+      ) : null}
       {first ? <SubjectSection section={first} /> : null}
       {plan.roundups.length > 0 ? (
         <section aria-labelledby="roundups-heading">
-          <SectionHeading title="סיכומים" id="roundups-heading" color="#ffffff" linkHref="/roundups" linkLabel="לכל הסיכומים" />
+          <SectionHeading title={ROUNDUPS.label} id="roundups-heading" color={ROUNDUPS.color} linkHref={ROUNDUPS.href} linkLabel="לכל הסיכומים" />
           <div className="-mx-6 flex snap-x snap-mandatory gap-3 overflow-x-auto px-6 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-4 sm:overflow-visible sm:px-0">
             {plan.roundups.map((article) => (
               <div key={article.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
@@ -45,7 +47,7 @@ export async function HomeSections() {
 
 function SubjectSection({ section }: { readonly section: HomeSection<ArticleView> }) {
   const { subject, articles, total } = section;
-  const href = `/topics/${subject.slug}`;
+  const href = subjectPath(subject.slug);
   const headingId = `section-${subject.slug}`;
 
   if (section.variant === "compact") {

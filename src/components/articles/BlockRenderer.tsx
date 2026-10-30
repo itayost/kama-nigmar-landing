@@ -99,8 +99,10 @@ export function BlockRenderer({ blocks: stored, emphasizeOpener = false }: Block
     ? blocks.findIndex((block) => block.type === "paragraph")
     : -1;
 
+  // Pasted text can carry long runs of non-breaking spaces; let any line break
+  // rather than push a phone page sideways.
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 wrap-anywhere">
       {blocks.map((block, index) => (
         <Block key={block.id} block={block} isOpener={index === openerIndex} />
       ))}

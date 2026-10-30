@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { CSSProperties } from "react";
 import { FORMAT_LABELS, type ArticleFormat } from "@/lib/taxonomy/format";
 import type { SubjectSummary } from "@/lib/taxonomy/public";
@@ -11,6 +12,47 @@ export function subjectStyle(color: string | null | undefined): CSSProperties {
 // Where the cover crops around: the admin's focal point, or the center.
 export function coverPosition(article: { readonly coverFocusX: number | null; readonly coverFocusY: number | null }) {
   return `${article.coverFocusX ?? 50}% ${article.coverFocusY ?? 50}%`;
+}
+
+interface CoverImageProps {
+  readonly article: {
+    readonly coverImageUrl: string | null;
+    readonly coverFocusX: number | null;
+    readonly coverFocusY: number | null;
+  };
+  readonly sizes: string;
+  readonly className?: string;
+  // Replaces the default navy wash behind the wordmark when there is no cover.
+  readonly placeholderClassName?: string;
+  readonly labelClassName?: string;
+}
+
+// A card's cover, cropped around its focal point, or the wordmark on a wash.
+// Fills its positioned parent.
+export function CoverImage({
+  article,
+  sizes,
+  className = "",
+  placeholderClassName = "bg-gradient-to-br from-bg-start to-bg-end",
+  labelClassName = "",
+}: CoverImageProps) {
+  if (!article.coverImageUrl) {
+    return (
+      <span className={`flex h-full w-full items-center justify-center ${placeholderClassName}`}>
+        <span className={`font-extrabold text-accent/40 ${labelClassName}`}>כמה נגמר?</span>
+      </span>
+    );
+  }
+  return (
+    <Image
+      src={article.coverImageUrl}
+      alt=""
+      fill
+      sizes={sizes}
+      style={{ objectPosition: coverPosition(article) }}
+      className={`object-cover ${className}`}
+    />
+  );
 }
 
 interface KickerProps {

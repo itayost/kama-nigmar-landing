@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { and, desc, eq, sql } from "drizzle-orm";
+import { readingTimeMinutes } from "@/lib/articles/reading-time";
 import {
   planRecirculation,
   rankTrending,
@@ -7,43 +8,54 @@ import {
 } from "@/lib/articles/recirculation";
 import { getDb } from "@/lib/db";
 import { articleViewsDaily, articles, type Article } from "@/lib/db/schema";
-import type { WithTaxonomy } from "@/lib/taxonomy/public";
+import { type WithTaxonomy } from "@/lib/taxonomy/public";
 import { decorate } from "./taxonomy";
 
-// An article as the public site shows it: with its subject and tags.
-export type ArticleView = WithTaxonomy<Article>;
+// An article as lists show it: with its subject and tags, and without its
+// body, which only the article page needs. Every list reads one cached copy
+// of the archive, so it stays small.
+export type ArticleView = WithTaxonomy<
+  Omit<Article, "content"> & { readonly readingMinutes: number; readonly blockCount: number }
+>;
 
-async function selectPublished(): Promise<Article[]> {
-  return getDb()
-    .select()
-    .from(articles)
-    .where(eq(articles.status, "published"))
-    .orderBy(desc(articles.publishedAt));
+// The article page's full article, body included.
+export type ArticleDetail = WithTaxonomy<Article>;
+
+function toListed({ content, ...article }: Article) {
+  return { ...article, readingMinutes: readingTimeMinutes(content), blockCount: content.length };
 }
 
 export async function getPublishedArticles(): Promise<ArticleView[]> {
   "use cache";
   cacheLife("article");
   cacheTag("articles");
-  return decorate(await selectPublished());
+  const rows = getDb()
+    .select()
+    .from(articles)
+    .where(eq(articles.status, "published"))
+    .orderBy(desc(articles.publishedAt))
+    .then((list) => list.map(toListed));
+  return decorate(rows);
 }
 
-export async function getArticleByNumber(number: number): Promise<ArticleView | null> {
+export async function getArticleByNumber(number: number): Promise<ArticleDetail | null> {
   "use cache";
   cacheLife("article");
   cacheTag("articles", `article-${number}`);
-  const rows = await getDb()
+  const rows = getDb()
     .select()
     .from(articles)
     .where(and(eq(articles.number, number), eq(articles.status, "published")))
     .limit(1);
-  if (!rows[0]) return null;
   const [article] = await decorate(rows);
-  return article;
+  return article ?? null;
 }
 
 // Views received in the trailing 7 days, keyed by article id (ADR 0001).
+// Cached on its own so every recirculation entry shares one aggregate.
 async function fetchWeeklyViews(): Promise<Record<string, number>> {
+  "use cache";
+  cacheLife("hours");
   const rows = await getDb()
     .select({
       articleId: articleViewsDaily.articleId,
@@ -55,13 +67,20 @@ async function fetchWeeklyViews(): Promise<Record<string, number>> {
   return Object.fromEntries(rows.map((row) => [row.articleId, row.total]));
 }
 
-// Recirculation ranks by shared tags and subjects, so it plans over tag ids.
+// Recirculation ranks by shared tag and subject ids; only what it reads.
 function forRanking(article: ArticleView) {
   return {
-    ...article,
+    id: article.id,
+    publishedAt: article.publishedAt,
     tags: article.tagList.map((tag) => tag.id),
-    subjects: article.subjectIds,
+    subjects: article.subjects.map((subject) => subject.id),
   };
+}
+
+// Maps ranked ids back to the listed articles.
+function resolveIds(published: readonly ArticleView[]) {
+  const byId = new Map(published.map((article) => [article.id, article]));
+  return (list: readonly { readonly id: string }[]) => list.flatMap((item) => byId.get(item.id) ?? []);
 }
 
 // cacheLife("hours") instead of the article profile: rankings blend in view
@@ -72,18 +91,17 @@ export async function getRecirculation(number: number): Promise<RecirculationPla
   cacheLife("hours");
   cacheTag("articles");
   const [published, weeklyViews] = await Promise.all([
-    decorate(await selectPublished()),
+    getPublishedArticles(),
     fetchWeeklyViews(),
   ]);
   const current = published.find((article) => article.number === number);
   if (!current) return { midArticle: [], related: [], trending: [] };
-  const byId = new Map(published.map((article) => [article.id, article]));
+  const back = resolveIds(published);
   const plan = planRecirculation(
-    { ...forRanking(current), blockCount: current.content.length },
+    { ...forRanking(current), blockCount: current.blockCount },
     published.map(forRanking),
     weeklyViews,
   );
-  const back = (list: readonly { readonly id: string }[]) => list.flatMap((item) => byId.get(item.id) ?? []);
   return { midArticle: back(plan.midArticle), related: back(plan.related), trending: back(plan.trending) };
 }
 
@@ -91,6 +109,6 @@ export async function getTrendingArticles(limit: number): Promise<ArticleView[]>
   "use cache";
   cacheLife("hours");
   cacheTag("articles");
-  const [published, weeklyViews] = await Promise.all([decorate(await selectPublished()), fetchWeeklyViews()]);
-  return rankTrending(published, weeklyViews, limit);
+  const [published, weeklyViews] = await Promise.all([getPublishedArticles(), fetchWeeklyViews()]);
+  return resolveIds(published)(rankTrending(published.map(forRanking), weeklyViews, limit));
 }

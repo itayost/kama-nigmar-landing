@@ -3,7 +3,9 @@ import type { Article } from "@/lib/db/schema";
 import { SITE_URL } from "@/lib/site";
 import {
   breadcrumbSchema,
+  collectionPageSchema,
   newsArticleSchema,
+  pageOpenGraph,
   podcastSeriesSchema,
   webSiteSchema,
 } from "./schema";
@@ -97,5 +99,27 @@ describe("breadcrumbSchema", () => {
       { "@type": "ListItem", position: 1, name: "בית", item: SITE_URL },
       { "@type": "ListItem", position: 2, name: "כתבות", item: `${SITE_URL}/articles` },
     ]);
+  });
+});
+
+describe("collectionPageSchema", () => {
+  test("describes a listing page as part of the site", () => {
+    const schema = collectionPageSchema({ name: "כדורסל", description: "הכל על כדורסל", url: `${SITE_URL}/topics/basketball` });
+    expect(schema).toMatchObject({
+      "@type": "CollectionPage",
+      name: "כדורסל",
+      url: `${SITE_URL}/topics/basketball`,
+      inLanguage: "he",
+      isPartOf: { "@type": "WebSite", url: SITE_URL },
+    });
+  });
+});
+
+describe("pageOpenGraph", () => {
+  test("suffixes the title with the site name and points at the page", () => {
+    const og = pageOpenGraph({ name: "סיכומים", description: "תיאור", url: `${SITE_URL}/roundups` });
+    expect(og.title).toBe("סיכומים | כמה נגמר?");
+    expect(og.url).toBe(`${SITE_URL}/roundups`);
+    expect(og.locale).toBe("he_IL");
   });
 });

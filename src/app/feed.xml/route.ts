@@ -19,7 +19,7 @@ export async function GET(): Promise<Response> {
       if (article.subtitle) {
         parts.push(`      <description>${escapeXml(article.subtitle)}</description>`);
       }
-      const categories = [...(article.subject ? [article.subject.name] : []), ...article.tagList.map((tag) => tag.name)];
+      const categories = [...article.subjects, ...article.tagList].map((entry) => entry.name);
       for (const category of new Set(categories)) {
         parts.push(`      <category>${escapeXml(category)}</category>`);
       }

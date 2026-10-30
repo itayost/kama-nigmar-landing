@@ -1,8 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ArticleView } from "@/lib/dal/articles";
 import { formatDateShort } from "@/lib/datetime";
-import { AlsoIn, coverPosition, subjectStyle, SubjectKicker } from "./subject";
+import { AlsoIn, CoverImage, subjectStyle, SubjectKicker } from "./subject";
 
 interface ArticleRowProps {
   readonly article: ArticleView;
@@ -24,20 +23,12 @@ export function ArticleRow({ article, note, showSubtitle, phEvent }: ArticleRowP
       className="group grid grid-cols-[6rem_minmax(0,1fr)] items-start gap-3 border-b border-surface-border py-3 last:border-b-0 sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-4"
     >
       <div className="relative aspect-[3/2] overflow-hidden rounded-lg bg-surface">
-        {article.coverImageUrl ? (
-          <Image
-            src={article.coverImageUrl}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 96px, 136px"
-            style={{ objectPosition: coverPosition(article) }}
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transform-none"
-          />
-        ) : (
-          <span className="grid h-full place-items-center bg-gradient-to-br from-bg-start to-bg-end text-[0.65rem] font-extrabold text-accent/40">
-            כמה נגמר?
-          </span>
-        )}
+        <CoverImage
+          article={article}
+          sizes="(max-width: 640px) 96px, 136px"
+          className="transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transform-none"
+          labelClassName="text-[0.65rem]"
+        />
       </div>
       <div className="flex min-w-0 flex-col gap-1">
         <h3 className="text-[0.95rem] font-bold leading-snug text-pretty transition-colors group-hover:text-[var(--subject)]">
@@ -47,9 +38,7 @@ export function ArticleRow({ article, note, showSubtitle, phEvent }: ArticleRowP
           <p className="line-clamp-2 text-sm text-text-muted">{article.subtitle}</p>
         ) : null}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
-          {article.format !== "story" && !article.subject ? (
-            <SubjectKicker subject={null} format={article.format} />
-          ) : null}
+          {article.subject ? null : <SubjectKicker subject={null} format={article.format} />}
           {note ?? (article.publishedAt ? formatDateShort(article.publishedAt) : null)}
           <AlsoIn subject={article.subject} alsoIn={article.alsoIn} />
         </div>

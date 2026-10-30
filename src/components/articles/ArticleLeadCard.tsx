@@ -1,10 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
-import { readingTimeLabel } from "@/lib/articles/reading-time";
+import { minutesLabel } from "@/lib/articles/reading-time";
 import { formatDateLong } from "@/lib/datetime";
 import type { ArticleView } from "@/lib/dal/articles";
-import { coverPosition, subjectStyle, SubjectKicker } from "./subject";
+import { CoverImage, subjectStyle, SubjectKicker } from "./subject";
 
 interface ArticleLeadCardProps {
   readonly article: ArticleView;
@@ -19,20 +18,13 @@ export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
       className="group relative block min-h-[340px] overflow-hidden rounded-[20px] border border-surface-border transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--subject)]/45 active:scale-[0.99] motion-reduce:transform-none md:min-h-[380px]"
     >
       <div className="absolute inset-0">
-        {article.coverImageUrl ? (
-          <Image
-            src={article.coverImageUrl}
-            alt=""
-            fill
-            sizes="(max-width: 1024px) 100vw, 972px"
-            style={{ objectPosition: coverPosition(article) }}
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transform-none"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(80%_100%_at_70%_20%,rgba(46,204,64,0.15),transparent_55%),linear-gradient(150deg,#14311f_0%,#0d1d33_60%,#101a3a_100%)]">
-            <span className="text-5xl font-black text-white/5">כמה נגמר?</span>
-          </div>
-        )}
+        <CoverImage
+          article={article}
+          sizes="(max-width: 1024px) 100vw, 972px"
+          className="transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transform-none"
+          placeholderClassName="bg-[radial-gradient(80%_100%_at_70%_20%,rgba(46,204,64,0.15),transparent_55%),linear-gradient(150deg,#14311f_0%,#0d1d33_60%,#101a3a_100%)]"
+          labelClassName="text-5xl font-black text-white/5"
+        />
       </div>
       <div
         aria-hidden="true"
@@ -58,7 +50,7 @@ export function ArticleLeadCard({ article }: ArticleLeadCardProps) {
             </>
           ) : null}
           <span>·</span>
-          <span>{readingTimeLabel(article.content)}</span>
+          <span>{minutesLabel(article.readingMinutes)}</span>
         </div>
       </div>
     </Link>

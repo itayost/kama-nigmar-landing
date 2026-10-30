@@ -1,34 +1,38 @@
 import type { Metadata } from "next";
 import { RoundupCard } from "@/components/articles/RoundupCard";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ArchiveHeader } from "@/components/ui/ArchiveHeader";
 import { getPublishedArticles } from "@/lib/dal/articles";
-import { breadcrumbSchema, FEED_ALTERNATE } from "@/lib/seo/schema";
+import { breadcrumbSchema, collectionPageSchema, FEED_ALTERNATE, pageOpenGraph } from "@/lib/seo/schema";
 import { SITE_URL } from "@/lib/site";
+import { isRoundup, ROUNDUPS } from "@/lib/taxonomy/public";
 
-const pageUrl = `${SITE_URL}/roundups`;
-const description = "סיכומי השבוע והסופ״ש של כמה נגמר? — כל מה שקרה בספורט, בישראל ובעולם.";
+const page = {
+  name: ROUNDUPS.label,
+  description: "סיכומי השבוע והסופ״ש של כמה נגמר? — כל מה שקרה בספורט, בישראל ובעולם.",
+  url: `${SITE_URL}${ROUNDUPS.href}`,
+};
 
 export const metadata: Metadata = {
-  title: "סיכומים",
-  description,
-  alternates: { canonical: pageUrl, types: FEED_ALTERNATE },
+  title: page.name,
+  description: page.description,
+  alternates: { canonical: page.url, types: FEED_ALTERNATE },
+  openGraph: pageOpenGraph(page),
 };
 
 export default async function RoundupsPage() {
-  const roundups = (await getPublishedArticles()).filter((article) => article.format === "roundup");
+  const roundups = (await getPublishedArticles()).filter(isRoundup);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 pb-10">
+      <JsonLd data={collectionPageSchema(page)} />
       <JsonLd
         data={breadcrumbSchema([
           { name: "בית", url: SITE_URL },
-          { name: "סיכומים", url: pageUrl },
+          { name: page.name, url: page.url },
         ])}
       />
-      <header className="mb-8 border-b-[3px] border-white pt-8 pb-5 md:pt-10">
-        <h1 className="text-[clamp(2.4rem,1.6rem+3.6vw,4rem)] leading-[0.95] font-black tracking-tight">סיכומים</h1>
-        <p className="mt-3 text-[0.95rem] text-white/75">{description}</p>
-      </header>
+      <ArchiveHeader title={page.name} description={page.description} color={ROUNDUPS.color} />
       {roundups.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {roundups.map((article) => (

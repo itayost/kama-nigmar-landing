@@ -70,15 +70,11 @@ async function TrendingStrip() {
 
 // The archive's only filter is the subject: each chip opens that subject's page.
 async function SubjectChips() {
-  const { subjects, roundups } = await getNavigation();
-  const chips = [
-    ...subjects.map((subject) => ({ href: `/topics/${subject.slug}`, label: subject.name, color: subject.color, count: subject.count })),
-    { href: "/roundups", label: "סיכומים", color: "#ffffff", count: roundups.count },
-  ];
+  const { sections } = await getNavigation();
 
   return (
     <nav aria-label="נושאים" className="mb-8 flex flex-wrap gap-2">
-      {chips.map((chip) => (
+      {sections.map((chip) => (
         <Link
           key={chip.href}
           href={chip.href}

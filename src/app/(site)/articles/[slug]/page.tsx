@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
 import { AuthorAvatar } from "@/components/articles/AuthorAvatar";
 import { BlockRenderer } from "@/components/articles/BlockRenderer";
 import { EpisodeCallout } from "@/components/articles/EpisodeCallout";
 import { coverPosition, subjectStyle, SubjectKicker } from "@/components/articles/subject";
 import { MidArticleRelated } from "@/components/articles/MidArticleRelated";
+import { HeaderSolidity } from "@/components/layout/HeaderSolidity";
 import { PollSection } from "@/components/polls/PollSection";
 import { getPollById } from "@/lib/dal/polls";
 import { RecirculationSections } from "@/components/articles/RecirculationSections";
@@ -21,10 +21,12 @@ import {
   getArticleByNumber,
   getPublishedArticles,
   getRecirculation,
-  type ArticleView,
+  type ArticleDetail,
 } from "@/lib/dal/articles";
 import { formatDateLong } from "@/lib/datetime";
+import { stallNotFoundOutsidePrerender } from "@/lib/not-found-guard";
 import { FEED_ALTERNATE, breadcrumbSchema, newsArticleSchema } from "@/lib/seo/schema";
+import { subjectPath } from "@/lib/taxonomy/public";
 import { SITE_URL } from "@/lib/site";
 
 const UPDATED_LABEL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
@@ -53,21 +55,6 @@ async function resolveArticle(slugParam: string) {
   return getArticleByNumber(number);
 }
 
-// A "not found" outcome must never be prerenderable, and it is the only outcome that needs
-// the guard. A render with a concrete param is keyed on its own path (/articles/7), but a
-// render with unresolved fallback params is keyed on the shared /articles/[slug] entry and
-// degrades the param to a placeholder - which parseArticleNumber rejects, so it always lands
-// here. Without stalling, that complete not-found page is stored under the shared key and
-// replayed at a 200 for every param generateStaticParams did not cover: every article
-// published since the last deploy, served a not-found body and a noindex head. The shared
-// entry deliberately carries none of the path or "articles" cache tags, so neither
-// updateTag nor revalidatePath can clear it afterwards.
-//
-// Under a real request connection() resolves immediately, so genuine 404s are unaffected,
-// and articles keep rendering as fully static per-path entries.
-async function stallNotFoundOutsidePrerender(): Promise<void> {
-  await connection();
-}
 
 // Not marked "use cache": the params promise is not a stable cache key, and metadata
 // is part of the shell. resolveArticle() delegates to already-cached DAL functions
@@ -128,23 +115,23 @@ function ArticleSkeleton() {
 }
 
 // The label above the headline, linking to the subject's page.
-function Kicker({ article }: { readonly article: ArticleView }) {
+function Kicker({ article }: { readonly article: ArticleDetail }) {
   const label = <SubjectKicker subject={article.subject} format={article.format} className="text-xs" />;
   if (!article.subject) return label;
   return (
-    <Link href={`/topics/${article.subject.slug}`} className="self-start transition-opacity hover:opacity-85">
+    <Link href={subjectPath(article.subject.slug)} className="self-start transition-opacity hover:opacity-85">
       {label}
     </Link>
   );
 }
 
-function Headline({ article, className = "" }: { readonly article: ArticleView; readonly className?: string }) {
+function Headline({ article, className = "" }: { readonly article: ArticleDetail; readonly className?: string }) {
   return (
     <h1 className={`font-black leading-[1.1] tracking-tight text-balance ${className}`}>{article.title}</h1>
   );
 }
 
-function Byline({ article }: { readonly article: ArticleView }) {
+function Byline({ article }: { readonly article: ArticleDetail }) {
   const articleUrl = `${SITE_URL}/articles/${article.number}`;
   const wasUpdated =
     article.publishedAt !== null &&
@@ -169,12 +156,13 @@ function Byline({ article }: { readonly article: ArticleView }) {
 
 // The article's tags grouped by the subject they belong to, then a door to
 // every other subject the article appears in.
-function TagsBySubject({ article }: { readonly article: ArticleView }) {
-  const subjects = [...(article.subject ? [article.subject] : []), ...article.alsoIn];
-  const groups = subjects
+function TagsBySubject({ article }: { readonly article: ArticleDetail }) {
+  const groups = article.subjects
     .map((subject) => ({ subject, tags: article.tagList.filter((tag) => tag.subjectId === subject.id) }))
     .filter((group) => group.tags.length > 0);
-  if (groups.length === 0 && article.alsoIn.length === 0) return null;
+  // Tags the admin hasn't sorted into a subject yet: shown, but with no page to open.
+  const unsorted = article.tagList.filter((tag) => tag.subjectId === null);
+  if (groups.length === 0 && unsorted.length === 0 && article.alsoIn.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-4 border-t border-surface-border pt-5">
@@ -187,7 +175,7 @@ function TagsBySubject({ article }: { readonly article: ArticleView }) {
           {tags.map((tag) => (
             <Link
               key={tag.id}
-              href={`/topics/${subject.slug}?tag=${encodeURIComponent(tag.name)}`}
+              href={`${subjectPath(subject.slug)}?tag=${encodeURIComponent(tag.name)}`}
               className="rounded-full border border-[var(--subject)]/45 px-3 py-1 text-xs transition-colors hover:bg-[var(--subject)]/15"
             >
               {tag.name}
@@ -195,10 +183,19 @@ function TagsBySubject({ article }: { readonly article: ArticleView }) {
           ))}
         </div>
       ))}
+      {unsorted.length > 0 ? (
+        <div className="flex flex-wrap gap-2 text-xs text-text-muted">
+          {unsorted.map((tag) => (
+            <span key={tag.id} className="rounded-full border border-surface-border px-3 py-1">
+              {tag.name}
+            </span>
+          ))}
+        </div>
+      ) : null}
       {article.alsoIn.map((subject) => (
         <Link
           key={subject.id}
-          href={`/topics/${subject.slug}`}
+          href={subjectPath(subject.slug)}
           style={subjectStyle(subject.color)}
           className="flex items-center gap-2.5 rounded-xl border border-[var(--subject)]/35 bg-[var(--subject)]/[0.08] px-4 py-3 text-sm transition-colors hover:bg-[var(--subject)]/15"
         >
@@ -212,10 +209,11 @@ function TagsBySubject({ article }: { readonly article: ArticleView }) {
 }
 
 // Full-bleed cover with the headline on the photo; the article rides up over
-// it on a sheet with rounded top corners.
-function CoverSheet({ article, children }: { readonly article: ArticleView; readonly children: ReactNode }) {
+// it on a sheet with rounded top corners. The sheet overlaps the cover by
+// --sheet-overlap, and the headline and credit sit just above it.
+function CoverSheet({ article, children }: { readonly article: ArticleDetail; readonly children: ReactNode }) {
   return (
-    <main data-cover-sheet className="-mt-15">
+    <main data-cover-sheet className="-mt-header [--sheet-overlap:1.875rem] md:[--sheet-overlap:7.5rem]">
       <figure className="sticky top-0 m-0 h-[68svh] min-h-[26rem] overflow-hidden bg-bg-start md:h-[72vh]">
         <Image
           src={article.coverImageUrl ?? ""}
@@ -231,20 +229,20 @@ function CoverSheet({ article, children }: { readonly article: ArticleView; read
           aria-hidden="true"
           className="absolute inset-0 bg-[linear-gradient(to_top,rgba(6,13,24,0.94)_0%,rgba(6,13,24,0.45)_34%,transparent_62%)]"
         />
-        <div className="cover-headline absolute inset-x-0 bottom-[calc(1.875rem+1.25rem)] md:bottom-[calc(7.5rem+2rem)]">
+        <div className="cover-headline absolute inset-x-0 bottom-[calc(var(--sheet-overlap)+1.25rem)] md:bottom-[calc(var(--sheet-overlap)+2rem)]">
           <div className="mx-auto flex max-w-[47.5rem] flex-col gap-3 px-6 md:px-12">
             <Kicker article={article} />
             <Headline article={article} className="text-[clamp(1.9rem,1.3rem+3.2vw,3.25rem)] [text-shadow:0_2px_18px_rgba(0,0,0,0.45)]" />
           </div>
         </div>
         {article.coverCredit ? (
-          <figcaption className="absolute end-4 bottom-[calc(1.875rem+0.5rem)] text-[0.72rem] text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.75)] md:bottom-[calc(7.5rem+0.75rem)]">
+          <figcaption className="absolute end-4 bottom-[calc(var(--sheet-overlap)+0.5rem)] text-[0.72rem] text-white/80 [text-shadow:0_1px_6px_rgba(0,0,0,0.75)] md:bottom-[calc(var(--sheet-overlap)+0.75rem)]">
             {article.coverCredit}
           </figcaption>
         ) : null}
       </figure>
-      <article className="relative z-10 -mt-[1.875rem] flex flex-col gap-6 rounded-t-[1.625rem] bg-[linear-gradient(180deg,#0c1a30_0%,var(--color-bg-start)_15rem,var(--color-bg-end)_100%)] px-6 pt-6 pb-12 shadow-[0_-24px_48px_-20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.09)] md:mx-auto md:-mt-[7.5rem] md:max-w-[47.5rem] md:rounded-t-[1.75rem] md:px-12 md:pt-10">
-        <span data-sheet-top aria-hidden="true" className="absolute top-0" />
+      <article className="relative z-10 mt-[calc(var(--sheet-overlap)*-1)] flex flex-col gap-6 rounded-t-[1.625rem] bg-[linear-gradient(180deg,#0c1a30_0%,var(--color-bg-start)_15rem,var(--color-bg-end)_100%)] px-6 pt-6 pb-12 shadow-[0_-24px_48px_-20px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.09)] md:mx-auto md:max-w-[47.5rem] md:rounded-t-[1.75rem] md:px-12 md:pt-10">
+        <HeaderSolidity />
         {article.subtitle ? (
           <p className="text-xl leading-relaxed font-light text-white/75">{article.subtitle}</p>
         ) : null}
@@ -255,7 +253,7 @@ function CoverSheet({ article, children }: { readonly article: ArticleView; read
 }
 
 // Articles without a cover keep the classic column.
-function PlainLayout({ article, children }: { readonly article: ArticleView; readonly children: ReactNode }) {
+function PlainLayout({ article, children }: { readonly article: ArticleDetail; readonly children: ReactNode }) {
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-10">
       <article className="flex flex-col gap-6">
@@ -292,7 +290,7 @@ async function ArticleContent({
   const midPoll = linkedPoll?.status === "active" ? linkedPoll : null;
   const shouldSplitBlocks = plan.midArticle.length > 0 || midPoll !== null;
   const subjectCrumb = article.subject
-    ? { name: article.subject.name, url: `${SITE_URL}/topics/${article.subject.slug}` }
+    ? { name: article.subject.name, url: `${SITE_URL}${subjectPath(article.subject.slug)}` }
     : { name: "כתבות", url: `${SITE_URL}/articles` };
   const Layout = article.coverImageUrl ? CoverSheet : PlainLayout;
 

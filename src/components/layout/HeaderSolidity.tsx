@@ -1,21 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-// On an article with a full-bleed cover the header floats over the photo.
-// Once the article's sheet reaches the header, the header turns solid again.
+// Marks the top of an article's sheet. Over the cover the header floats on a
+// shade; once the sheet reaches the header, the header turns solid again.
+// It lives inside the sheet, so it only runs once the sheet is on the page.
 export function HeaderSolidity() {
-  const pathname = usePathname();
+  const marker = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const header = document.querySelector<HTMLElement>("[data-site-header]");
-    const sheetTop = document.querySelector("[data-sheet-top]");
-    if (!header) return;
-    if (!sheetTop) {
-      header.dataset.solid = "";
-      return;
-    }
+    const sheetTop = marker.current;
+    if (!header || !sheetTop) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         const passed = !entry.isIntersecting && entry.boundingClientRect.top < header.offsetHeight;
@@ -25,8 +21,11 @@ export function HeaderSolidity() {
       { rootMargin: `-${header.offsetHeight}px 0px 0px 0px` },
     );
     observer.observe(sheetTop);
-    return () => observer.disconnect();
-  }, [pathname]);
+    return () => {
+      observer.disconnect();
+      delete header.dataset.solid;
+    };
+  }, []);
 
-  return null;
+  return <span ref={marker} aria-hidden="true" className="absolute top-0" />;
 }

@@ -24,7 +24,10 @@ export function readingTimeMinutes(blocks: readonly StoredBlock[]): number {
   return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
 }
 
-export function readingTimeLabel(blocks: readonly StoredBlock[]): string {
-  const minutes = readingTimeMinutes(blocks);
+export function minutesLabel(minutes: number): string {
   return minutes === 1 ? "דקת קריאה" : `${minutes} דקות קריאה`;
+}
+
+export function readingTimeLabel(blocks: readonly StoredBlock[]): string {
+  return minutesLabel(readingTimeMinutes(blocks));
 }

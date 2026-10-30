@@ -1,8 +1,11 @@
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import type { RecirculationPlan } from "@/lib/articles/recirculation";
 import type { ArticleView } from "@/lib/dal/articles";
-import type { SubjectSummary } from "@/lib/taxonomy/public";
+import { subjectPath, type SubjectSummary } from "@/lib/taxonomy/public";
 import { ArticleCard } from "./ArticleCard";
+
+// Three across inside the article column, about 240px each.
+const RECIRC_CARD_SIZES = "(max-width: 640px) 100vw, 240px";
 
 interface RecirculationSectionsProps {
   readonly plan: RecirculationPlan<ArticleView>;
@@ -21,12 +24,12 @@ export function RecirculationSections({ plan, subject }: RecirculationSectionsPr
             title={subject ? `עוד ב${subject.name}` : "עוד באותו נושא"}
             id="related-articles-heading"
             color={subject?.color}
-            linkHref={subject ? `/topics/${subject.slug}` : undefined}
+            linkHref={subject ? subjectPath(subject.slug) : undefined}
             linkLabel={subject ? "לכל הכתבות בנושא" : undefined}
           />
           <div className="grid gap-4 sm:grid-cols-3">
             {plan.related.map((article) => (
-              <ArticleCard key={article.id} article={article} phEvent="recirc_related_click" />
+              <ArticleCard key={article.id} article={article} phEvent="recirc_related_click" sizes={RECIRC_CARD_SIZES} />
             ))}
           </div>
         </section>
@@ -36,7 +39,7 @@ export function RecirculationSections({ plan, subject }: RecirculationSectionsPr
           <SectionHeading title="הנקראות ביותר" id="trending-articles-heading" />
           <div className="grid gap-4 sm:grid-cols-3">
             {plan.trending.map((article) => (
-              <ArticleCard key={article.id} article={article} phEvent="recirc_trending_click" />
+              <ArticleCard key={article.id} article={article} phEvent="recirc_trending_click" sizes={RECIRC_CARD_SIZES} />
             ))}
           </div>
         </section>

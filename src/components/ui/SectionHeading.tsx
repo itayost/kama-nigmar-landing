@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { subjectStyle } from "@/components/articles/subject";
 
 interface SectionHeadingProps {
   readonly title: string;
@@ -19,23 +20,21 @@ export function SectionHeading({
   color,
 }: SectionHeadingProps) {
   return (
-    <div className="mb-6 flex items-baseline justify-between">
+    <div style={subjectStyle(color)} className="mb-6 flex items-baseline justify-between">
       <Tag
         id={id}
         className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight"
       >
         <span
           aria-hidden="true"
-          style={color ? { backgroundColor: color } : undefined}
-          className={`h-2.5 w-2.5 rounded-[3px] ${color ? "" : "bg-accent shadow-[0_0_14px_rgba(46,204,64,0.6)]"}`}
+          className={`h-2.5 w-2.5 rounded-[3px] bg-[var(--subject)] ${color ? "" : "shadow-[0_0_14px_rgba(46,204,64,0.6)]"}`}
         />
         {title}
       </Tag>
       {linkHref && linkLabel ? (
         <Link
           href={linkHref}
-          style={color ? { color } : undefined}
-          className="text-sm font-semibold text-accent transition-opacity hover:opacity-80"
+          className="text-sm font-semibold text-[var(--subject)] transition-opacity hover:opacity-80"
         >
           {linkLabel}
         </Link>
