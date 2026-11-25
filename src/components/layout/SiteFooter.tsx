@@ -137,8 +137,18 @@ export async function SiteFooter({ spotifyUrl, applePodcastUrl }: SiteFooterProp
         </div>
         <div className="flex items-center justify-between border-t border-surface-border py-4 text-xs text-text-muted">
           <span>כמה נגמר? © {year}</span>
-          <span>נבנה על ידי ItayOst</span>
         </div>
+        <p className="pb-4 text-center text-xs text-text-muted">
+          עוצב ופותח על ידי{" "}
+          <a
+            href="https://www.itayost.com"
+            target="_blank"
+            rel="noopener"
+            className="transition-colors hover:text-white"
+          >
+            ITAYOST
+          </a>
+        </p>
       </div>
     </footer>
   );
